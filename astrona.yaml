@@ -1,8 +1,9 @@
-# Preparation scaffold. Technical pages stay draft until authoring and review.
+# Reading-only content; YAML knowledge checks have a separate index.
 training:
   id: ATS032
   title: 'CKS: Cluster Hardening'
-  description: Preparation scaffold for Cluster Hardening. Lessons and environments are planned.
+  description: 'Detailed reading material and reusable YAML knowledge checks for CKS: Cluster Hardening.
+    Technical content remains draft. No labs or playgrounds.'
   certification:
     name: Certified Kubernetes Security Specialist
     code: CKS
@@ -18,7 +19,7 @@ training:
 modules:
 - id: module-intro
   title: Introduction
-  description: Planned introduction and authoring status.
+  description: Audience, reading method and review process.
   content:
   - type: reading
     title: Introduction
@@ -34,43 +35,75 @@ modules:
     path: sections/intro/course-03-how-this-course-is-made.md
 - id: module-010
   title: Use Role Based Access Controls to minimize exposure
-  description: Planned coverage of this curriculum objective.
+  description: Developed reading and reasoning for Use Role Based Access Controls to minimize exposure.
+  draft: true
   content:
   - type: reading
-    title: Section Overview
+    title: Use Role Based Access Controls to minimize exposure
     path: sections/section-010/README.md
   - type: reading
-    title: Use Role Based Access Controls to minimize exposure
+    title: Authorization And Effective Permissions
     path: sections/section-010/module-01/course.md
+  - type: reading
+    title: RBAC Grants And Their Consequences
+    path: sections/section-010/module-01/course-01-rbac-grants-and-their-consequences.md
+  - type: reading
+    title: Summary
+    path: sections/section-010/module-01/course-02-summary.md
 - id: module-020
   title: Exercise caution in using service accounts e.g. disable defaults, minimize permissions on newly
     created ones
-  description: Planned coverage of this curriculum objective.
+  description: Developed reading and reasoning for Exercise caution in using service accounts e.g. disable
+    defaults, minimize permissions on newly created ones.
+  draft: true
   content:
-  - type: reading
-    title: Section Overview
-    path: sections/section-020/README.md
   - type: reading
     title: Exercise caution in using service accounts e.g. disable defaults, minimize permissions on newly
       created ones
+    path: sections/section-020/README.md
+  - type: reading
+    title: Authentication And Workload Credentials
     path: sections/section-020/module-01/course.md
+  - type: reading
+    title: API Identity And ServiceAccounts
+    path: sections/section-020/module-01/course-01-api-identity-and-serviceaccounts.md
+  - type: reading
+    title: Summary
+    path: sections/section-020/module-01/course-02-summary.md
 - id: module-030
   title: Restrict access to Kubernetes API
-  description: Planned coverage of this curriculum objective.
+  description: Developed reading and reasoning for Restrict access to Kubernetes API.
+  draft: true
   content:
-  - type: reading
-    title: Section Overview
-    path: sections/section-030/README.md
   - type: reading
     title: Restrict access to Kubernetes API
+    path: sections/section-030/README.md
+  - type: reading
+    title: API Server Security Boundaries
     path: sections/section-030/module-01/course.md
+  - type: reading
+    title: Protecting The Cluster API
+    path: sections/section-030/module-01/course-01-protecting-the-cluster-api.md
+  - type: reading
+    title: Summary
+    path: sections/section-030/module-01/course-02-summary.md
 - id: module-040
   title: Upgrade Kubernetes to avoid vulnerabilities
-  description: Planned coverage of this curriculum objective.
+  description: Developed reading and reasoning for Upgrade Kubernetes to avoid vulnerabilities.
+  draft: true
   content:
   - type: reading
-    title: Section Overview
+    title: Upgrade Kubernetes to avoid vulnerabilities
     path: sections/section-040/README.md
   - type: reading
-    title: Upgrade Kubernetes to avoid vulnerabilities
+    title: Supported Upgrade And Node Maintenance
     path: sections/section-040/module-01/course.md
+  - type: reading
+    title: Cluster Upgrades And Maintenance Boundaries
+    path: sections/section-040/module-01/course-01-cluster-upgrades-and-maintenance-boundaries.md
+  - type: reading
+    title: Datastore Snapshots And The Limits Of Recovery
+    path: sections/section-040/module-01/course-02-datastore-snapshots-and-the-limits-of-recovery.md
+  - type: reading
+    title: Summary
+    path: sections/section-040/module-01/course-03-summary.md

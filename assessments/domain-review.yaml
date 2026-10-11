@@ -1,0 +1,248 @@
+schema_version: 1
+kind: question_bank
+id: ats032-domain-review
+course_id: ATS032
+exam_code: CKS
+status: draft
+provenance: Original practice material; not official examination questions.
+scope:
+  type: domain
+  id: domain-review
+  title: Cluster Hardening
+placement:
+  position: after
+  reading: sections/section-040/module-01/course-03-summary.md
+questions:
+- id: ats032-domain-review-q01
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain additive grants and indirect privilege.
+  source_readings:
+  - sections/section-010/module-01/course-01-rbac-grants-and-their-consequences.md
+  prompt: A workload cannot directly read Secrets but can create a Pod mounting sensitive data under permissive
+    policy. What does this illustrate?
+  options:
+  - id: a
+    text: Indirect authority through permitted resource operations.
+    explanation: Effective access needs analysis beyond one direct verb.
+  - id: b
+    text: A universal rule that every Pod creator is always cluster-admin.
+    explanation: The route depends on actual grants and surrounding policy.
+  - id: c
+    text: That namespace scope removes every data path.
+    explanation: A namespaced operation can still have sensitive consequences.
+  correct_option: a
+  explanation: Effective access needs analysis beyond one direct verb.
+- id: ats032-domain-review-q02
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Compare Role, ClusterRole, RoleBinding and ClusterRoleBinding.
+  source_readings:
+  - sections/section-010/module-01/course-01-rbac-grants-and-their-consequences.md
+  prompt: A RoleBinding references a ClusterRole in one namespace. Which scope applies to the namespaced
+    grant?
+  options:
+  - id: a
+    text: Only nodes carrying a matching label.
+    explanation: RBAC grant scope is not node placement selection.
+  - id: b
+    text: Every namespace automatically.
+    explanation: A ClusterRoleBinding is the distinct cluster-wide arrangement.
+  - id: c
+    text: The RoleBinding's namespace.
+    explanation: Reusing a cluster-scoped definition does not make this binding cluster-wide.
+  correct_option: c
+  explanation: Reusing a cluster-scoped definition does not make this binding cluster-wide.
+- id: ats032-domain-review-q03
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain additive grants and indirect privilege.
+  source_readings:
+  - sections/section-010/module-01/course-01-rbac-grants-and-their-consequences.md
+  prompt: A broad grant is removed from one role, but another binding still grants it. What is the effective
+    result?
+  options:
+  - id: a
+    text: The identity cannot authenticate anymore.
+    explanation: Permission changes do not necessarily revoke the credential's identity.
+  - id: b
+    text: The permission can remain because applicable grants combine.
+    explanation: RBAC is additive across applicable grants.
+  - id: c
+    text: The omitted rule explicitly denies every other grant.
+    explanation: Omission is not a general deny rule.
+  correct_option: b
+  explanation: RBAC is additive across applicable grants.
+- id: ats032-domain-review-q04
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain ServiceAccount token audience and lifetime.
+  source_readings:
+  - sections/section-020/module-01/course-01-api-identity-and-serviceaccounts.md
+  prompt: A projected token has a limited audience and lifetime. What do these controls bound?
+  options:
+  - id: a
+    text: The intended recipient and period in which the credential can be useful.
+    explanation: They narrow selected credential exposure properties.
+  - id: b
+    text: Every operation the authenticated identity may perform.
+    explanation: Authorization grants are a separate control.
+  - id: c
+    text: Whether the application contains vulnerable code.
+    explanation: Token properties do not verify application code.
+  correct_option: a
+  explanation: They narrow selected credential exposure properties.
+- id: ats032-domain-review-q05
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain ServiceAccount token audience and lifetime.
+  source_readings:
+  - sections/section-020/module-01/course-01-api-identity-and-serviceaccounts.md
+  prompt: Why use a bounded audience and lifetime for a workload token?
+  options:
+  - id: a
+    text: It grants every API operation.
+    explanation: Authorization is separate.
+  - id: b
+    text: It makes token disclosure harmless.
+    explanation: A valid leaked token can still be abused.
+  - id: c
+    text: It narrows intended use and exposure duration.
+    explanation: A token should fit its actual consumer.
+  correct_option: c
+  explanation: A token should fit its actual consumer.
+- id: ats032-domain-review-q06
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Identify unnecessary credential mounting and disclosure paths.
+  source_readings:
+  - sections/section-020/module-01/course-01-api-identity-and-serviceaccounts.md
+  prompt: A workload never calls the API. Which credential choice is appropriate?
+  options:
+  - id: a
+    text: Store the token in every log line.
+    explanation: Logs would spread the credential.
+  - id: b
+    text: Avoid unnecessary token automounting.
+    explanation: Removing unused credential delivery reduces exposure.
+  - id: c
+    text: Mount an administrator token by default.
+    explanation: That adds unjustified authority.
+  correct_option: b
+  explanation: Removing unused credential delivery reduces exposure.
+- id: ats032-domain-review-q07
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Identify risks from excessive API exposure and powerful credentials.
+  source_readings:
+  - sections/section-030/module-01/course-01-protecting-the-cluster-api.md
+  prompt: A private API endpoint accepts a stolen powerful credential. Which distinction matters?
+  options:
+  - id: a
+    text: Network restriction does not remove misuse by an allowed authenticated identity.
+    explanation: The accepted path still depends on authority and credential protection.
+  - id: b
+    text: Private addressing guarantees no caller can misuse the API.
+    explanation: Reachability and permission are separate.
+  - id: c
+    text: Every such request is a scheduler scoring error.
+    explanation: API credential misuse is not node scoring.
+  correct_option: a
+  explanation: The accepted path still depends on authority and credential protection.
+- id: ats032-domain-review-q08
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain the API server's identity, permission and admission checks.
+  source_readings:
+  - sections/section-030/module-01/course-01-protecting-the-cluster-api.md
+  prompt: An API caller authenticates but lacks the requested create permission. Which boundary rejects
+    it?
+  options:
+  - id: a
+    text: Container image retrieval.
+    explanation: The rejection concerns API authority before workload execution.
+  - id: b
+    text: Service endpoint selection.
+    explanation: Traffic backends do not grant API actions.
+  - id: c
+    text: Authorization.
+    explanation: Identity and permission are separate API decisions.
+  correct_option: c
+  explanation: Identity and permission are separate API decisions.
+- id: ats032-domain-review-q09
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Distinguish API audit evidence from application request logs.
+  source_readings:
+  - sections/section-030/module-01/course-01-protecting-the-cluster-api.md
+  prompt: An API audit record shows an accepted Pod creation. What does it not establish by itself?
+  options:
+  - id: a
+    text: Which resource action was requested when recorded by policy.
+    explanation: That is within relevant audit context.
+  - id: b
+    text: That the application later started and behaved correctly.
+    explanation: Accepted API intent and runtime outcomes are different stages.
+  - id: c
+    text: Whether the response was accepted when the event includes it.
+    explanation: Response outcome is part of the stated evidence.
+  correct_option: b
+  explanation: Accepted API intent and runtime outcomes are different stages.
+- id: ats032-domain-review-q10
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Evaluate datastore snapshot scope and restore prerequisites.
+  source_readings:
+  - sections/section-040/module-01/course-02-datastore-snapshots-and-the-limits-of-recovery.md
+  prompt: A datastore snapshot restores resource objects. Does it automatically restore independent database
+    records?
+  options:
+  - id: a
+    text: No; application data recovery requires its own source and process
+    explanation: The snapshot scope does not include every external data set.
+  - id: b
+    text: Yes; every external system is part of datastore content
+    explanation: Cluster state and backend application data are distinct.
+  - id: c
+    text: Yes; a PVC definition contains all files by definition
+    explanation: The definition represents a storage relationship, not all stored bytes.
+  correct_option: a
+  explanation: The snapshot scope does not include every external data set.
+- id: ats032-domain-review-q11
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain supported component-version and upgrade order.
+  source_readings:
+  - sections/section-040/module-01/course-01-cluster-upgrades-and-maintenance-boundaries.md
+  prompt: Why follow the target release's supported upgrade order?
+  options:
+  - id: a
+    text: The Service port determines all version compatibility
+    explanation: Traffic ports do not define component skew.
+  - id: b
+    text: Every minor version can always be skipped safely
+    explanation: Release transitions require the supported procedure.
+  - id: c
+    text: Component version relationships and lifecycle steps have constraints
+    explanation: Arbitrary package order can create an unsupported state.
+  correct_option: c
+  explanation: Arbitrary package order can create an unsupported state.
+- id: ats032-domain-review-q12
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Distinguish cordon, drain and disruption policy.
+  source_readings:
+  - sections/section-040/module-01/course-01-cluster-upgrades-and-maintenance-boundaries.md
+  prompt: What does cordoning do by itself?
+  options:
+  - id: a
+    text: Automatically restore a datastore snapshot
+    explanation: Scheduling eligibility does not restore state.
+  - id: b
+    text: Restrict normal new placement without evicting current workloads
+    explanation: Cordon and drain express different maintenance actions.
+  - id: c
+    text: Immediately delete all existing Pods
+    explanation: That is not cordon's action.
+  correct_option: b
+  explanation: Cordon and drain express different maintenance actions.
