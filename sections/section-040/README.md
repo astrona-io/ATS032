@@ -5,7 +5,9 @@ exam_objectives:
 ---
 # Upgrade Kubernetes to avoid vulnerabilities
 
-This section covers upgrade Kubernetes to avoid vulnerabilities. It develops supported Upgrade And Node Maintenance through mechanisms, examples, prerequisites and failure reasoning.
+A node upgrade removes its ready application replicas, but the remaining nodes cannot host replacements. Version compatibility and maintenance availability are separate planning requirements.
+
+The explanations identify the responsible components, compare intended and observed state, and work through the decisions needed to preserve the requirement. Read the worked examples as reasoning about a proposed system; no environment is started by this section.
 
 Read the module goals, teaching and closing summary in order. YAML checks are indexed separately and appear after designated summaries. Larger domains include an intermediate checkpoint before the final review.
 
