@@ -5,6 +5,20 @@ exam_objectives:
 ---
 # Protecting The Cluster API
 
+A workload cannot use a broad role, but the API endpoint still exposes an insecure authentication path. Network access, credential verification, authorization and admission protect different parts of the control surface.
+
+## Learning objectives
+
+- Explain the API server's identity, permission and admission checks.
+- Relate API transport protection to authenticated peer identity.
+- Identify risks from excessive API exposure and powerful credentials.
+
+## Before you start
+
+This chapter is standalone reading material; no running cluster or installed tools are required. A Pod is the Kubernetes unit for running one or more containers, and a namespace groups namespaced objects. Treat the worked configurations as teaching examples rather than recorded observations from a provisioned environment.
+
+## Responsible components and behavior
+
 The Kubernetes application programming interface (API) controls stored cluster resources. A caller able to change workloads or permissions can affect application execution and data access. The API server is therefore a central security boundary, not merely an administrative convenience.
 
 ## Authentication And Authorization
@@ -36,6 +50,29 @@ Audit records can identify API requests, caller identities, target resources and
 Suppose an exposed deployment credential creates an unexpected workload. The API can have behaved correctly according to an excessively broad grant. Investigate the identity, granted actions, audit timeline and resulting resources. Revoke exposed authority, restore reviewed state and inspect any data or infrastructure the workload could access.
 
 A secure API design combines trusted transport, narrow permissions, suitable admission, protected storage and useful evidence. Each part enforces or observes a particular boundary; none alone proves that every accepted declaration is harmless.
+
+## Work through the decision
+
+The API server is the decision point for supported resource requests. Protect its transport, authentication configuration and datastore access. Limit who can reach management endpoints under the platform's design, while recognizing that network reachability does not itself grant or deny every API action.
+
+An authenticated read of sensitive data can be harmful even without administrative writes. Broad workload-creation authority can also enable indirect access subject to other controls. Review actual identities, effective grants and admission behavior together. Audit evidence records supported request activity, while host execution and external data actions need their own observation sources.
+
+```mermaid
+flowchart TB
+    N0["Endpoint access"]
+    N1["Protected authenticated transport"]
+    N2["Request authorization"]
+    N3["Relevant admission policy"]
+    N4["Audited resource decision"]
+    N0 --> N1
+    N1 --> N2
+    N2 --> N3
+    N3 --> N4
+```
+
+API protection combines independent boundaries rather than relying on one restrictive role or firewall rule.
+
+API protection combines independent boundaries rather than relying on one restrictive role or firewall rule.
 
 ## Common pitfalls
 
