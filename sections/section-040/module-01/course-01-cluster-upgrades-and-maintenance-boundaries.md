@@ -5,6 +5,20 @@ exam_objectives:
 ---
 # Cluster Upgrades And Maintenance Boundaries
 
+A node upgrade removes its ready application replicas, but the remaining nodes cannot host replacements. Version compatibility and maintenance availability are separate planning requirements.
+
+## Learning objectives
+
+- Explain supported component-version and upgrade order.
+- Distinguish cordon, drain and disruption policy.
+- Evaluate datastore snapshot scope and restore prerequisites.
+
+## Before you start
+
+This chapter is standalone reading material; no running cluster or installed tools are required. A Pod is the Kubernetes unit for running one or more containers, and a namespace groups namespaced objects. Treat the worked configurations as teaching examples rather than recorded observations from a provisioned environment.
+
+## Responsible components and behavior
+
 A cluster upgrade changes component versions while preserving the intended cluster and workload behavior. Control-plane components, node agents and clients have supported version relationships. A successful package installation on one machine does not establish that the cluster follows those relationships or that application disruption was controlled.
 
 ## Establish The Starting State
@@ -38,6 +52,29 @@ After a node change, verify its reported version, readiness and relevant compone
 Application verification should include useful behavior and availability, not only control-plane process startup. An upgraded node can be ready while a particular extension or workload fails under the new release. Relate each observation to the layer that changed.
 
 Treat maintenance as a sequence with explicit boundaries: known starting state, supported version step, controlled workload movement, component update and observed recovery. A rollback or restore plan must account for data and version compatibility; downgrading packages indiscriminately is not a universal recovery procedure.
+
+## Work through the decision
+
+A supported upgrade follows the release's documented component order and version-skew limits. Do not substitute a remembered order from another release. Before node maintenance, account for workloads that cannot be safely evicted, their disruption budgets and the capacity needed elsewhere.
+
+Cordon prevents ordinary new placement, while drain requests supported eviction and cleanup under its options. Neither migrates external data or guarantees a replacement can run. DaemonSets, static Pods and local state need explicit handling. After the version change, verify component health, restore the intended scheduling state and test meaningful workloads before declaring maintenance complete.
+
+```mermaid
+flowchart TB
+    N0["Supported release plan"]
+    N1["Disruption and capacity review"]
+    N2["Node maintenance"]
+    N3["Component upgrade"]
+    N4["Health and workload verification"]
+    N0 --> N1
+    N1 --> N2
+    N2 --> N3
+    N3 --> N4
+```
+
+Upgrade correctness includes supported versions and preserved application operation, rather than only a changed version label.
+
+Upgrade correctness includes supported versions and preserved application operation, rather than only a changed version label.
 
 ## Common pitfalls
 
