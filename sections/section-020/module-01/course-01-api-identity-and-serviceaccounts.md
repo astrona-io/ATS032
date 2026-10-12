@@ -6,6 +6,20 @@ exam_objectives:
 ---
 # API Identity And ServiceAccounts
 
+An example `probe` application can run without reading Kubernetes resources, while a controller needs a workload identity to call the API. Giving both the same mounted credentials exposes authority where it may not be needed.
+
+## Learning objectives
+
+- Distinguish established identity from granted API permission.
+- Explain ServiceAccount token audience and lifetime.
+- Identify unnecessary credential mounting and disclosure paths.
+
+## Before you start
+
+This chapter is standalone reading material; no running cluster or installed tools are required. A Pod is the Kubernetes unit for running one or more containers, and a namespace groups namespaced objects. Treat the worked configurations as teaching examples rather than recorded observations from a provisioned environment.
+
+## Responsible components and behavior
+
 The `shuttle` application asks the Kubernetes application programming interface (API) to read Pods. Before returning data, the API server evaluates the request. Authentication establishes the caller's identity. Authorization decides whether that identity may perform the requested action on the target resource.
 
 Admission handles additional checks and possible mutation for relevant resource-changing requests after authorization. An admission policy might reject a privileged Pod even when the caller is authorized to create Pods. Authentication failure, insufficient permission and a policy rejection describe different stages and require different corrections.
@@ -40,6 +54,25 @@ A ServiceAccount identifies a workload within a namespace. The Pod can obtain a 
 The workload should receive credentials only when it needs them. Disabling automatic token mounting can reduce unnecessary access for an application that never calls the Kubernetes API. That choice is separate from the ServiceAccount's role grants: not mounting a credential changes availability of that credential to the process, while role-based access control (RBAC) defines what an authenticated identity may do.
 
 A diagnosis should state which stage rejected the request and which identity made it. An admission error about privilege is not repaired by issuing another token. A forbidden response is not resolved merely by adding a namespace label. The corrective action belongs to the failed contract.
+
+## Work through the decision
+
+A ServiceAccount is a namespaced workload identity. The admitted Pod's `serviceAccountName` identifies the chosen account; admission can supply the namespace's default when no explicit account was requested. Projected credentials may include an audience and lifetime, and the kubelet manages supported rotation.
+
+Credential delivery and authorization are separate. Disabling automatic token mounting reduces credential availability to a process that does not need API access; it does not remove grants from the identity itself. Conversely, a mounted token supplies a way to authenticate but does not grant administrative actions. Inspect references and mount structure rather than displaying token contents.
+
+```mermaid
+flowchart TB
+    A["ServiceAccount identity"] --> P["Pod account selection"]
+    P --> T["Projected credential delivery"]
+    T --> I["Authenticated API request"]
+    B["Applicable role bindings"] --> Z["Authorization decision"]
+    I --> Z
+```
+
+Selecting and delivering a workload identity does not determine its permissions without authorization grants.
+
+You can now inspect identity and credential delivery without disclosing secrets. A workload should receive only the API authority and credential access that its actual responsibility requires.
 
 ## Common pitfalls
 
