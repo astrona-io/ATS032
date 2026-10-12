@@ -6,7 +6,9 @@ exam_objectives:
 ---
 # Exercise caution in using service accounts e.g. disable defaults, minimize permissions on newly created ones
 
-This section covers exercise caution in using service accounts e.g. disable defaults, minimize permissions on newly created ones. It develops authentication And Workload Credentials through mechanisms, examples, prerequisites and failure reasoning.
+An example `probe` application can run without reading Kubernetes resources, while a controller needs a workload identity to call the API. Giving both the same mounted credentials exposes authority where it may not be needed.
+
+The explanations identify the responsible components, compare intended and observed state, and work through the decisions needed to preserve the requirement. Read the worked examples as reasoning about a proposed system; no environment is started by this section.
 
 Read the module goals, teaching and closing summary in order. YAML checks are indexed separately and appear after designated summaries. Larger domains include an intermediate checkpoint before the final review.
 
