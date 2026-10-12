@@ -5,7 +5,9 @@ exam_objectives:
 ---
 # Restrict access to Kubernetes API
 
-This section covers restrict access to Kubernetes API. It develops aPI Server Security Boundaries through mechanisms, examples, prerequisites and failure reasoning.
+A workload cannot use a broad role, but the API endpoint still exposes an insecure authentication path. Network access, credential verification, authorization and admission protect different parts of the control surface.
+
+The explanations identify the responsible components, compare intended and observed state, and work through the decisions needed to preserve the requirement. Read the worked examples as reasoning about a proposed system; no environment is started by this section.
 
 Read the module goals, teaching and closing summary in order. YAML checks are indexed separately and appear after designated summaries. Larger domains include an intermediate checkpoint before the final review.
 
