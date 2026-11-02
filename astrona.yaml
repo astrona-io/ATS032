@@ -1,9 +1,8 @@
-# Reading-only content; YAML knowledge checks have a separate index.
 training:
   id: ATS032
   title: 'CKS: Cluster Hardening'
-  description: 'Detailed reading material and reusable YAML knowledge checks for CKS: Cluster Hardening.
-    Technical content remains draft. No labs or playgrounds.'
+  description: 'Detailed reading material and reusable YAML knowledge checks for CKS:
+    Cluster Hardening. Technical content remains draft. No labs or playgrounds.'
   certification:
     name: Certified Kubernetes Security Specialist
     code: CKS
@@ -12,8 +11,8 @@ training:
     weight: 15
     competencies:
     - Use Role Based Access Controls to minimize exposure
-    - Exercise caution in using service accounts e.g. disable defaults, minimize permissions on newly
-      created ones
+    - Exercise caution in using service accounts e.g. disable defaults, minimize permissions
+      on newly created ones
     - Restrict access to Kubernetes API
     - Upgrade Kubernetes to avoid vulnerabilities
 modules:
@@ -35,8 +34,9 @@ modules:
     path: sections/intro/course-03-how-this-course-is-made.md
 - id: module-010
   title: Use Role Based Access Controls to minimize exposure
-  description: Developed reading and reasoning for Use Role Based Access Controls to minimize exposure.
-  draft: true
+  description: Developed reading and reasoning for Use Role Based Access Controls
+    to minimize exposure.
+  status: alpha
   content:
   - type: reading
     title: Use Role Based Access Controls to minimize exposure
@@ -48,18 +48,40 @@ modules:
     title: RBAC Grants And Their Consequences
     path: sections/section-010/module-01/course-01-rbac-grants-and-their-consequences.md
   - type: reading
+    title: Grant Namespace Pod Read Access — Task
+    path: sections/section-010/module-01/labs/lab-01/question.md
+  - type: lab
+    title: Grant Namespace Pod Read Access
+    path: sections/section-010/module-01/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 20m
+    topic: rbac
+    task_kind: build
+    learning_goals:
+    - Grant a ServiceAccount only Pod read access in the required namespace and verify
+      denied operations.
+    tags:
+    - cks
+    - rbac
+  - type: reading
+    title: Grant Namespace Pod Read Access — Solution
+    path: sections/section-010/module-01/labs/lab-01/solution.md
+  - type: reading
+    title: 'Guided Practice: Grant Namespace Pod Read Access'
+    path: sections/section-010/module-01/course-02-guided-practice.md
+  - type: reading
     title: Summary
-    path: sections/section-010/module-01/course-02-summary.md
+    path: sections/section-010/module-01/course-03-summary.md
 - id: module-020
-  title: Exercise caution in using service accounts e.g. disable defaults, minimize permissions on newly
-    created ones
-  description: Developed reading and reasoning for Exercise caution in using service accounts e.g. disable
-    defaults, minimize permissions on newly created ones.
-  draft: true
+  title: Exercise caution in using service accounts e.g. disable defaults, minimize
+    permissions on newly created ones
+  description: Developed reading and reasoning for Exercise caution in using service
+    accounts e.g. disable defaults, minimize permissions on newly created ones.
+  status: alpha
   content:
   - type: reading
-    title: Exercise caution in using service accounts e.g. disable defaults, minimize permissions on newly
-      created ones
+    title: Exercise caution in using service accounts e.g. disable defaults, minimize
+      permissions on newly created ones
     path: sections/section-020/README.md
   - type: reading
     title: Authentication And Workload Credentials
@@ -68,12 +90,33 @@ modules:
     title: API Identity And ServiceAccounts
     path: sections/section-020/module-01/course-01-api-identity-and-serviceaccounts.md
   - type: reading
+    title: Disable Unneeded ServiceAccount Tokens — Task
+    path: sections/section-020/module-01/labs/lab-01/question.md
+  - type: lab
+    title: Disable Unneeded ServiceAccount Tokens
+    path: sections/section-020/module-01/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: token-minimization
+    task_kind: build
+    learning_goals:
+    - Run a workload without mounting credentials it does not need.
+    tags:
+    - cks
+    - token-minimization
+  - type: reading
+    title: Disable Unneeded ServiceAccount Tokens — Solution
+    path: sections/section-020/module-01/labs/lab-01/solution.md
+  - type: reading
+    title: 'Guided Practice: Disable Unneeded ServiceAccount Tokens'
+    path: sections/section-020/module-01/course-02-guided-practice.md
+  - type: reading
     title: Summary
-    path: sections/section-020/module-01/course-02-summary.md
+    path: sections/section-020/module-01/course-03-summary.md
 - id: module-030
   title: Restrict access to Kubernetes API
   description: Developed reading and reasoning for Restrict access to Kubernetes API.
-  draft: true
+  status: alpha
   content:
   - type: reading
     title: Restrict access to Kubernetes API
@@ -85,12 +128,34 @@ modules:
     title: Protecting The Cluster API
     path: sections/section-030/module-01/course-01-protecting-the-cluster-api.md
   - type: reading
+    title: Use A Workload Identity For An API Request — Task
+    path: sections/section-030/module-01/labs/lab-01/question.md
+  - type: lab
+    title: Use A Workload Identity For An API Request
+    path: sections/section-030/module-01/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: serviceaccount-api
+    task_kind: build
+    learning_goals:
+    - Run the application with a narrow identity and authenticate a real API request
+      from its container.
+    tags:
+    - cks
+    - serviceaccount-api
+  - type: reading
+    title: Use A Workload Identity For An API Request — Solution
+    path: sections/section-030/module-01/labs/lab-01/solution.md
+  - type: reading
+    title: 'Guided Practice: Use A Workload Identity For An API Request'
+    path: sections/section-030/module-01/course-02-guided-practice.md
+  - type: reading
     title: Summary
-    path: sections/section-030/module-01/course-02-summary.md
+    path: sections/section-030/module-01/course-03-summary.md
 - id: module-040
   title: Upgrade Kubernetes to avoid vulnerabilities
   description: Developed reading and reasoning for Upgrade Kubernetes to avoid vulnerabilities.
-  draft: true
+  status: alpha
   content:
   - type: reading
     title: Upgrade Kubernetes to avoid vulnerabilities
@@ -105,5 +170,27 @@ modules:
     title: Datastore Snapshots And The Limits Of Recovery
     path: sections/section-040/module-01/course-02-datastore-snapshots-and-the-limits-of-recovery.md
   - type: reading
+    title: Drain And Return A Worker To Service — Task
+    path: sections/section-040/module-01/labs/lab-01/question.md
+  - type: lab
+    title: Drain And Return A Worker To Service
+    path: sections/section-040/module-01/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: node-maintenance
+    task_kind: build
+    learning_goals:
+    - Respect disruption limits while draining and returning an isolated worker to
+      service.
+    tags:
+    - cks
+    - node-maintenance
+  - type: reading
+    title: Drain And Return A Worker To Service — Solution
+    path: sections/section-040/module-01/labs/lab-01/solution.md
+  - type: reading
+    title: 'Guided Practice: Drain And Return A Worker To Service'
+    path: sections/section-040/module-01/course-03-guided-practice.md
+  - type: reading
     title: Summary
-    path: sections/section-040/module-01/course-03-summary.md
+    path: sections/section-040/module-01/course-04-summary.md
