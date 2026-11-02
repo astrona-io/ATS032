@@ -36,7 +36,7 @@ modules:
   title: Use Role Based Access Controls to minimize exposure
   description: Developed reading and reasoning for Use Role Based Access Controls
     to minimize exposure.
-  status: alpha
+  maturity: alpha
   content:
   - type: reading
     title: Use Role Based Access Controls to minimize exposure
@@ -77,7 +77,7 @@ modules:
     permissions on newly created ones
   description: Developed reading and reasoning for Exercise caution in using service
     accounts e.g. disable defaults, minimize permissions on newly created ones.
-  status: alpha
+  maturity: alpha
   content:
   - type: reading
     title: Exercise caution in using service accounts e.g. disable defaults, minimize
@@ -116,7 +116,7 @@ modules:
 - id: module-030
   title: Restrict access to Kubernetes API
   description: Developed reading and reasoning for Restrict access to Kubernetes API.
-  status: alpha
+  maturity: alpha
   content:
   - type: reading
     title: Restrict access to Kubernetes API
@@ -155,7 +155,7 @@ modules:
 - id: module-040
   title: Upgrade Kubernetes to avoid vulnerabilities
   description: Developed reading and reasoning for Upgrade Kubernetes to avoid vulnerabilities.
-  status: alpha
+  maturity: alpha
   content:
   - type: reading
     title: Upgrade Kubernetes to avoid vulnerabilities
