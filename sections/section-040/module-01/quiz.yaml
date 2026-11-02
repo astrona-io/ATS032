@@ -1,0 +1,216 @@
+# Knowledge check for section 040, module 01. Contract:
+# schemas/question-bank.schema.json. Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats032-040-01
+course_id: ATS032
+exam_code: CKS
+status: draft
+provenance: "Original practice material written for this course; not official exam questions."
+scope:
+  type: section
+  id: section-040
+  title: "Upgrade Kubernetes To Avoid Vulnerabilities"
+placement:
+  position: after
+  reading: sections/section-040/module-01/course-05-summary.md
+questions:
+  - id: ats032-040-01-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Explain why upgrades are a security control."
+    source_readings:
+      - sections/section-040/module-01/course-01-versions-skew-and-support.md
+    prompt: "Why does a cluster on an old minor version stay exposed to known vulnerabilities?"
+    options:
+      - id: a
+        text: "Only the most recent minor versions receive fixes, and an older one gets none"
+        explanation: "Correct."
+      - id: b
+        text: "Old versions block security updates for other components"
+        explanation: "Components are independent in this respect."
+      - id: c
+        text: "Vulnerabilities only affect the newest release"
+        explanation: "Published flaws affect the versions that contain them."
+    correct_option: a
+    explanation: "The project maintains the newest three minor versions. Upgrading is the only way to receive fixes."
+
+  - id: ats032-040-01-q02
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Apply the skew rule for the kubelet."
+    source_readings:
+      - sections/section-040/module-01/course-01-versions-skew-and-support.md
+    prompt: "The API server runs 1.35. Which kubelet version is supported?"
+    options:
+      - id: a
+        text: "1.36"
+        explanation: "A kubelet may not be newer than the API server."
+      - id: b
+        text: "1.32"
+        explanation: "Correct. It is three minor versions older."
+      - id: c
+        text: "1.31"
+        explanation: "It is four minor versions older, which is outside the policy."
+    correct_option: b
+    explanation: "The kubelet may be the same version or up to three minor versions older than the API server."
+
+  - id: ats032-040-01-q03
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Name the order of an upgrade."
+    source_readings:
+      - sections/section-040/module-01/course-01-versions-skew-and-support.md
+    prompt: "Which order is correct for a minor version upgrade?"
+    options:
+      - id: a
+        text: "Kubelets on workers, then the control plane"
+        explanation: "Kubelets may not be newer than the API server."
+      - id: b
+        text: "All nodes at the same moment"
+        explanation: "It removes capacity and gives no way to stop on a problem."
+      - id: c
+        text: "Control plane first, then workers one at a time"
+        explanation: "Correct."
+    correct_option: c
+    explanation: "The API server must not be older than the components that talk to it."
+
+  - id: ats032-040-01-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Distinguish the node maintenance commands."
+    source_readings:
+      - sections/section-040/module-01/course-02-cordon-drain-and-disruption-budgets.md
+    prompt: "What does `kubectl cordon <node>` do?"
+    options:
+      - id: a
+        text: "Marks the node unschedulable and leaves running Pods in place"
+        explanation: "Correct."
+      - id: b
+        text: "Evicts every Pod and marks the node unschedulable"
+        explanation: "That is `kubectl drain`."
+      - id: c
+        text: "Removes the node from the cluster"
+        explanation: "That is `kubectl delete node`."
+    correct_option: a
+    explanation: "Drain adds eviction to the cordon. Uncordon reverses it."
+
+  - id: ats032-040-01-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain why a drain refuses a Pod."
+    source_readings:
+      - sections/section-040/module-01/course-02-cordon-drain-and-disruption-budgets.md
+    prompt: "`kubectl drain` stops because the node runs a Pod that no controller owns. Which statement is correct?"
+    options:
+      - id: a
+        text: "Add `--ignore-daemonsets` and the Pod moves"
+        explanation: "That flag is for DaemonSet Pods."
+      - id: b
+        text: "The Pod is recreated elsewhere automatically"
+        explanation: "Nothing owns it, so nothing recreates it."
+      - id: c
+        text: "`--force` would delete the Pod and it would not return"
+        explanation: "Correct."
+    correct_option: c
+    explanation: "Move or recreate the bare Pod yourself, or accept its loss with `--force`."
+
+  - id: ats032-040-01-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Read a PodDisruptionBudget."
+    source_readings:
+      - sections/section-040/module-01/course-02-cordon-drain-and-disruption-budgets.md
+    prompt: "A Deployment has two replicas and a PodDisruptionBudget with `minAvailable: 2`. What happens when you drain a node that runs one replica?"
+    options:
+      - id: a
+        text: "The eviction is refused and the drain waits until its timeout"
+        explanation: "Correct."
+      - id: b
+        text: "The replica is evicted and the budget is ignored"
+        explanation: "Evictions respect the budget."
+      - id: c
+        text: "The budget is lowered automatically"
+        explanation: "Budgets are not changed by Kubernetes."
+    correct_option: a
+    explanation: "No Pod may be down, so no eviction is allowed. Fix the budget or add replicas."
+
+  - id: ats032-040-01-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Know what a PodDisruptionBudget covers."
+    source_readings:
+      - sections/section-040/module-01/course-02-cordon-drain-and-disruption-budgets.md
+    prompt: "A node loses power. Does a PodDisruptionBudget keep the Pods on it available?"
+    options:
+      - id: a
+        text: "Yes, the budget keeps replicas on other nodes"
+        explanation: "The budget does not place Pods."
+      - id: b
+        text: "No, a budget limits voluntary evictions only"
+        explanation: "Correct."
+      - id: c
+        text: "Yes, but only with `maxUnavailable`"
+        explanation: "Both fields apply to voluntary disruptions only."
+    correct_option: b
+    explanation: "A crash is an involuntary disruption. Replicas and spreading give availability."
+
+  - id: ats032-040-01-q08
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Choose the right kubeadm command for each node."
+    source_readings:
+      - sections/section-040/module-01/course-03-the-kubeadm-upgrade-sequence.md
+    prompt: "Which command upgrades the local control-plane components on the second control-plane node?"
+    options:
+      - id: a
+        text: "`kubeadm upgrade apply v1.35.2`"
+        explanation: "Apply runs once on the first control-plane node."
+      - id: b
+        text: "`kubeadm upgrade node`"
+        explanation: "Correct."
+      - id: c
+        text: "`kubeadm init phase upload-config`"
+        explanation: "That is not an upgrade step."
+    correct_option: b
+    explanation: "The node command reads the configuration that the first node already updated."
+
+  - id: ats032-040-01-q09
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Complete the node-level upgrade after kubeadm."
+    source_readings:
+      - sections/section-040/module-01/course-03-the-kubeadm-upgrade-sequence.md
+    prompt: "`kubeadm upgrade apply` has succeeded. What must you still do to run the new kubelet on that node?"
+    options:
+      - id: a
+        text: "Nothing, because kubeadm upgrades the kubelet"
+        explanation: "kubeadm does not upgrade the kubelet package."
+      - id: b
+        text: "Drain the node, install the new `kubelet` package, run `systemctl daemon-reload`, restart the kubelet and uncordon"
+        explanation: "Correct."
+      - id: c
+        text: "Delete the node object and join it again"
+        explanation: "This is not needed."
+    correct_option: b
+    explanation: "The package, the systemd reload and the restart move the node to the new kubelet version."
+
+  - id: ats032-040-01-q10
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Take and protect an etcd snapshot."
+    source_readings:
+      - sections/section-040/module-01/course-04-snapshot-and-verify.md
+    prompt: "Which statement about an etcd snapshot of a kubeadm cluster is correct?"
+    options:
+      - id: a
+        text: "`etcdctl snapshot save` needs the CA, certificate and key of the etcd server, and the file contains all Secrets"
+        explanation: "Correct."
+      - id: b
+        text: "The snapshot contains only metadata, so any user may read it"
+        explanation: "It contains the full state, including Secrets."
+      - id: c
+        text: "The snapshot works without certificates when the endpoint is `127.0.0.1`"
+        explanation: "The endpoint uses TLS with client certificates."
+    correct_option: a
+    explanation: "Protect the file with mode 0600 and store a copy off the host."

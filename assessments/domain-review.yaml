@@ -11,14 +11,14 @@ scope:
   title: Cluster Hardening
 placement:
   position: after
-  reading: sections/section-040/module-01/course-03-summary.md
+  reading: sections/section-040/module-01/course-05-summary.md
 questions:
 - id: ats032-domain-review-q01
   type: single_choice
   difficulty: intermediate
   learning_objective: Explain additive grants and indirect privilege.
   source_readings:
-  - sections/section-010/module-01/course-01-rbac-grants-and-their-consequences.md
+  - sections/section-010/module-01/course-03-additive-grants-dangerous-verbs-and-auditing-access.md
   prompt: A workload cannot directly read Secrets but can create a Pod mounting sensitive data under permissive
     policy. What does this illustrate?
   options:
@@ -38,7 +38,7 @@ questions:
   difficulty: intermediate
   learning_objective: Compare Role, ClusterRole, RoleBinding and ClusterRoleBinding.
   source_readings:
-  - sections/section-010/module-01/course-01-rbac-grants-and-their-consequences.md
+  - sections/section-010/module-01/course-02-clusterroles-reuse-and-escalation-prevention.md
   prompt: A RoleBinding references a ClusterRole in one namespace. Which scope applies to the namespaced
     grant?
   options:
@@ -58,7 +58,7 @@ questions:
   difficulty: intermediate
   learning_objective: Explain additive grants and indirect privilege.
   source_readings:
-  - sections/section-010/module-01/course-01-rbac-grants-and-their-consequences.md
+  - sections/section-010/module-01/course-03-additive-grants-dangerous-verbs-and-auditing-access.md
   prompt: A broad grant is removed from one role, but another binding still grants it. What is the effective
     result?
   options:
@@ -78,7 +78,7 @@ questions:
   difficulty: intermediate
   learning_objective: Explain ServiceAccount token audience and lifetime.
   source_readings:
-  - sections/section-020/module-01/course-01-api-identity-and-serviceaccounts.md
+  - sections/section-020/module-01/course-03-bound-tokens-audience-and-legacy-secrets.md
   prompt: A projected token has a limited audience and lifetime. What do these controls bound?
   options:
   - id: a
@@ -97,7 +97,7 @@ questions:
   difficulty: intermediate
   learning_objective: Explain ServiceAccount token audience and lifetime.
   source_readings:
-  - sections/section-020/module-01/course-01-api-identity-and-serviceaccounts.md
+  - sections/section-020/module-01/course-03-bound-tokens-audience-and-legacy-secrets.md
   prompt: Why use a bounded audience and lifetime for a workload token?
   options:
   - id: a
@@ -116,7 +116,7 @@ questions:
   difficulty: intermediate
   learning_objective: Identify unnecessary credential mounting and disclosure paths.
   source_readings:
-  - sections/section-020/module-01/course-01-api-identity-and-serviceaccounts.md
+  - sections/section-020/module-01/course-02-disable-automounting-and-minimize-permissions.md
   prompt: A workload never calls the API. Which credential choice is appropriate?
   options:
   - id: a
@@ -135,7 +135,7 @@ questions:
   difficulty: intermediate
   learning_objective: Identify risks from excessive API exposure and powerful credentials.
   source_readings:
-  - sections/section-030/module-01/course-01-protecting-the-cluster-api.md
+  - sections/section-030/module-01/course-03-hardening-the-endpoint-and-the-kubelet.md
   prompt: A private API endpoint accepts a stolen powerful credential. Which distinction matters?
   options:
   - id: a
@@ -154,7 +154,7 @@ questions:
   difficulty: intermediate
   learning_objective: Explain the API server's identity, permission and admission checks.
   source_readings:
-  - sections/section-030/module-01/course-01-protecting-the-cluster-api.md
+  - sections/section-030/module-01/course-01-how-an-api-request-is-checked.md
   prompt: An API caller authenticates but lacks the requested create permission. Which boundary rejects
     it?
   options:
@@ -174,7 +174,7 @@ questions:
   difficulty: intermediate
   learning_objective: Distinguish API audit evidence from application request logs.
   source_readings:
-  - sections/section-030/module-01/course-01-protecting-the-cluster-api.md
+  - sections/section-030/module-01/course-03-hardening-the-endpoint-and-the-kubelet.md
   prompt: An API audit record shows an accepted Pod creation. What does it not establish by itself?
   options:
   - id: a
@@ -193,7 +193,7 @@ questions:
   difficulty: intermediate
   learning_objective: Evaluate datastore snapshot scope and restore prerequisites.
   source_readings:
-  - sections/section-040/module-01/course-02-datastore-snapshots-and-the-limits-of-recovery.md
+  - sections/section-040/module-01/course-04-snapshot-and-verify.md
   prompt: A datastore snapshot restores resource objects. Does it automatically restore independent database
     records?
   options:
@@ -213,7 +213,7 @@ questions:
   difficulty: intermediate
   learning_objective: Explain supported component-version and upgrade order.
   source_readings:
-  - sections/section-040/module-01/course-01-cluster-upgrades-and-maintenance-boundaries.md
+  - sections/section-040/module-01/course-01-versions-skew-and-support.md
   prompt: Why follow the target release's supported upgrade order?
   options:
   - id: a
@@ -232,7 +232,7 @@ questions:
   difficulty: intermediate
   learning_objective: Distinguish cordon, drain and disruption policy.
   source_readings:
-  - sections/section-040/module-01/course-01-cluster-upgrades-and-maintenance-boundaries.md
+  - sections/section-040/module-01/course-02-cordon-drain-and-disruption-budgets.md
   prompt: What does cordoning do by itself?
   options:
   - id: a

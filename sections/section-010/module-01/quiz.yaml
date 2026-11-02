@@ -1,0 +1,217 @@
+# Knowledge check for section 010, module 01. Contract:
+# schemas/question-bank.schema.json. Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats032-010-01
+course_id: ATS032
+exam_code: CKS
+status: draft
+provenance: "Original practice material written for this course; not official exam questions."
+scope:
+  type: section
+  id: section-010
+  title: "Minimize Exposure With Role Based Access Control"
+placement:
+  position: after
+  reading: sections/section-010/module-01/course-04-summary.md
+questions:
+  - id: ats032-010-01-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Name the RBAC object that limits a grant to one namespace."
+    source_readings:
+      - sections/section-010/module-01/course-01-roles-bindings-and-scope.md
+    prompt: "Which RBAC object lists rules that apply only inside its own namespace?"
+    options:
+      - id: a
+        text: "`ClusterRole`"
+        explanation: "A ClusterRole is not tied to a namespace. Its reach depends on the binding."
+      - id: b
+        text: "`ClusterRoleBinding`"
+        explanation: "A ClusterRoleBinding gives a ClusterRole in every namespace."
+      - id: c
+        text: "`Role`"
+        explanation: "Correct. A Role lists rules for one namespace."
+    correct_option: c
+    explanation: "A Role is namespaced and holds rules for its own namespace. A ClusterRole is a cluster-wide definition."
+
+  - id: ats032-010-01-q02
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Write the core API group correctly in an RBAC rule."
+    source_readings:
+      - sections/section-010/module-01/course-01-roles-bindings-and-scope.md
+    prompt: "A rule must cover Pods, which are in the core API group. What goes in `apiGroups`?"
+    options:
+      - id: a
+        text: "`[\"core\"]`"
+        explanation: "There is no API group named core. The rule would match nothing."
+      - id: b
+        text: "`[\"\"]`"
+        explanation: "Correct. The core group is the empty string."
+      - id: c
+        text: "`[\"v1\"]`"
+        explanation: "`v1` is a version, not an API group."
+    correct_option: b
+    explanation: "The core API group, which holds Pods, Services, ConfigMaps and Secrets, is written as the empty string."
+
+  - id: ats032-010-01-q03
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Test the permissions of a ServiceAccount with kubectl auth can-i."
+    source_readings:
+      - sections/section-010/module-01/course-01-roles-bindings-and-scope.md
+    prompt: "A cluster administrator runs `kubectl auth can-i list secrets -n outpost` to test the ServiceAccount `shuttle` in `starfleet`. The answer is `yes`, but the ServiceAccount has no grants. What is wrong?"
+    options:
+      - id: a
+        text: "The command has no `--as=system:serviceaccount:starfleet:shuttle`, so it tested the administrator"
+        explanation: "Correct. Without `--as`, the answer is for the caller, who is cluster-admin."
+      - id: b
+        text: "RBAC allows every action until a deny rule is added"
+        explanation: "RBAC denies by default and has no deny rule."
+      - id: c
+        text: "`can-i` only supports the verb `get`"
+        explanation: "`can-i` supports every verb."
+    correct_option: a
+    explanation: "`kubectl auth can-i` answers for the identity that runs it unless `--as` names another identity."
+
+  - id: ats032-010-01-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain the reach of a RoleBinding that references a ClusterRole."
+    source_readings:
+      - sections/section-010/module-01/course-02-clusterroles-reuse-and-escalation-prevention.md
+    prompt: "A RoleBinding in `outpost` references the ClusterRole `view` and names the ServiceAccount `starfleet/shuttle`. Where can `shuttle` read Pods?"
+    options:
+      - id: a
+        text: "In every namespace"
+        explanation: "That needs a ClusterRoleBinding."
+      - id: b
+        text: "Only in `starfleet`, the namespace of the ServiceAccount"
+        explanation: "The reach follows the namespace of the binding, not of the subject."
+      - id: c
+        text: "Only in `outpost`, the namespace of the RoleBinding"
+        explanation: "Correct. A RoleBinding limits a ClusterRole to its own namespace."
+    correct_option: c
+    explanation: "The binding decides the reach. A RoleBinding gives the ClusterRole rules only in the namespace where the binding exists."
+
+  - id: ats032-010-01-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Know which built-in ClusterRole omits Secrets."
+    source_readings:
+      - sections/section-010/module-01/course-02-clusterroles-reuse-and-escalation-prevention.md
+    prompt: "A team needs read-only access to most objects in a namespace, and must not read Secrets. Which built-in ClusterRole fits, bound with a RoleBinding?"
+    options:
+      - id: a
+        text: "`edit`"
+        explanation: "`edit` includes read and write access to Secrets."
+      - id: b
+        text: "`admin`"
+        explanation: "`admin` includes Secrets and also manages Roles and RoleBindings."
+      - id: c
+        text: "`view`"
+        explanation: "Correct. `view` is read-only and leaves out Secrets."
+    correct_option: c
+    explanation: "`view` allows read-only access to most namespaced objects and does not include Secrets."
+
+  - id: ats032-010-01-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain the escalation check on Role creation."
+    source_readings:
+      - sections/section-010/module-01/course-02-clusterroles-reuse-and-escalation-prevention.md
+    prompt: "A ServiceAccount may create Roles in `outpost` but has no permission on Secrets. It tries to create a Role that allows `get` on Secrets. What happens?"
+    options:
+      - id: a
+        text: "The Role is created and is inactive until an administrator approves it"
+        explanation: "RBAC has no approval state for Roles."
+      - id: b
+        text: "The API server rejects the request because the ServiceAccount would grant permissions it does not hold"
+        explanation: "Correct. This is the escalation prevention check."
+      - id: c
+        text: "The Role is created, but it grants nothing to its creator"
+        explanation: "The request is rejected at creation; the Role does not exist."
+    correct_option: b
+    explanation: "A caller can create a Role only if it already holds every permission in it, or holds the `escalate` verb."
+
+  - id: ats032-010-01-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Find why access remains after a grant is removed."
+    source_readings:
+      - sections/section-010/module-01/course-03-additive-grants-dangerous-verbs-and-auditing-access.md
+    prompt: "An administrator deletes the RoleBinding that gave `shuttle` the right to list Pods in `outpost`. `kubectl auth can-i list pods -n outpost --as=system:serviceaccount:starfleet:shuttle` still prints `yes`. What is the most likely cause?"
+    options:
+      - id: a
+        text: "Another binding, ClusterRole or group membership still allows the action"
+        explanation: "Correct. RBAC grants add up and nothing subtracts."
+      - id: b
+        text: "The API server caches the deleted binding for 24 hours"
+        explanation: "The RBAC authorizer reads current objects. There is no 24-hour cache."
+      - id: c
+        text: "The deleted binding must be deleted a second time to take effect"
+        explanation: "One delete removes the object."
+    correct_option: a
+    explanation: "The effective permission is the union of all applicable rules. Find every binding that applies to the identity and its groups."
+
+  - id: ats032-010-01-q08
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Identify indirect Secret exposure through Pod creation."
+    source_readings:
+      - sections/section-010/module-01/course-03-additive-grants-dangerous-verbs-and-auditing-access.md
+    prompt: "A Role in `outpost` allows `create` on `pods` and has no rule for Secrets. Why can it still expose the Secrets of `outpost`?"
+    options:
+      - id: a
+        text: "`create` on `pods` implies `get` on `secrets` in the RBAC authorizer"
+        explanation: "RBAC does not imply one resource from another."
+      - id: b
+        text: "A new Pod can mount any Secret of its namespace and the creator can read it from the container"
+        explanation: "Correct. The Pod volume is the path to the data."
+      - id: c
+        text: "Pods created in a namespace are always run as cluster-admin"
+        explanation: "Pods run with the ServiceAccount they name, not cluster-admin."
+    correct_option: b
+    explanation: "Permission to create Pods lets the creator mount Secrets and ServiceAccount tokens of the namespace, which is indirect access."
+
+  - id: ats032-010-01-q09
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Review bindings to broad groups."
+    source_readings:
+      - sections/section-010/module-01/course-03-additive-grants-dangerous-verbs-and-auditing-access.md
+    prompt: "A review of `kubectl get clusterrolebindings -o wide` finds a binding of `edit` to the group `system:authenticated`. A ClusterRoleBinding like this is a risk because:"
+    options:
+      - id: a
+        text: "Every identity that authenticates, including every ServiceAccount, receives `edit` in every namespace"
+        explanation: "Correct. A ClusterRoleBinding applies everywhere and the group contains all authenticated identities."
+      - id: b
+        text: "The group `system:authenticated` has no members, so the binding is ignored"
+        explanation: "The group contains all authenticated identities."
+      - id: c
+        text: "`edit` cannot be used in a ClusterRoleBinding"
+        explanation: "Any ClusterRole can be used in a ClusterRoleBinding."
+    correct_option: a
+    explanation: "Bindings to broad groups give the grant to every identity in the group. Remove them and bind specific subjects instead."
+
+  - id: ats032-010-01-q10
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Choose the safest grant for a workload that only reads ConfigMaps in one namespace."
+    source_readings:
+      - sections/section-010/module-01/course-01-roles-bindings-and-scope.md
+      - sections/section-010/module-01/course-03-additive-grants-dangerous-verbs-and-auditing-access.md
+    prompt: "A workload using the ServiceAccount `shuttle` must read ConfigMaps in `outpost` only. Which grant follows least privilege?"
+    options:
+      - id: a
+        text: "A Role in `outpost` with `get` and `list` on `configmaps`, and a RoleBinding in `outpost` for `shuttle`"
+        explanation: "Correct. It limits verb, resource and namespace."
+      - id: b
+        text: "A ClusterRoleBinding of `view` for `shuttle`"
+        explanation: "It gives read access to most objects in every namespace."
+      - id: c
+        text: "A Role in `outpost` with `*` on `configmaps`, so future needs are covered"
+        explanation: "The wildcard adds write verbs that the workload does not need."
+    correct_option: a
+    explanation: "Name the exact verbs, resource and namespace. Broader grants add exposure without a need."

@@ -1,0 +1,217 @@
+# Knowledge check for section 020, module 01. Contract:
+# schemas/question-bank.schema.json. Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats032-020-01
+course_id: ATS032
+exam_code: CKS
+status: draft
+provenance: "Original practice material written for this course; not official exam questions."
+scope:
+  type: section
+  id: section-020
+  title: "Restrict ServiceAccount Credentials"
+placement:
+  position: after
+  reading: sections/section-020/module-01/course-04-summary.md
+questions:
+  - id: ats032-020-01-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Explain which ServiceAccount a pod uses when none is named."
+    source_readings:
+      - sections/section-020/module-01/course-01-serviceaccounts-and-the-default-token.md
+    prompt: "A pod manifest has no `serviceAccountName`. Which ServiceAccount does the pod use?"
+    options:
+      - id: a
+        text: "No ServiceAccount, so the pod cannot call the API"
+        explanation: "Admission always sets an account on the pod."
+      - id: b
+        text: "The ServiceAccount named `default` in the pod's namespace"
+        explanation: "Correct. The ServiceAccount admission controller sets it."
+      - id: c
+        text: "The ServiceAccount of the node that runs the pod"
+        explanation: "Nodes are not ServiceAccounts."
+    correct_option: b
+    explanation: "Every namespace has a `default` ServiceAccount, and pods without a named account use it."
+
+  - id: ats032-020-01-q02
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Name the mount path of the ServiceAccount credentials."
+    source_readings:
+      - sections/section-020/module-01/course-01-serviceaccounts-and-the-default-token.md
+    prompt: "Where does the kubelet mount the ServiceAccount token, the CA bundle and the namespace file in a container?"
+    options:
+      - id: a
+        text: "`/etc/kubernetes/pki`"
+        explanation: "That is the certificate directory on control-plane nodes."
+      - id: b
+        text: "`/var/lib/kubelet/serviceaccount`"
+        explanation: "That path is on the node, not in the container."
+      - id: c
+        text: "`/var/run/secrets/kubernetes.io/serviceaccount`"
+        explanation: "Correct. It holds `token`, `ca.crt` and `namespace`."
+    correct_option: c
+    explanation: "The projected volume is mounted at `/var/run/secrets/kubernetes.io/serviceaccount` in every container."
+
+  - id: ats032-020-01-q03
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Check whether a pod has a token without exposing it."
+    source_readings:
+      - sections/section-020/module-01/course-01-serviceaccounts-and-the-default-token.md
+    prompt: "What is the safe way to check that a pod has a ServiceAccount token mounted?"
+    options:
+      - id: a
+        text: "List the files in `/var/run/secrets/kubernetes.io/serviceaccount` with `kubectl exec`"
+        explanation: "Correct. It proves the mount without printing the token."
+      - id: b
+        text: "Print the file `token` and read the JWT"
+        explanation: "Printing the token exposes a valid credential."
+      - id: c
+        text: "Run `kubectl get secrets` and look for a token Secret"
+        explanation: "Projected tokens are not stored in Secrets."
+    correct_option: a
+    explanation: "Check that the directory and the file exist. Never print the token."
+
+  - id: ats032-020-01-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Apply the precedence between pod and ServiceAccount automount settings."
+    source_readings:
+      - sections/section-020/module-01/course-02-disable-automounting-and-minimize-permissions.md
+    prompt: "A ServiceAccount sets `automountServiceAccountToken: false`. A pod that uses it sets `automountServiceAccountToken: true` in its `spec`. Is the token mounted?"
+    options:
+      - id: a
+        text: "No, the ServiceAccount value always wins"
+        explanation: "The pod value takes precedence."
+      - id: b
+        text: "Yes, the pod value takes precedence over the ServiceAccount"
+        explanation: "Correct."
+      - id: c
+        text: "The pod is rejected because the two values conflict"
+        explanation: "There is no conflict check. The pod is accepted."
+    correct_option: b
+    explanation: "The pod-level field overrides the ServiceAccount field. Use an admission policy to enforce a rule for all pods."
+
+  - id: ats032-020-01-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Know when an automount change takes effect."
+    source_readings:
+      - sections/section-020/module-01/course-02-disable-automounting-and-minimize-permissions.md
+    prompt: "An administrator patches the `default` ServiceAccount of a namespace with `automountServiceAccountToken: false`. What happens to pods that already run?"
+    options:
+      - id: a
+        text: "They keep their token until they are recreated"
+        explanation: "Correct. The field is read when a pod is created."
+      - id: b
+        text: "The kubelet removes the token from them within a minute"
+        explanation: "The kubelet does not remove volumes from running pods."
+      - id: c
+        text: "They are restarted automatically"
+        explanation: "No controller restarts pods after a ServiceAccount change."
+    correct_option: a
+    explanation: "The setting is read at pod creation. Delete and recreate the pods, or roll out the Deployment."
+
+  - id: ats032-020-01-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Identify the risky binding for new ServiceAccounts."
+    source_readings:
+      - sections/section-020/module-01/course-02-disable-automounting-and-minimize-permissions.md
+    prompt: "An application in namespace `starfleet` fails with `Forbidden`. Which fix keeps the namespace least privileged?"
+    options:
+      - id: a
+        text: "Bind a Role with the missing verb to the `default` ServiceAccount"
+        explanation: "Every pod that uses `default` would receive the grant."
+      - id: b
+        text: "Bind `cluster-admin` to the group `system:serviceaccounts:starfleet`"
+        explanation: "This gives full control to every ServiceAccount of the namespace."
+      - id: c
+        text: "Create a dedicated ServiceAccount, grant it the missing verb only, and set it on the Deployment"
+        explanation: "Correct. Only that workload receives the grant."
+    correct_option: c
+    explanation: "Use one ServiceAccount per workload that calls the API and grant only what it uses."
+
+  - id: ats032-020-01-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain what a token audience does."
+    source_readings:
+      - sections/section-020/module-01/course-03-bound-tokens-audience-and-legacy-secrets.md
+    prompt: "A projected token is requested with `audience: ledger`. Which statement is correct?"
+    options:
+      - id: a
+        text: "The token is meant for the service named `ledger`, and the API server does not accept it for its own requests"
+        explanation: "Correct. The API server requires its own audience."
+      - id: b
+        text: "The token can call the API server and the `ledger` service"
+        explanation: "The audience list decides who accepts the token."
+      - id: c
+        text: "The audience limits the token to the namespace `ledger`"
+        explanation: "The audience names a recipient, not a namespace."
+    correct_option: a
+    explanation: "An audience names the intended recipient. A service must check that its own audience is in the token."
+
+  - id: ats032-020-01-q08
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Request a short-lived token with kubectl."
+    source_readings:
+      - sections/section-020/module-01/course-03-bound-tokens-audience-and-legacy-secrets.md
+    prompt: "A script must call the API once as the ServiceAccount `reporter` in `outpost`, with a credential that expires on its own. Which method fits?"
+    options:
+      - id: a
+        text: "`kubectl -n outpost create token reporter --duration=10m`"
+        explanation: "Correct. It uses the TokenRequest API and the token expires."
+      - id: b
+        text: "Create a Secret of type `kubernetes.io/service-account-token` for `reporter`"
+        explanation: "That token has no expiry."
+      - id: c
+        text: "Copy the token file from a running pod of `reporter`"
+        explanation: "It exposes the pod's credential and may be revoked when the pod ends."
+    correct_option: a
+    explanation: "`kubectl create token` requests a bound token with a lifetime. The minimum is ten minutes."
+
+  - id: ats032-020-01-q09
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Audit for long-lived ServiceAccount tokens."
+    source_readings:
+      - sections/section-020/module-01/course-03-bound-tokens-audience-and-legacy-secrets.md
+    prompt: "Which command lists the long-lived ServiceAccount token Secrets in every namespace?"
+    options:
+      - id: a
+        text: "`kubectl get serviceaccounts -A -o wide`"
+        explanation: "It lists accounts, not token Secrets."
+      - id: b
+        text: "`kubectl get secrets -A --field-selector type=kubernetes.io/service-account-token`"
+        explanation: "Correct. It filters Secrets by type."
+      - id: c
+        text: "`kubectl get tokens -A`"
+        explanation: "Tokens are not an API resource."
+    correct_option: b
+    explanation: "Legacy tokens are Secrets of type `kubernetes.io/service-account-token`. A field selector on the type finds them."
+
+  - id: ats032-020-01-q10
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Combine mount control and permissions for a workload that never calls the API."
+    source_readings:
+      - sections/section-020/module-01/course-02-disable-automounting-and-minimize-permissions.md
+      - sections/section-020/module-01/course-03-bound-tokens-audience-and-legacy-secrets.md
+    prompt: "A Deployment never calls the Kubernetes API. A reviewer wants the lowest exposure. Which pod template achieves it?"
+    options:
+      - id: a
+        text: "A dedicated ServiceAccount with a read-only Role and a one-hour projected token"
+        explanation: "The workload does not need any API access."
+      - id: b
+        text: "The `default` ServiceAccount, with the token mounted, since it has no permissions"
+        explanation: "The token is still present, and a later binding to `default` would expose it."
+      - id: c
+        text: "A dedicated ServiceAccount with no grants and `automountServiceAccountToken: false` in the pod spec"
+        explanation: "Correct. There is no token and no permission."
+    correct_option: c
+    explanation: "Do not mount a credential the workload does not use, and keep the account free of grants."

@@ -1,20 +1,17 @@
 ---
 draft: true
 exam_objectives:
-- Exercise caution in using service accounts e.g. disable defaults, minimize permissions
-  on newly created ones
+- Exercise caution in using service accounts e.g. disable defaults, minimize permissions on newly created ones
 ---
-# Exercise caution in using service accounts e.g. disable defaults, minimize permissions on newly created ones
+# Restrict ServiceAccount Credentials
 
-An example `probe` application can run without reading Kubernetes resources, while a controller needs a workload identity to call the API. Giving both the same mounted credentials exposes authority where it may not be needed.
+Every pod receives a ServiceAccount credential unless it is switched off. This section shows how the credential reaches the container, how to turn off mounting in a ServiceAccount and in a pod, how to keep new ServiceAccounts without grants, and how to use short-lived tokens with an audience in place of long-lived Secret tokens.
 
-The explanations identify the responsible components, compare intended and observed state, and work through the decisions needed to preserve the requirement. Read the worked examples as reasoning about a proposed system; no environment is started by this section.
-
-Read the module goals, teaching and closing summary in order. YAML checks are indexed separately and appear after designated summaries. Larger domains include an intermediate checkpoint before the final review.
+The section has one module. Read the landing page, then the parts in order, and use the playground next to the text. The lab follows the part it practises, and the summary closes the module. A ten-question knowledge check follows the summary.
 
 ## Learning Outcomes
 
-- Distinguish established identity from granted API permission.
-- Explain ServiceAccount token audience and lifetime.
-- Identify unnecessary credential mounting and disclosure paths.
-- Relate authentication failure to the actual credential mechanism.
+- Explain how a pod gets its ServiceAccount and what is mounted.
+- Disable token mounting at ServiceAccount and pod level and state which setting wins.
+- Request short-lived tokens and set an audience and lifetime on a projected token.
+- Audit long-lived ServiceAccount token Secrets.

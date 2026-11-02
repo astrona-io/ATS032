@@ -1,8 +1,7 @@
 training:
   id: ATS032
   title: 'CKS: Cluster Hardening'
-  description: 'Detailed reading material and reusable YAML knowledge checks for CKS:
-    Cluster Hardening. Technical content remains draft. No labs or playgrounds.'
+  description: 'Detailed reading material, hands-on labs and reusable YAML knowledge checks for CKS: Cluster Hardening. Technical content remains draft.'
   certification:
     name: Certified Kubernetes Security Specialist
     code: CKS
@@ -11,8 +10,7 @@ training:
     weight: 15
     competencies:
     - Use Role Based Access Controls to minimize exposure
-    - Exercise caution in using service accounts e.g. disable defaults, minimize permissions
-      on newly created ones
+    - Exercise caution in using service accounts e.g. disable defaults, minimize permissions on newly created ones
     - Restrict access to Kubernetes API
     - Upgrade Kubernetes to avoid vulnerabilities
 modules:
@@ -33,20 +31,19 @@ modules:
     title: How This Course Is Made
     path: sections/intro/course-03-how-this-course-is-made.md
 - id: module-010
-  title: Use Role Based Access Controls to minimize exposure
-  description: Developed reading and reasoning for Use Role Based Access Controls
-    to minimize exposure.
+  title: Minimize Exposure With Role Based Access Control
+  description: Build namespaced and cluster-wide RBAC grants, understand escalation prevention, and audit effective access.
   status: alpha
   content:
   - type: reading
-    title: Use Role Based Access Controls to minimize exposure
+    title: Minimize Exposure With Role Based Access Control
     path: sections/section-010/README.md
   - type: reading
-    title: Authorization And Effective Permissions
+    title: Minimize Exposure With Role Based Access Control
     path: sections/section-010/module-01/course.md
   - type: reading
-    title: RBAC Grants And Their Consequences
-    path: sections/section-010/module-01/course-01-rbac-grants-and-their-consequences.md
+    title: Roles, Bindings And Scope
+    path: sections/section-010/module-01/course-01-roles-bindings-and-scope.md
   - type: reading
     title: Grant Namespace Pod Read Access — Task
     path: sections/section-010/module-01/labs/lab-01/question.md
@@ -58,8 +55,7 @@ modules:
     topic: rbac
     task_kind: build
     learning_goals:
-    - Grant a ServiceAccount only Pod read access in the required namespace and verify
-      denied operations.
+    - Grant a ServiceAccount only Pod read access in the required namespace and verify denied operations.
     tags:
     - cks
     - rbac
@@ -67,28 +63,35 @@ modules:
     title: Grant Namespace Pod Read Access — Solution
     path: sections/section-010/module-01/labs/lab-01/solution.md
   - type: reading
-    title: 'Guided Practice: Grant Namespace Pod Read Access'
-    path: sections/section-010/module-01/course-02-guided-practice.md
+    title: ClusterRoles, Reuse And Escalation Prevention
+    path: sections/section-010/module-01/course-02-clusterroles-reuse-and-escalation-prevention.md
+  - type: reading
+    title: Additive Grants, Dangerous Verbs And Auditing Access
+    path: sections/section-010/module-01/course-03-additive-grants-dangerous-verbs-and-auditing-access.md
   - type: reading
     title: Summary
-    path: sections/section-010/module-01/course-03-summary.md
+    path: sections/section-010/module-01/course-04-summary.md
+  - type: quiz
+    title: 'Knowledge Check: Minimize Exposure With Role Based Access Control'
+    path: sections/section-010/module-01/quiz.yaml
+    question_count: 10
 - id: module-020
-  title: Exercise caution in using service accounts e.g. disable defaults, minimize
-    permissions on newly created ones
-  description: Developed reading and reasoning for Exercise caution in using service
-    accounts e.g. disable defaults, minimize permissions on newly created ones.
+  title: Restrict ServiceAccount Credentials
+  description: Control how ServiceAccount credentials reach pods, turn off unneeded tokens, and use short-lived bound tokens.
   status: alpha
   content:
   - type: reading
-    title: Exercise caution in using service accounts e.g. disable defaults, minimize
-      permissions on newly created ones
+    title: Restrict ServiceAccount Credentials
     path: sections/section-020/README.md
   - type: reading
-    title: Authentication And Workload Credentials
+    title: Restrict ServiceAccount Credentials
     path: sections/section-020/module-01/course.md
   - type: reading
-    title: API Identity And ServiceAccounts
-    path: sections/section-020/module-01/course-01-api-identity-and-serviceaccounts.md
+    title: ServiceAccounts And The Default Token
+    path: sections/section-020/module-01/course-01-serviceaccounts-and-the-default-token.md
+  - type: reading
+    title: Disable Automounting And Minimize Permissions
+    path: sections/section-020/module-01/course-02-disable-automounting-and-minimize-permissions.md
   - type: reading
     title: Disable Unneeded ServiceAccount Tokens — Task
     path: sections/section-020/module-01/labs/lab-01/question.md
@@ -108,25 +111,32 @@ modules:
     title: Disable Unneeded ServiceAccount Tokens — Solution
     path: sections/section-020/module-01/labs/lab-01/solution.md
   - type: reading
-    title: 'Guided Practice: Disable Unneeded ServiceAccount Tokens'
-    path: sections/section-020/module-01/course-02-guided-practice.md
+    title: Bound Tokens, Audience And Legacy Secrets
+    path: sections/section-020/module-01/course-03-bound-tokens-audience-and-legacy-secrets.md
   - type: reading
     title: Summary
-    path: sections/section-020/module-01/course-03-summary.md
+    path: sections/section-020/module-01/course-04-summary.md
+  - type: quiz
+    title: 'Knowledge Check: Restrict ServiceAccount Credentials'
+    path: sections/section-020/module-01/quiz.yaml
+    question_count: 10
 - id: module-030
-  title: Restrict access to Kubernetes API
-  description: Developed reading and reasoning for Restrict access to Kubernetes API.
+  title: Restrict Access To The Kubernetes API
+  description: Follow a request through authentication, authorization and admission, and harden the API server and kubelet.
   status: alpha
   content:
   - type: reading
-    title: Restrict access to Kubernetes API
+    title: Restrict Access To The Kubernetes API
     path: sections/section-030/README.md
   - type: reading
-    title: API Server Security Boundaries
+    title: Restrict Access To The Kubernetes API
     path: sections/section-030/module-01/course.md
   - type: reading
-    title: Protecting The Cluster API
-    path: sections/section-030/module-01/course-01-protecting-the-cluster-api.md
+    title: How An API Request Is Checked
+    path: sections/section-030/module-01/course-01-how-an-api-request-is-checked.md
+  - type: reading
+    title: A Narrow Workload Identity
+    path: sections/section-030/module-01/course-02-a-narrow-workload-identity.md
   - type: reading
     title: Use A Workload Identity For An API Request — Task
     path: sections/section-030/module-01/labs/lab-01/question.md
@@ -138,8 +148,7 @@ modules:
     topic: serviceaccount-api
     task_kind: build
     learning_goals:
-    - Run the application with a narrow identity and authenticate a real API request
-      from its container.
+    - Run the application with a narrow identity and authenticate a real API request from its container.
     tags:
     - cks
     - serviceaccount-api
@@ -147,28 +156,32 @@ modules:
     title: Use A Workload Identity For An API Request — Solution
     path: sections/section-030/module-01/labs/lab-01/solution.md
   - type: reading
-    title: 'Guided Practice: Use A Workload Identity For An API Request'
-    path: sections/section-030/module-01/course-02-guided-practice.md
+    title: Hardening The Endpoint And The Kubelet
+    path: sections/section-030/module-01/course-03-hardening-the-endpoint-and-the-kubelet.md
   - type: reading
     title: Summary
-    path: sections/section-030/module-01/course-03-summary.md
+    path: sections/section-030/module-01/course-04-summary.md
+  - type: quiz
+    title: 'Knowledge Check: Restrict Access To The Kubernetes API'
+    path: sections/section-030/module-01/quiz.yaml
+    question_count: 10
 - id: module-040
-  title: Upgrade Kubernetes to avoid vulnerabilities
-  description: Developed reading and reasoning for Upgrade Kubernetes to avoid vulnerabilities.
+  title: Upgrade Kubernetes To Avoid Vulnerabilities
+  description: Plan a supported upgrade, drain nodes safely, run the kubeadm sequence and protect the cluster with an etcd snapshot.
   status: alpha
   content:
   - type: reading
-    title: Upgrade Kubernetes to avoid vulnerabilities
+    title: Upgrade Kubernetes To Avoid Vulnerabilities
     path: sections/section-040/README.md
   - type: reading
-    title: Supported Upgrade And Node Maintenance
+    title: Upgrade Kubernetes To Avoid Vulnerabilities
     path: sections/section-040/module-01/course.md
   - type: reading
-    title: Cluster Upgrades And Maintenance Boundaries
-    path: sections/section-040/module-01/course-01-cluster-upgrades-and-maintenance-boundaries.md
+    title: Versions, Skew And Support
+    path: sections/section-040/module-01/course-01-versions-skew-and-support.md
   - type: reading
-    title: Datastore Snapshots And The Limits Of Recovery
-    path: sections/section-040/module-01/course-02-datastore-snapshots-and-the-limits-of-recovery.md
+    title: Cordon, Drain And Disruption Budgets
+    path: sections/section-040/module-01/course-02-cordon-drain-and-disruption-budgets.md
   - type: reading
     title: Drain And Return A Worker To Service — Task
     path: sections/section-040/module-01/labs/lab-01/question.md
@@ -180,8 +193,7 @@ modules:
     topic: node-maintenance
     task_kind: build
     learning_goals:
-    - Respect disruption limits while draining and returning an isolated worker to
-      service.
+    - Respect disruption limits while draining and returning an isolated worker to service.
     tags:
     - cks
     - node-maintenance
@@ -189,8 +201,15 @@ modules:
     title: Drain And Return A Worker To Service — Solution
     path: sections/section-040/module-01/labs/lab-01/solution.md
   - type: reading
-    title: 'Guided Practice: Drain And Return A Worker To Service'
-    path: sections/section-040/module-01/course-03-guided-practice.md
+    title: The kubeadm Upgrade Sequence
+    path: sections/section-040/module-01/course-03-the-kubeadm-upgrade-sequence.md
+  - type: reading
+    title: Snapshot And Verify
+    path: sections/section-040/module-01/course-04-snapshot-and-verify.md
   - type: reading
     title: Summary
-    path: sections/section-040/module-01/course-04-summary.md
+    path: sections/section-040/module-01/course-05-summary.md
+  - type: quiz
+    title: 'Knowledge Check: Upgrade Kubernetes To Avoid Vulnerabilities'
+    path: sections/section-040/module-01/quiz.yaml
+    question_count: 10

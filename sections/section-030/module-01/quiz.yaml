@@ -1,0 +1,216 @@
+# Knowledge check for section 030, module 01. Contract:
+# schemas/question-bank.schema.json. Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats032-030-01
+course_id: ATS032
+exam_code: CKS
+status: draft
+provenance: "Original practice material written for this course; not official exam questions."
+scope:
+  type: section
+  id: section-030
+  title: "Restrict Access To The Kubernetes API"
+placement:
+  position: after
+  reading: sections/section-030/module-01/course-04-summary.md
+questions:
+  - id: ats032-030-01-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Name the order of the API server checks."
+    source_readings:
+      - sections/section-030/module-01/course-01-how-an-api-request-is-checked.md
+    prompt: "In which order does the API server check a write request?"
+    options:
+      - id: a
+        text: "Admission, authorization, authentication"
+        explanation: "Admission runs last."
+      - id: b
+        text: "Authentication, admission, authorization"
+        explanation: "Authorization comes before admission."
+      - id: c
+        text: "Authentication, authorization, admission"
+        explanation: "Correct."
+    correct_option: c
+    explanation: "The server first identifies the caller, then checks the permission, then lets admission change or reject the object."
+
+  - id: ats032-030-01-q02
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Tell a 401 from a 403."
+    source_readings:
+      - sections/section-030/module-01/course-01-how-an-api-request-is-checked.md
+    prompt: "A request with a valid ServiceAccount token returns `403 Forbidden`. What does it mean?"
+    options:
+      - id: a
+        text: "The identity is known, and no authorization rule allows the action"
+        explanation: "Correct."
+      - id: b
+        text: "The token is expired or unknown"
+        explanation: "That returns 401."
+      - id: c
+        text: "An admission controller rejected the object"
+        explanation: "Admission errors name the plugin or policy that rejected the write."
+    correct_option: a
+    explanation: "A 403 is an authorization result. The caller was authenticated."
+
+  - id: ats032-030-01-q03
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Name the identity of an unauthenticated request."
+    source_readings:
+      - sections/section-030/module-01/course-01-how-an-api-request-is-checked.md
+    prompt: "With `--anonymous-auth=true`, which user and group does a request without credentials receive?"
+    options:
+      - id: a
+        text: "`system:anonymous` in `system:unauthenticated`"
+        explanation: "Correct."
+      - id: b
+        text: "`system:serviceaccount:default:default`"
+        explanation: "That is a ServiceAccount identity and needs a token."
+      - id: c
+        text: "`system:masters`"
+        explanation: "That group is cluster-admin and needs a certificate."
+    correct_option: a
+    explanation: "The request is still authorized. Only the rules that name those subjects apply."
+
+  - id: ats032-030-01-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Judge the risk of a broad binding to anonymous users."
+    source_readings:
+      - sections/section-030/module-01/course-01-how-an-api-request-is-checked.md
+    prompt: "A ClusterRoleBinding gives `view` to the group `system:unauthenticated`. What is the effect?"
+    options:
+      - id: a
+        text: "No effect, because anonymous requests never reach authorization"
+        explanation: "They do reach authorization."
+      - id: b
+        text: "Any host that can reach the API port can read objects that `view` covers, without a credential"
+        explanation: "Correct."
+      - id: c
+        text: "Only requests from inside the cluster can use it"
+        explanation: "The grant does not depend on the source."
+    correct_option: b
+    explanation: "Anonymous callers are authorized like any other. A broad role bound to their group opens that access to the network."
+
+  - id: ats032-030-01-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain the failure policy of an admission webhook."
+    source_readings:
+      - sections/section-030/module-01/course-01-how-an-api-request-is-checked.md
+    prompt: "A validating webhook enforces a security rule and has `failurePolicy: Ignore`. The webhook service is down. What happens to matching requests?"
+    options:
+      - id: a
+        text: "They are rejected"
+        explanation: "That is the behavior of `Fail`."
+      - id: b
+        text: "They wait until the service returns"
+        explanation: "The request does not wait indefinitely."
+      - id: c
+        text: "They are allowed without the check"
+        explanation: "Correct."
+    correct_option: c
+    explanation: "With `Ignore`, a failed call is skipped. Use `Fail` for a rule that must always apply."
+
+  - id: ats032-030-01-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Scope a Role for a workload identity."
+    source_readings:
+      - sections/section-030/module-01/course-02-a-narrow-workload-identity.md
+    prompt: "A Pod must list Services in its own namespace. Which grant is the narrowest that works?"
+    options:
+      - id: a
+        text: "A Role with `get`, `list` on `services`, bound to a dedicated ServiceAccount in that namespace"
+        explanation: "Correct."
+      - id: b
+        text: "The `view` ClusterRole bound with a ClusterRoleBinding"
+        explanation: "It grants read access to many resources in every namespace."
+      - id: c
+        text: "A Role with `*` verbs on `services`, bound to `default`"
+        explanation: "It is broad in verbs and shared by every Pod that uses `default`."
+    correct_option: a
+    explanation: "Name exact resources and verbs, keep the scope to one namespace, and use a dedicated ServiceAccount."
+
+  - id: ats032-030-01-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Verify a workload identity from inside the Pod."
+    source_readings:
+      - sections/section-030/module-01/course-02-a-narrow-workload-identity.md
+    prompt: "`kubectl auth can-i list services --as=system:serviceaccount:starfleet:lister` prints `yes`. What does it prove?"
+    options:
+      - id: a
+        text: "The Pods of the Deployment run as `lister` and authenticate with its token"
+        explanation: "The check does not look at any Pod."
+      - id: b
+        text: "The authorizer allows that identity, and nothing is shown about the Pods"
+        explanation: "Correct."
+      - id: c
+        text: "The identity is denied everything else"
+        explanation: "Other grants can exist. The check covers one action."
+    correct_option: b
+    explanation: "To prove the workload works, send a request from inside the Pod with its token and CA file."
+
+  - id: ats032-030-01-q08
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Interpret the result of a combined test."
+    source_readings:
+      - sections/section-030/module-01/course-02-a-narrow-workload-identity.md
+    prompt: "From a Pod that runs as `lister`, listing Services in its namespace returns `200`, and listing Secrets returns `403`. What does the pair show?"
+    options:
+      - id: a
+        text: "The token authenticates and the Role allows only Services"
+        explanation: "Correct."
+      - id: b
+        text: "The token is not valid for Secrets because of its audience"
+        explanation: "The audience is the API server for both requests."
+      - id: c
+        text: "Admission rejected the Secrets request"
+        explanation: "Admission does not decide read requests."
+    correct_option: a
+    explanation: "A 200 shows that authentication and authorization work. A 403 on another resource shows the grant is narrow."
+
+  - id: ats032-030-01-q09
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Name the limits that NodeRestriction adds."
+    source_readings:
+      - sections/section-030/module-01/course-03-hardening-the-endpoint-and-the-kubelet.md
+    prompt: "What does the NodeRestriction admission plugin do?"
+    options:
+      - id: a
+        text: "It limits a kubelet to modify its own Node object and the Pods bound to its node"
+        explanation: "Correct."
+      - id: b
+        text: "It blocks all network traffic between nodes"
+        explanation: "That is a network policy or firewall."
+      - id: c
+        text: "It prevents users from creating Pods on control-plane nodes"
+        explanation: "That is a scheduling taint."
+    correct_option: a
+    explanation: "It works together with the Node authorizer, which limits what a kubelet may read."
+
+  - id: ats032-030-01-q10
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Apply kubelet hardening settings."
+    source_readings:
+      - sections/section-030/module-01/course-03-hardening-the-endpoint-and-the-kubelet.md
+    prompt: "Which kubelet configuration closes the kubelet API to unauthenticated callers and delegates decisions to the API server?"
+    options:
+      - id: a
+        text: "`authentication.anonymous.enabled: true` and `authorization.mode: AlwaysAllow`"
+        explanation: "Both settings are open."
+      - id: b
+        text: "`authentication.anonymous.enabled: false` and `authorization.mode: Webhook`"
+        explanation: "Correct."
+      - id: c
+        text: "`readOnlyPort: 10255` and `authorization.mode: Webhook`"
+        explanation: "Port 10255 is the unauthenticated read-only port. Set it to 0."
+    correct_option: b
+    explanation: "Also set `readOnlyPort: 0`, then restart the kubelet."

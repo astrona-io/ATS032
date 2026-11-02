@@ -3,17 +3,15 @@ draft: true
 exam_objectives:
 - Use Role Based Access Controls to minimize exposure
 ---
-# Use Role Based Access Controls to minimize exposure
+# Minimize Exposure With Role Based Access Control
 
-A RoleBinding grants a reusable ClusterRole only inside the binding's namespace. Its reference to a cluster-scoped role definition does not make the grant cluster-wide. Read the binding scope and subject together.
+Role Based Access Control (RBAC) decides what each identity may do in the cluster, and there is no deny rule: access is the union of every grant. This section builds Roles and bindings, shows how a binding decides the reach of a ClusterRole, explains the check that stops an identity from granting more than it holds, and shows how to list who can do what.
 
-The explanations identify the responsible components, compare intended and observed state, and work through the decisions needed to preserve the requirement. Read the worked examples as reasoning about a proposed system; no environment is started by this section.
-
-Read the module goals, teaching and closing summary in order. YAML checks are indexed separately and appear after designated summaries. Larger domains include an intermediate checkpoint before the final review.
+The section has one module. Read the landing page, then the parts in order, and use the playground next to the text. The lab follows the part it practises, and the summary closes the module. A ten-question knowledge check follows the summary.
 
 ## Learning Outcomes
 
-- Compare Role, ClusterRole, RoleBinding and ClusterRoleBinding.
-- Evaluate namespace scope, verbs, resources and subjects.
-- Explain additive grants and indirect privilege.
-- Apply least privilege to a workload identity.
+- Build a Role and a RoleBinding and prove their limits with kubectl auth can-i.
+- Explain how a RoleBinding or ClusterRoleBinding decides the reach of a ClusterRole.
+- Explain escalation prevention and the verbs escalate, bind and impersonate.
+- Find all bindings that keep an action alive and audit the access of an identity.

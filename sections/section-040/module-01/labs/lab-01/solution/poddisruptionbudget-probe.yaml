@@ -1,0 +1,19 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: probe
+  namespace: starfleet
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: probe
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: maintenance-record
+  namespace: starfleet
+data:
+  node: astro-ats-032-lab-040-01-01-worker
+  result: returned-to-service

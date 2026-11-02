@@ -3,17 +3,15 @@ draft: true
 exam_objectives:
 - Restrict access to Kubernetes API
 ---
-# Restrict access to Kubernetes API
+# Restrict Access To The Kubernetes API
 
-A workload cannot use a broad role, but the API endpoint still exposes an insecure authentication path. Network access, credential verification, authorization and admission protect different parts of the control surface.
+Every request to the API server is authenticated, authorized and admitted. This section follows a request through the three checks, tests anonymous and authenticated access from inside a pod, builds a narrow workload identity, and reviews the API server and kubelet settings that limit who can reach and use the API.
 
-The explanations identify the responsible components, compare intended and observed state, and work through the decisions needed to preserve the requirement. Read the worked examples as reasoning about a proposed system; no environment is started by this section.
-
-Read the module goals, teaching and closing summary in order. YAML checks are indexed separately and appear after designated summaries. Larger domains include an intermediate checkpoint before the final review.
+The section has one module. Read the landing page, then the parts in order, and use the playground next to the text. The lab follows the part it practises, and the summary closes the module. A ten-question knowledge check follows the summary.
 
 ## Learning Outcomes
 
-- Explain the API server's identity, permission and admission checks.
-- Relate API transport protection to authenticated peer identity.
-- Identify risks from excessive API exposure and powerful credentials.
-- Distinguish API audit evidence from application request logs.
+- Name the three checks and the status code of each failure.
+- Test anonymous and token access from a pod.
+- Give a workload an identity that allows one resource only.
+- Name the API server and kubelet hardening settings.
