@@ -1,0 +1,109 @@
+version: 1
+approval: CKS requested 2026-10-11; established reading-only scope
+course:
+  id: ATS032
+  certification:
+    name: Certified Kubernetes Security Specialist
+    code: CKS
+    provider: CNCF / Linux Foundation
+    domain: Cluster Hardening
+    weight: 15
+    competencies:
+    - Use Role Based Access Controls to minimize exposure
+    - Exercise caution in using service accounts e.g. disable defaults, minimize permissions on newly
+      created ones
+    - Restrict access to Kubernetes API
+    - Upgrade Kubernetes to avoid vulnerabilities
+defaults:
+  playground: false
+  module_lab: false
+  capstone: false
+  section_quiz: false
+  final_quiz: true
+assessment_format: YAML question banks v1, registered in assessments/index.yaml
+sections:
+- id: section-010
+  title: Use Role Based Access Controls to minimize exposure
+  curriculum_item: Use Role Based Access Controls to minimize exposure
+  capstone: false
+  section_quiz: false
+  modules:
+  - id: module-01
+    title: Authorization And Effective Permissions
+    objectives:
+    - Compare Role, ClusterRole, RoleBinding and ClusterRoleBinding.
+    - Evaluate namespace scope, verbs, resources and subjects.
+    - Explain additive grants and indirect privilege.
+    - Apply least privilege to a workload identity.
+    outline:
+    - RBAC Grants And Their Consequences
+    playground: false
+    module_lab: false
+    sources:
+    - reading: sections/section-010/module-01/course-01-rbac-grants-and-their-consequences.md
+      adapted_from: ATS043/sections/section-040/module-01/course-01-rbac-grants-and-their-consequences.md
+- id: section-020
+  title: Exercise caution in using service accounts e.g. disable defaults, minimize permissions on newly
+    created ones
+  curriculum_item: Exercise caution in using service accounts e.g. disable defaults, minimize permissions
+    on newly created ones
+  capstone: false
+  section_quiz: false
+  modules:
+  - id: module-01
+    title: Authentication And Workload Credentials
+    objectives:
+    - Distinguish established identity from granted API permission.
+    - Explain ServiceAccount token audience and lifetime.
+    - Identify unnecessary credential mounting and disclosure paths.
+    - Relate authentication failure to the actual credential mechanism.
+    outline:
+    - API Identity And ServiceAccounts
+    playground: false
+    module_lab: false
+    sources:
+    - reading: sections/section-020/module-01/course-01-api-identity-and-serviceaccounts.md
+      adapted_from: ATS043/sections/section-030/module-01/course-01-api-identity-and-serviceaccounts.md
+- id: section-030
+  title: Restrict access to Kubernetes API
+  curriculum_item: Restrict access to Kubernetes API
+  capstone: false
+  section_quiz: false
+  modules:
+  - id: module-01
+    title: API Server Security Boundaries
+    objectives:
+    - Explain the API server's identity, permission and admission checks.
+    - Relate API transport protection to authenticated peer identity.
+    - Identify risks from excessive API exposure and powerful credentials.
+    - Distinguish API audit evidence from application request logs.
+    outline:
+    - Protecting The Cluster API
+    playground: false
+    module_lab: false
+    sources:
+    - reading: sections/section-030/module-01/course-01-protecting-the-cluster-api.md
+      adapted_from: ATS042/sections/section-010/module-01/course-01-protecting-the-cluster-api.md
+- id: section-040
+  title: Upgrade Kubernetes to avoid vulnerabilities
+  curriculum_item: Upgrade Kubernetes to avoid vulnerabilities
+  capstone: false
+  section_quiz: false
+  modules:
+  - id: module-01
+    title: Supported Upgrade And Node Maintenance
+    objectives:
+    - Explain supported component-version and upgrade order.
+    - Distinguish cordon, drain and disruption policy.
+    - Evaluate datastore snapshot scope and restore prerequisites.
+    - Verify component and application recovery after lifecycle changes.
+    outline:
+    - Cluster Upgrades And Maintenance Boundaries
+    - Datastore Snapshots And The Limits Of Recovery
+    playground: false
+    module_lab: false
+    sources:
+    - reading: sections/section-040/module-01/course-01-cluster-upgrades-and-maintenance-boundaries.md
+      adapted_from: ATS025/sections/section-040/module-01/course-01-cluster-upgrades-and-maintenance-boundaries.md
+    - reading: sections/section-040/module-01/course-02-datastore-snapshots-and-the-limits-of-recovery.md
+      adapted_from: ATS025/sections/section-040/module-01/course-02-datastore-snapshots-and-the-limits-of-recovery.md
