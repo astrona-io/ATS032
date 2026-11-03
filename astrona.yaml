@@ -1,7 +1,9 @@
+---
 training:
   id: ATS032
   title: 'CKS: Cluster Hardening'
-  description: 'Detailed reading material, hands-on labs and reusable YAML knowledge checks for CKS: Cluster Hardening. Technical content remains draft.'
+  description: 'Detailed reading material, hands-on labs and reusable YAML knowledge
+    checks for CKS: Cluster Hardening. Technical content remains draft.'
   certification:
     name: Certified Kubernetes Security Specialist
     code: CKS
@@ -10,7 +12,8 @@ training:
     weight: 15
     competencies:
     - Use Role Based Access Controls to minimize exposure
-    - Exercise caution in using service accounts e.g. disable defaults, minimize permissions on newly created ones
+    - Exercise caution in using service accounts e.g. disable defaults, minimize permissions
+      on newly created ones
     - Restrict access to Kubernetes API
     - Upgrade Kubernetes to avoid vulnerabilities
 modules:
@@ -32,7 +35,8 @@ modules:
     path: sections/intro/course-03-how-this-course-is-made.md
 - id: module-010
   title: Minimize Exposure With Role Based Access Control
-  description: Build namespaced and cluster-wide RBAC grants, understand escalation prevention, and audit effective access.
+  description: Build namespaced and cluster-wide RBAC grants, understand escalation
+    prevention, and audit effective access.
   status: alpha
   content:
   - type: reading
@@ -55,7 +59,8 @@ modules:
     topic: rbac
     task_kind: build
     learning_goals:
-    - Grant a ServiceAccount only Pod read access in the required namespace and verify denied operations.
+    - Grant a ServiceAccount only Pod read access in the required namespace and verify
+      denied operations.
     tags:
     - cks
     - rbac
@@ -76,9 +81,110 @@ modules:
     path: sections/section-010/module-01/quiz.yaml
     question_count: 10
     pass_score: 70
+  - type: reading
+    title: Audit And Narrow Effective Access
+    path: sections/section-010/module-02/course.md
+  - type: reading
+    title: Ask The Authorizer Precisely
+    path: sections/section-010/module-02/course-01-ask-the-authorizer-precisely.md
+  - type: reading
+    title: Find Every Grant That Reaches An Identity
+    path: sections/section-010/module-02/course-02-find-every-grant-for-an-identity.md
+  - type: reading
+    title: Rewrite A Broad Grant As Least Privilege
+    path: sections/section-010/module-02/course-03-rewrite-a-broad-grant-as-least-privilege.md
+  - type: reading
+    title: Rewrite A Broad Grant As Least Privilege — Task
+    path: sections/section-010/module-02/labs/lab-01/question.md
+  - type: lab
+    title: Rewrite A Broad Grant As Least Privilege
+    path: sections/section-010/module-02/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: rbac-audit
+    task_kind: build
+    learning_goals:
+    - Replace a cluster-wide ClusterRoleBinding with a namespaced Role and RoleBinding
+      and verify allowed and denied actions.
+    tags:
+    - cks
+    - rbac
+    - audit
+  - type: reading
+    title: Rewrite A Broad Grant As Least Privilege — Solution
+    path: sections/section-010/module-02/labs/lab-01/solution.md
+  - type: reading
+    title: Summary
+    path: sections/section-010/module-02/course-04-summary.md
+  - type: quiz
+    title: 'Knowledge Check: Audit And Narrow Effective Access'
+    path: sections/section-010/module-02/quiz.yaml
+    question_count: 10
+    pass_score: 70
+  - type: reading
+    title: Subjects, Built-In Roles And Wildcards
+    path: sections/section-010/module-03/course.md
+  - type: reading
+    title: Users, Groups And ServiceAccounts As Subjects
+    path: sections/section-010/module-03/course-01-users-groups-and-serviceaccounts-as-subjects.md
+  - type: reading
+    title: Built-In And Aggregated ClusterRoles
+    path: sections/section-010/module-03/course-02-built-in-and-aggregated-clusterroles.md
+  - type: reading
+    title: Remove Wildcards And Narrow Rules
+    path: sections/section-010/module-03/course-03-remove-wildcards-and-narrow-rules.md
+  - type: reading
+    title: Remove Wildcards From A Group Role — Task
+    path: sections/section-010/module-03/labs/lab-01/question.md
+  - type: lab
+    title: Remove Wildcards From A Group Role
+    path: sections/section-010/module-03/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: rbac-wildcards
+    task_kind: build
+    learning_goals:
+    - Replace a wildcard rule in a group Role with explicit resources and verbs and
+      verify allowed and denied actions.
+    tags:
+    - cks
+    - rbac
+    - wildcards
+  - type: reading
+    title: Remove Wildcards From A Group Role — Solution
+    path: sections/section-010/module-03/labs/lab-01/solution.md
+  - type: reading
+    title: Summary
+    path: sections/section-010/module-03/course-04-summary.md
+  - type: quiz
+    title: 'Knowledge Check: Subjects, Built-In Roles And Wildcards'
+    path: sections/section-010/module-03/quiz.yaml
+    question_count: 10
+    pass_score: 70
+  - type: reading
+    title: Remediate An RBAC Review Across Three Namespaces — Task
+    path: sections/section-010/capstone/labs/lab-01/question.md
+  - type: lab
+    title: Remediate An RBAC Review Across Three Namespaces
+    path: sections/section-010/capstone/labs/lab-01
+    difficulty: advanced
+    estimated_duration: 50m
+    topic: rbac-capstone
+    task_kind: build
+    learning_goals:
+    - Narrow a cluster-wide grant, remove a binding to every authenticated identity,
+      remove wildcards and build an aggregated ClusterRole in one review.
+    tags:
+    - cks
+    - rbac
+    - capstone
+  - type: reading
+    title: Remediate An RBAC Review Across Three Namespaces — Solution
+    path: sections/section-010/capstone/labs/lab-01/solution.md
 - id: module-020
   title: Restrict ServiceAccount Credentials
-  description: Control how ServiceAccount credentials reach pods, turn off unneeded tokens, and use short-lived bound tokens.
+  description: Control how ServiceAccount credentials reach pods, turn off unneeded
+    tokens, and use short-lived bound tokens.
   status: alpha
   content:
   - type: reading
@@ -122,9 +228,107 @@ modules:
     path: sections/section-020/module-01/quiz.yaml
     question_count: 10
     pass_score: 70
+  - type: reading
+    title: Dedicated Least-Privilege ServiceAccounts
+    path: sections/section-020/module-02/course.md
+  - type: reading
+    title: One ServiceAccount For Each Workload
+    path: sections/section-020/module-02/course-01-one-serviceaccount-for-each-workload.md
+  - type: reading
+    title: Grant Only What The Workload Uses
+    path: sections/section-020/module-02/course-02-grant-only-what-the-workload-uses.md
+  - type: reading
+    title: Clean Up The Default ServiceAccount
+    path: sections/section-020/module-02/course-03-clean-up-the-default-serviceaccount.md
+  - type: reading
+    title: Give Each Workload Its Own Least-Privilege ServiceAccount — Task
+    path: sections/section-020/module-02/labs/lab-01/question.md
+  - type: lab
+    title: Give Each Workload Its Own Least-Privilege ServiceAccount
+    path: sections/section-020/module-02/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: serviceaccount-least-privilege
+    task_kind: build
+    learning_goals:
+    - Move a workload to a dedicated ServiceAccount, create one narrow grant and remove
+      the grant from the default account.
+    tags:
+    - cks
+    - serviceaccount-least-privilege
+  - type: reading
+    title: Give Each Workload Its Own Least-Privilege ServiceAccount — Solution
+    path: sections/section-020/module-02/labs/lab-01/solution.md
+  - type: reading
+    title: Summary
+    path: sections/section-020/module-02/course-04-summary.md
+  - type: quiz
+    title: 'Knowledge Check: Dedicated Least-Privilege ServiceAccounts'
+    path: sections/section-020/module-02/quiz.yaml
+    question_count: 10
+    pass_score: 70
+  - type: reading
+    title: Audit ServiceAccount Use And Tokens
+    path: sections/section-020/module-03/course.md
+  - type: reading
+    title: Find Which Pods Use Which ServiceAccount
+    path: sections/section-020/module-03/course-01-find-which-pods-use-which-serviceaccount.md
+  - type: reading
+    title: Audit Grants That Reach ServiceAccounts
+    path: sections/section-020/module-03/course-02-audit-grants-that-reach-serviceaccounts.md
+  - type: reading
+    title: 'Audit Tokens: Secrets, Lifetimes And Audience'
+    path: sections/section-020/module-03/course-03-audit-tokens-secrets-lifetimes-and-audience.md
+  - type: reading
+    title: Remove ServiceAccount Findings From A Namespace — Task
+    path: sections/section-020/module-03/labs/lab-01/question.md
+  - type: lab
+    title: Remove ServiceAccount Findings From A Namespace
+    path: sections/section-020/module-03/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: serviceaccount-audit
+    task_kind: build
+    learning_goals:
+    - Remove over-broad grants, a long-lived token Secret and a long projected token,
+      and keep the one permission the workload needs.
+    tags:
+    - cks
+    - serviceaccount-audit
+  - type: reading
+    title: Remove ServiceAccount Findings From A Namespace — Solution
+    path: sections/section-020/module-03/labs/lab-01/solution.md
+  - type: reading
+    title: Summary
+    path: sections/section-020/module-03/course-04-summary.md
+  - type: quiz
+    title: 'Knowledge Check: Audit ServiceAccount Use And Tokens'
+    path: sections/section-020/module-03/quiz.yaml
+    question_count: 10
+    pass_score: 70
+  - type: reading
+    title: Harden ServiceAccounts Across Two Namespaces — Task
+    path: sections/section-020/capstone/labs/lab-01/question.md
+  - type: lab
+    title: Harden ServiceAccounts Across Two Namespaces
+    path: sections/section-020/capstone/labs/lab-01
+    difficulty: advanced
+    estimated_duration: 50m
+    topic: serviceaccount-capstone
+    task_kind: build
+    learning_goals:
+    - Combine a dedicated account, a narrow grant, a cleaned default account, and
+      the removal of a legacy token and a group binding.
+    tags:
+    - cks
+    - serviceaccount-capstone
+  - type: reading
+    title: Harden ServiceAccounts Across Two Namespaces — Solution
+    path: sections/section-020/capstone/labs/lab-01/solution.md
 - id: module-030
   title: Restrict Access To The Kubernetes API
-  description: Follow a request through authentication, authorization and admission, and harden the API server and kubelet.
+  description: Follow a request through authentication, authorization and admission,
+    and harden the API server and kubelet.
   status: alpha
   content:
   - type: reading
@@ -150,7 +354,8 @@ modules:
     topic: serviceaccount-api
     task_kind: build
     learning_goals:
-    - Run the application with a narrow identity and authenticate a real API request from its container.
+    - Run the application with a narrow identity and authenticate a real API request
+      from its container.
     tags:
     - cks
     - serviceaccount-api
@@ -168,9 +373,107 @@ modules:
     path: sections/section-030/module-01/quiz.yaml
     question_count: 10
     pass_score: 70
+  - type: reading
+    title: Authentication, Anonymous Access And Authorization Modes
+    path: sections/section-030/module-02/course.md
+  - type: reading
+    title: Authentication Methods And Identities
+    path: sections/section-030/module-02/course-01-authentication-methods-and-identities.md
+  - type: reading
+    title: Anonymous Access In Practice
+    path: sections/section-030/module-02/course-02-anonymous-access-in-practice.md
+  - type: reading
+    title: Remove Anonymous Access To The API — Task
+    path: sections/section-030/module-02/labs/lab-01/question.md
+  - type: lab
+    title: Remove Anonymous Access To The API
+    path: sections/section-030/module-02/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: anonymous-access
+    task_kind: build
+    learning_goals:
+    - Remove the binding that gives anonymous callers access to cluster data without
+      breaking health access or a named team binding.
+    tags:
+    - cks
+    - anonymous-access
+  - type: reading
+    title: Remove Anonymous Access To The API — Solution
+    path: sections/section-030/module-02/labs/lab-01/solution.md
+  - type: reading
+    title: Authorization Modes And Impersonation
+    path: sections/section-030/module-02/course-03-authorization-modes-and-impersonation.md
+  - type: reading
+    title: Summary
+    path: sections/section-030/module-02/course-04-summary.md
+  - type: quiz
+    title: 'Knowledge Check: Authentication, Anonymous Access And Authorization Modes'
+    path: sections/section-030/module-02/quiz.yaml
+    question_count: 10
+    pass_score: 70
+  - type: reading
+    title: Admission Control For API Writes
+    path: sections/section-030/module-03/course.md
+  - type: reading
+    title: Pod Security Admission
+    path: sections/section-030/module-03/course-01-pod-security-admission.md
+  - type: reading
+    title: ValidatingAdmissionPolicy With CEL
+    path: sections/section-030/module-03/course-02-validatingadmissionpolicy-with-cel.md
+  - type: reading
+    title: Enforce Admission Rules In A Namespace — Task
+    path: sections/section-030/module-03/labs/lab-01/question.md
+  - type: lab
+    title: Enforce Admission Rules In A Namespace
+    path: sections/section-030/module-03/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: admission-rules
+    task_kind: build
+    learning_goals:
+    - Reject privileged Pods and NodePort Services in one namespace with Pod Security
+      labels and a ValidatingAdmissionPolicy.
+    tags:
+    - cks
+    - admission-rules
+  - type: reading
+    title: Enforce Admission Rules In A Namespace — Solution
+    path: sections/section-030/module-03/labs/lab-01/solution.md
+  - type: reading
+    title: Admission Webhooks And Failure Policy
+    path: sections/section-030/module-03/course-03-admission-webhooks-and-failure-policy.md
+  - type: reading
+    title: Summary
+    path: sections/section-030/module-03/course-04-summary.md
+  - type: quiz
+    title: 'Knowledge Check: Restrict Access To The Kubernetes API'
+    path: sections/section-030/module-03/quiz.yaml
+    question_count: 10
+    pass_score: 70
+  - type: reading
+    title: 'Knowledge Check: Admission Control For API Writes'
+    path: sections/section-030/capstone/labs/lab-01/question.md
+  - type: lab
+    title: Restrict API Access End To End
+    path: sections/section-030/capstone/labs/lab-01
+    difficulty: advanced
+    estimated_duration: 50m
+    topic: api-access-capstone
+    task_kind: build
+    learning_goals:
+    - Combine a narrow workload identity, removal of anonymous access and admission
+      rules in one namespace, and prove each with requests.
+    tags:
+    - cks
+    - api-access-capstone
+  - type: reading
+    title: Restrict API Access End To End — Solution
+    path: sections/section-030/capstone/labs/lab-01/solution.md
 - id: module-040
   title: Upgrade Kubernetes To Avoid Vulnerabilities
-  description: Plan a supported upgrade, drain nodes safely, run the kubeadm sequence and protect the cluster with an etcd snapshot.
+  description: Plan a supported upgrade, drain nodes safely, run the kubeadm sequence
+    and protect the cluster with an etcd snapshot.
   status: alpha
   content:
   - type: reading
@@ -196,7 +499,8 @@ modules:
     topic: node-maintenance
     task_kind: build
     learning_goals:
-    - Respect disruption limits while draining and returning an isolated worker to service.
+    - Respect disruption limits while draining and returning an isolated worker to
+      service.
     tags:
     - cks
     - node-maintenance
@@ -217,6 +521,103 @@ modules:
     path: sections/section-040/module-01/quiz.yaml
     question_count: 10
     pass_score: 70
+  - type: reading
+    title: Track Vulnerabilities And Inventory Versions
+    path: sections/section-040/module-02/course.md
+  - type: reading
+    title: Where Vulnerabilities Are Published
+    path: sections/section-040/module-02/course-01-where-vulnerabilities-are-published.md
+  - type: reading
+    title: Inventory What The Cluster Runs
+    path: sections/section-040/module-02/course-02-inventory-what-the-cluster-runs.md
+  - type: reading
+    title: Triage A Vulnerability And Plan Patch Waves
+    path: sections/section-040/module-02/course-03-triage-a-vulnerability-and-plan-patch-waves.md
+  - type: reading
+    title: Record The Version Inventory And Patch Waves — Task
+    path: sections/section-040/module-02/labs/lab-01/question.md
+  - type: lab
+    title: Record The Version Inventory And Patch Waves
+    path: sections/section-040/module-02/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: version-inventory
+    task_kind: build
+    learning_goals:
+    - Record the real versions of a cluster in one ConfigMap and label each node with
+      its patch wave.
+    tags:
+    - cks
+    - version-inventory
+  - type: reading
+    title: Record The Version Inventory And Patch Waves — Solution
+    path: sections/section-040/module-02/labs/lab-01/solution.md
+  - type: reading
+    title: Summary
+    path: sections/section-040/module-02/course-04-summary.md
+  - type: quiz
+    title: 'Knowledge Check: Track Vulnerabilities And Inventory Versions'
+    path: sections/section-040/module-02/quiz.yaml
+    question_count: 10
+    pass_score: 70
+  - type: reading
+    title: Patch Nodes And Verify The Upgraded Cluster
+    path: sections/section-040/module-03/course.md
+  - type: reading
+    title: Patch The Operating System And Container Runtime On Nodes
+    path: sections/section-040/module-03/course-01-patch-the-operating-system-and-container-runtime-on-nodes.md
+  - type: reading
+    title: Verify The Cluster After An Upgrade
+    path: sections/section-040/module-03/course-02-verify-the-cluster-after-an-upgrade.md
+  - type: reading
+    title: Verify And Repair A Cluster After Maintenance — Task
+    path: sections/section-040/module-03/labs/lab-01/question.md
+  - type: lab
+    title: Verify And Repair A Cluster After Maintenance
+    path: sections/section-040/module-03/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: post-maintenance-verification
+    task_kind: build
+    learning_goals:
+    - Find and repair a cordoned node, a leftover taint, a Pending Pod and a blocking
+      disruption budget.
+    tags:
+    - cks
+    - post-maintenance-verification
+  - type: reading
+    title: Verify And Repair A Cluster After Maintenance — Solution
+    path: sections/section-040/module-03/labs/lab-01/solution.md
+  - type: reading
+    title: Rollback Limits And Restore Drills
+    path: sections/section-040/module-03/course-03-rollback-limits-and-restore-drills.md
+  - type: reading
+    title: Summary
+    path: sections/section-040/module-03/course-04-summary.md
+  - type: quiz
+    title: 'Knowledge Check: Patch Nodes And Verify The Upgraded Cluster'
+    path: sections/section-040/module-03/quiz.yaml
+    question_count: 10
+    pass_score: 70
+  - type: reading
+    title: Run A Node Patch Window End To End — Task
+    path: sections/section-040/capstone/labs/lab-01/question.md
+  - type: lab
+    title: Run A Node Patch Window End To End
+    path: sections/section-040/capstone/labs/lab-01
+    difficulty: advanced
+    estimated_duration: 50m
+    topic: node-patch-window
+    task_kind: build
+    learning_goals:
+    - Drain a worker under a disruption budget, return it to service, move a bare
+      Pod and record the inventory.
+    tags:
+    - cks
+    - node-patch-window
+  - type: reading
+    title: Run A Node Patch Window End To End — Solution
+    path: sections/section-040/capstone/labs/lab-01/solution.md
   - type: quiz
     title: Final Domain Quiz
     path: sections/final-domain-quiz.yaml

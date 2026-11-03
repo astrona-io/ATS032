@@ -1,0 +1,216 @@
+# Knowledge check for section 010, module 02. Contract:
+# schemas/question-bank.schema.json. Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats032-010-02
+course_id: ATS032
+exam_code: CKS
+status: draft
+provenance: "Original practice material written for this course; not official exam questions."
+scope:
+  type: section
+  id: section-010
+  title: "Audit And Narrow Effective Access"
+placement:
+  position: after
+  reading: sections/section-010/module-02/course-04-summary.md
+questions:
+  - id: ats032-010-02-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Explain what kubectl auth can-i sends to the API server."
+    source_readings:
+      - sections/section-010/module-02/course-01-ask-the-authorizer-precisely.md
+    prompt: "What does `kubectl auth can-i` do when it answers `yes` or `no`?"
+    options:
+      - id: a
+        text: "It reads the Role and binding files on disk and computes the answer locally"
+        explanation: "`kubectl` does not read RBAC objects to compute the answer."
+      - id: b
+        text: "It sends an access review request, and the API server runs its real authorization chain"
+        explanation: "Correct. The API server decides, the same way it decides for a real request."
+      - id: c
+        text: "It sends the real action in dry-run mode and reports the result"
+        explanation: "No action is sent. An access review request is sent instead."
+    correct_option: b
+    explanation: "`kubectl auth can-i` sends an access review request to the API server, which answers with its own authorization chain."
+
+  - id: ats032-010-02-q02
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Test a group grant with impersonation."
+    source_readings:
+      - sections/section-010/module-02/course-01-ask-the-authorizer-precisely.md
+    prompt: "Which command tests whether a member of the group `starfleet-crew` may list Pods in `outpost`?"
+    options:
+      - id: a
+        text: "`kubectl auth can-i list pods -n outpost --as-group=starfleet-crew`"
+        explanation: "`--as-group` needs `--as` as well."
+      - id: b
+        text: "`kubectl auth can-i list pods -n outpost --as=jane --as-group=starfleet-crew`"
+        explanation: "Correct. A user name and a group together give the identity of a group member."
+      - id: c
+        text: "`kubectl auth can-i list pods -n outpost --group=starfleet-crew`"
+        explanation: "`kubectl auth can-i` has no `--group` flag."
+    correct_option: b
+    explanation: "Impersonate a user with `--as` and add the group with `--as-group`."
+
+  - id: ats032-010-02-q03
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Write a resource name and a subresource in a can-i question."
+    source_readings:
+      - sections/section-010/module-02/course-01-ask-the-authorizer-precisely.md
+    prompt: "How do you ask whether an identity may read the log of Pods in `outpost`?"
+    options:
+      - id: a
+        text: "`kubectl auth can-i get pods/log -n outpost --as=...`"
+        explanation: "Correct. A subresource is written after a slash."
+      - id: b
+        text: "`kubectl auth can-i get pods -n outpost --as=...`"
+        explanation: "A rule for `pods` does not cover the subresource `pods/log`."
+      - id: c
+        text: "`kubectl auth can-i get logs -n outpost --as=...`"
+        explanation: "`logs` is not a resource type."
+    correct_option: a
+    explanation: "Subresources are written as `resource/subresource`, and they are authorized separately from the resource."
+
+  - id: ats032-010-02-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "State what can-i does not check."
+    source_readings:
+      - sections/section-010/module-02/course-01-ask-the-authorizer-precisely.md
+    prompt: "`kubectl auth can-i update configmaps/missing -n outpost --as=...` prints `yes` for a ConfigMap that does not exist. Why?"
+    options:
+      - id: a
+        text: "The check looks only at authorization and does not look for the object"
+        explanation: "Correct. A rule that allows the verb allows it for any name."
+      - id: b
+        text: "The API server creates the ConfigMap when it answers"
+        explanation: "An access review never creates an object."
+      - id: c
+        text: "Missing objects always give `yes` for administrators and `no` for others"
+        explanation: "The answer depends on the rules, not on the existence of the object."
+    correct_option: a
+    explanation: "An access review asks about authorization only. It does not check that the object exists or that admission would accept the request."
+
+  - id: ats032-010-02-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Name the names that bindings can use to reach a ServiceAccount."
+    source_readings:
+      - sections/section-010/module-02/course-02-find-every-grant-for-an-identity.md
+    prompt: "Which binding subject also reaches the ServiceAccount `starfleet/scout`, besides its own user name?"
+    options:
+      - id: a
+        text: "The group `system:serviceaccounts:starfleet`"
+        explanation: "Correct. Every ServiceAccount of a namespace is in the group of that namespace."
+      - id: b
+        text: "The group `system:masters`"
+        explanation: "Only identities that authenticate with that group are members."
+      - id: c
+        text: "No other subject can reach it"
+        explanation: "A ServiceAccount is automatically a member of several groups."
+    correct_option: a
+    explanation: "A ServiceAccount is in `system:serviceaccounts`, in `system:serviceaccounts:<namespace>` and in `system:authenticated`."
+
+  - id: ats032-010-02-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Search bindings for an identity."
+    source_readings:
+      - sections/section-010/module-02/course-02-find-every-grant-for-an-identity.md
+    prompt: "An auditor wants every grant that applies to `starfleet/scout` in all namespaces. Which listing is incomplete?"
+    options:
+      - id: a
+        text: "RoleBindings of all namespaces and all ClusterRoleBindings"
+        explanation: "This is the complete set."
+      - id: b
+        text: "Only the RoleBindings of all namespaces"
+        explanation: "Correct. A ClusterRoleBinding applies in every namespace and must be listed too."
+      - id: c
+        text: "Bindings to the identity and to its groups"
+        explanation: "This is also needed and is part of a complete search."
+    correct_option: b
+    explanation: "A ClusterRoleBinding applies in every namespace. A review lists both binding kinds and searches for the groups as well."
+
+  - id: ats032-010-02-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Find the namespace of a ServiceAccount subject."
+    source_readings:
+      - sections/section-010/module-02/course-02-find-every-grant-for-an-identity.md
+    prompt: "Which output separates `starfleet/scout` from a ServiceAccount named `scout` in another namespace?"
+    options:
+      - id: a
+        text: "`kubectl get clusterrolebindings -o wide`, whose last column shows `namespace/name`"
+        explanation: "Correct. The column carries the namespace."
+      - id: b
+        text: "`kubectl get clusterrolebindings` without options"
+        explanation: "The default columns do not list subjects."
+      - id: c
+        text: "`kubectl get clusterroles`"
+        explanation: "ClusterRoles do not list their subjects."
+    correct_option: a
+    explanation: "The wide output shows ServiceAccount subjects with their namespace."
+
+  - id: ats032-010-02-q08
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Order the steps of a safe rewrite."
+    source_readings:
+      - sections/section-010/module-02/course-03-rewrite-a-broad-grant-as-least-privilege.md
+    prompt: "A workload holds a broad ClusterRoleBinding. Which order replaces it with a narrow grant without an outage?"
+    options:
+      - id: a
+        text: "Delete the broad binding, then create the narrow grant"
+        explanation: "The workload has no access in between."
+      - id: b
+        text: "Create and test the narrow grant, delete the broad binding, then test the denied actions"
+        explanation: "Correct. The workload is never without access, and the final test shows what stays allowed."
+      - id: c
+        text: "Create the narrow grant and keep the broad binding, because RBAC picks the smaller grant"
+        explanation: "RBAC grants add up. The broad binding keeps all of its access."
+    correct_option: b
+    explanation: "Add the narrow grant, test it, remove the broad one, and test the denied actions last."
+
+  - id: ats032-010-02-q09
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Know how to remove a built-in role grant."
+    source_readings:
+      - sections/section-010/module-02/course-03-rewrite-a-broad-grant-as-least-privilege.md
+    prompt: "The RoleBinding `crew-view` gives the built-in `view` ClusterRole to a group that needs less. What should you delete?"
+    options:
+      - id: a
+        text: "The ClusterRole `view`"
+        explanation: "Other bindings may use it, and the API server restores built-in roles at startup."
+      - id: b
+        text: "The RoleBinding `crew-view`"
+        explanation: "Correct. Delete the binding that reaches the group and keep the role."
+      - id: c
+        text: "The group `starfleet-crew`"
+        explanation: "Groups are not objects, so there is nothing to delete."
+    correct_option: b
+    explanation: "Remove access by deleting the binding, not the shared role."
+
+  - id: ats032-010-02-q10
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Explain the limit of resourceNames."
+    source_readings:
+      - sections/section-010/module-02/course-03-rewrite-a-broad-grant-as-least-privilege.md
+    prompt: "A rule lists `create` and `resourceNames: [\"scout-report\"]` for ConfigMaps. What does the `create` verb allow?"
+    options:
+      - id: a
+        text: "Creating only a ConfigMap named `scout-report`"
+        explanation: "A create request has no name for the authorizer to match."
+      - id: b
+        text: "Creating any ConfigMap"
+        explanation: "The rule is not a general create grant."
+      - id: c
+        text: "Nothing, because the rule never matches a create request"
+        explanation: "Correct. `resourceNames` cannot limit `create`, so the rule does not apply."
+    correct_option: c
+    explanation: "A `create` request carries no object name when it is authorized, so a rule with `resourceNames` never matches it."

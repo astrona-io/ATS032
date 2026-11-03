@@ -1,0 +1,309 @@
+{
+  "context": "kind-astro-ats-032-lab-030-capstone-01",
+  "resources": [
+    {
+      "kind": "serviceaccount",
+      "name": "lister",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "ServiceAccount",
+        "metadata": {
+          "name": "lister",
+          "namespace": "starfleet"
+        }
+      }
+    },
+    {
+      "kind": "role",
+      "name": "service-lister",
+      "expected": {
+        "apiVersion": "rbac.authorization.k8s.io/v1",
+        "kind": "Role",
+        "metadata": {
+          "name": "service-lister",
+          "namespace": "starfleet"
+        },
+        "rules": [
+          {
+            "apiGroups": [
+              ""
+            ],
+            "resources": [
+              "services"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "kind": "rolebinding",
+      "name": "service-lister-bind",
+      "expected": {
+        "apiVersion": "rbac.authorization.k8s.io/v1",
+        "kind": "RoleBinding",
+        "metadata": {
+          "name": "service-lister-bind",
+          "namespace": "starfleet"
+        },
+        "roleRef": {
+          "apiGroup": "rbac.authorization.k8s.io",
+          "kind": "Role",
+          "name": "service-lister"
+        },
+        "subjects": [
+          {
+            "kind": "ServiceAccount",
+            "name": "lister",
+            "namespace": "starfleet"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "deployment",
+      "name": "probe",
+      "expected": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": {
+          "name": "probe",
+          "namespace": "starfleet"
+        },
+        "spec": {
+          "replicas": 2,
+          "template": {
+            "spec": {
+              "serviceAccountName": "lister"
+            }
+          }
+        }
+      },
+      "state": "deployment"
+    },
+    {
+      "kind": "clusterrolebinding",
+      "name": "ops-viewer",
+      "expected": {
+        "apiVersion": "rbac.authorization.k8s.io/v1",
+        "kind": "ClusterRoleBinding",
+        "metadata": {
+          "name": "ops-viewer"
+        },
+        "roleRef": {
+          "apiGroup": "rbac.authorization.k8s.io",
+          "kind": "ClusterRole",
+          "name": "view"
+        },
+        "subjects": [
+          {
+            "kind": "Group",
+            "name": "ops",
+            "apiGroup": "rbac.authorization.k8s.io"
+          }
+        ]
+      },
+      "namespace": null
+    },
+    {
+      "kind": "namespace",
+      "name": "starfleet",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "Namespace",
+        "metadata": {
+          "name": "starfleet",
+          "labels": {
+            "pod-security.kubernetes.io/enforce": "baseline"
+          }
+        }
+      },
+      "namespace": null
+    },
+    {
+      "kind": "validatingadmissionpolicy",
+      "name": "no-nodeport",
+      "expected": {
+        "apiVersion": "admissionregistration.k8s.io/v1",
+        "kind": "ValidatingAdmissionPolicy",
+        "metadata": {
+          "name": "no-nodeport"
+        }
+      },
+      "namespace": null
+    },
+    {
+      "kind": "validatingadmissionpolicybinding",
+      "name": "no-nodeport-starfleet",
+      "expected": {
+        "apiVersion": "admissionregistration.k8s.io/v1",
+        "kind": "ValidatingAdmissionPolicyBinding",
+        "metadata": {
+          "name": "no-nodeport-starfleet"
+        },
+        "spec": {
+          "policyName": "no-nodeport",
+          "validationActions": [
+            "Deny"
+          ]
+        }
+      },
+      "namespace": null
+    }
+  ],
+  "absent": [
+    {
+      "kind": "clusterrolebinding",
+      "name": "anonymous-viewer",
+      "namespace": null
+    }
+  ],
+  "behavior": [
+    {
+      "args": [
+        "kubectl",
+        "-n",
+        "starfleet",
+        "exec",
+        "deployment/probe",
+        "--",
+        "python",
+        "-c",
+        "import ssl,urllib.request as r,urllib.error as e\nroot='/var/run/secrets/kubernetes.io/serviceaccount'\nc=ssl.create_default_context(cafile=root+'/ca.crt')\nq=r.Request('https://kubernetes.default.svc/api/v1/namespaces/starfleet/services',headers={'Authorization':'Bearer '+open(root+'/token').read()})\ntry:\n    print(r.urlopen(q,context=c,timeout=5).status)\nexcept e.HTTPError as x:\n    print(x.code)\n"
+      ],
+      "equals": "200"
+    },
+    {
+      "args": [
+        "kubectl",
+        "-n",
+        "starfleet",
+        "exec",
+        "deployment/probe",
+        "--",
+        "python",
+        "-c",
+        "import ssl,urllib.request as r,urllib.error as e\nroot='/var/run/secrets/kubernetes.io/serviceaccount'\nc=ssl.create_default_context(cafile=root+'/ca.crt')\nq=r.Request('https://kubernetes.default.svc/api/v1/namespaces/starfleet/pods',headers={'Authorization':'Bearer '+open(root+'/token').read()})\ntry:\n    print(r.urlopen(q,context=c,timeout=5).status)\nexcept e.HTTPError as x:\n    print(x.code)\n"
+      ],
+      "equals": "403"
+    },
+    {
+      "args": [
+        "kubectl",
+        "-n",
+        "starfleet",
+        "exec",
+        "deployment/probe",
+        "--",
+        "python",
+        "-c",
+        "import ssl,urllib.request as r,urllib.error as e\nroot='/var/run/secrets/kubernetes.io/serviceaccount'\nc=ssl.create_default_context(cafile=root+'/ca.crt')\nq=r.Request('https://kubernetes.default.svc/api/v1/namespaces/starfleet/pods')\ntry:\n    print(r.urlopen(q,context=c,timeout=5).status)\nexcept e.HTTPError as x:\n    print(x.code)\n"
+      ],
+      "equals": "403"
+    },
+    {
+      "args": [
+        "kubectl",
+        "-n",
+        "starfleet",
+        "exec",
+        "deployment/probe",
+        "--",
+        "python",
+        "-c",
+        "import ssl,urllib.request as r,urllib.error as e\nroot='/var/run/secrets/kubernetes.io/serviceaccount'\nc=ssl.create_default_context(cafile=root+'/ca.crt')\nq=r.Request('https://kubernetes.default.svc/version')\ntry:\n    print(r.urlopen(q,context=c,timeout=5).status)\nexcept e.HTTPError as x:\n    print(x.code)\n"
+      ],
+      "equals": "200"
+    },
+    {
+      "args": [
+        "kubectl",
+        "auth",
+        "can-i",
+        "list",
+        "pods",
+        "-n",
+        "starfleet",
+        "--as=ops-user",
+        "--as-group=ops"
+      ],
+      "equals": "yes"
+    },
+    {
+      "args": [
+        "kubectl",
+        "-n",
+        "starfleet",
+        "run",
+        "priv",
+        "--image=docker.io/library/busybox:1.37.0",
+        "--privileged",
+        "--dry-run=server",
+        "-o",
+        "name"
+      ],
+      "denied": true,
+      "failure_markers": [
+        "violates podsecurity"
+      ]
+    },
+    {
+      "args": [
+        "kubectl",
+        "-n",
+        "starfleet",
+        "create",
+        "service",
+        "nodeport",
+        "demo",
+        "--tcp=80:80",
+        "--dry-run=server",
+        "-o",
+        "name"
+      ],
+      "denied": true,
+      "failure_markers": [
+        "denied request"
+      ]
+    },
+    {
+      "args": [
+        "kubectl",
+        "-n",
+        "starfleet",
+        "create",
+        "service",
+        "clusterip",
+        "demo",
+        "--tcp=80:80",
+        "--dry-run=server",
+        "-o",
+        "name"
+      ],
+      "contains": [
+        "service/demo"
+      ]
+    },
+    {
+      "args": [
+        "kubectl",
+        "-n",
+        "outpost",
+        "create",
+        "service",
+        "nodeport",
+        "demo",
+        "--tcp=80:80",
+        "--dry-run=server",
+        "-o",
+        "name"
+      ],
+      "contains": [
+        "service/demo"
+      ]
+    }
+  ]
+}

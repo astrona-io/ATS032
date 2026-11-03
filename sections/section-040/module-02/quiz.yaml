@@ -1,0 +1,216 @@
+# Knowledge check for section 040, module 02. Contract:
+# schemas/question-bank.schema.json. Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats032-040-02
+course_id: ATS032
+exam_code: CKS
+status: draft
+provenance: "Original practice material written for this course; not official exam questions."
+scope:
+  type: section
+  id: section-040
+  title: "Upgrade Kubernetes To Avoid Vulnerabilities"
+placement:
+  position: after
+  reading: sections/section-040/module-02/course-04-summary.md
+questions:
+  - id: ats032-040-02-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Name the source that scripts can read for Kubernetes CVEs."
+    source_readings:
+      - sections/section-040/module-02/course-01-where-vulnerabilities-are-published.md
+    prompt: "Which source lets a script watch for new Kubernetes CVEs?"
+    options:
+      - id: a
+        text: "The official CVE feed, published as JSON and RSS"
+        explanation: "Correct."
+      - id: b
+        text: "The release notes of the next minor version"
+        explanation: "Release notes are written for people and appear only at a release."
+      - id: c
+        text: "The `kubectl version` command"
+        explanation: "It prints versions and lists no vulnerabilities."
+    correct_option: a
+    explanation: "The feed is machine-readable and lists every CVE that affects Kubernetes components."
+
+  - id: ats032-040-02-q02
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Read the support window of a minor version."
+    source_readings:
+      - sections/section-040/module-02/course-01-where-vulnerabilities-are-published.md
+    prompt: "A minor version has passed its support window. What does that mean for a new CVE in it?"
+    options:
+      - id: a
+        text: "The project still publishes a patch for it on request"
+        explanation: "Patches go only to supported minor versions."
+      - id: b
+        text: "The project publishes no fix for it and the cluster must move to a supported minor version"
+        explanation: "Correct."
+      - id: c
+        text: "The cluster fixes itself through automatic updates"
+        explanation: "Kubernetes does not update itself."
+    correct_option: b
+    explanation: "Out-of-support versions get no fixes, so the only protection is an upgrade."
+
+  - id: ats032-040-02-q03
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Read a CVSS vector."
+    source_readings:
+      - sections/section-040/module-02/course-01-where-vulnerabilities-are-published.md
+    prompt: "Two flaws have similar scores. The first needs network access and no credentials. The second needs local access to a node and `cluster-admin`. Which statement is correct?"
+    options:
+      - id: a
+        text: "The second is more urgent because it needs more rights"
+        explanation: "More required rights make a flaw harder to use."
+      - id: b
+        text: "Both have the same real risk because the scores match"
+        explanation: "The vector shows the real conditions."
+      - id: c
+        text: "The first is more urgent in most clusters because any client that reaches the endpoint can use it"
+        explanation: "Correct."
+    correct_option: c
+    explanation: "The vector shows what an attacker must have, and that decides how reachable the flaw is."
+
+  - id: ats032-040-02-q04
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Find the version of the API server."
+    source_readings:
+      - sections/section-040/module-02/course-02-inventory-what-the-cluster-runs.md
+    prompt: "Which command prints the `gitVersion` of the API server as JSON?"
+    options:
+      - id: a
+        text: "`kubectl get --raw /version`"
+        explanation: "Correct."
+      - id: b
+        text: "`kubectl get nodes -o wide`"
+        explanation: "It shows kubelet versions, not the API server version."
+      - id: c
+        text: "`kubectl config view`"
+        explanation: "It shows the kubeconfig, not the server version."
+    correct_option: a
+    explanation: "The `/version` endpoint of the API server returns its version document."
+
+  - id: ats032-040-02-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Read node information."
+    source_readings:
+      - sections/section-040/module-02/course-02-inventory-what-the-cluster-runs.md
+    prompt: "Where does a node object hold the kubelet version and the container runtime version?"
+    options:
+      - id: a
+        text: "In `metadata.labels`"
+        explanation: "Labels are set by people and tools, not by the kubelet for these facts."
+      - id: b
+        text: "In `spec.taints`"
+        explanation: "Taints control scheduling."
+      - id: c
+        text: "In `status.nodeInfo`"
+        explanation: "Correct."
+    correct_option: c
+    explanation: "The kubelet fills `status.nodeInfo` with versions, operating system, kernel and architecture."
+
+  - id: ats032-040-02-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain why an image tag is not an identity."
+    source_readings:
+      - sections/section-040/module-02/course-02-inventory-what-the-cluster-runs.md
+    prompt: "Why is `python:3.13-alpine` not an exact record of the code a Pod runs?"
+    options:
+      - id: a
+        text: "The registry can point the tag at new content, so two Pods may run different code under one tag"
+        explanation: "Correct."
+      - id: b
+        text: "Tags are removed after 24 hours"
+        explanation: "Tags stay until someone changes them."
+      - id: c
+        text: "Tags are random numbers"
+        explanation: "A tag is a name chosen by the image owner."
+    correct_option: a
+    explanation: "The digest is the hash of the content and never changes for one image."
+
+  - id: ats032-040-02-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Find the digest a container uses."
+    source_readings:
+      - sections/section-040/module-02/course-02-inventory-what-the-cluster-runs.md
+    prompt: "Which Pod field shows the image digest that a running container uses?"
+    options:
+      - id: a
+        text: "`spec.containers[0].image`"
+        explanation: "It shows the name written in the specification, often a tag."
+      - id: b
+        text: "`status.containerStatuses[0].imageID`"
+        explanation: "Correct."
+      - id: c
+        text: "`metadata.uid`"
+        explanation: "It identifies the Pod object."
+    correct_option: b
+    explanation: "The container runtime reports the resolved image and digest in the container status."
+
+  - id: ats032-040-02-q08
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Apply the triage questions."
+    source_readings:
+      - sections/section-040/module-02/course-03-triage-a-vulnerability-and-plan-patch-waves.md
+    prompt: "A kubelet flaw needs the right to mount `hostPath` volumes, and an admission rule in the cluster rejects every `hostPath` volume. What is the correct triage result?"
+    options:
+      - id: a
+        text: "Ignore the record and write nothing down"
+        explanation: "Always write the reason, so a reader can check it."
+      - id: b
+        text: "Treat it as a same-day emergency"
+        explanation: "The attacker cannot meet the condition here."
+      - id: c
+        text: "Lower the priority, write the reason, and include the fix in the next planned window"
+        explanation: "Correct."
+    correct_option: c
+    explanation: "Reachability changes priority, and the reasoning belongs in the record."
+
+  - id: ats032-040-02-q09
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Order the patch waves."
+    source_readings:
+      - sections/section-040/module-02/course-03-triage-a-vulnerability-and-plan-patch-waves.md
+    prompt: "The control-plane node, a worker with only controller-owned Pods and a worker with bare Pods need a patch. Which order is correct?"
+    options:
+      - id: a
+        text: "The worker with bare Pods first, because it is the hardest"
+        explanation: "The hard node needs preparation and goes last."
+      - id: b
+        text: "Control plane, then the worker with controller-owned Pods, then the worker with bare Pods"
+        explanation: "Correct."
+      - id: c
+        text: "All three at once to save time"
+        explanation: "It removes capacity and gives no way to stop on a problem."
+    correct_option: b
+    explanation: "The control plane goes first, and the nodes that are hardest to drain go last."
+
+  - id: ats032-040-02-q10
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Find bare Pods before a drain."
+    source_readings:
+      - sections/section-040/module-02/course-03-triage-a-vulnerability-and-plan-patch-waves.md
+    prompt: "Which `kubectl` output shows that a Pod is bare and a drain will refuse it?"
+    options:
+      - id: a
+        text: "`OWNER` shows `<none>` in a custom column on `metadata.ownerReferences[0].kind`"
+        explanation: "Correct."
+      - id: b
+        text: "`STATUS` shows `Running`"
+        explanation: "Both owned and bare Pods run."
+      - id: c
+        text: "`READY` shows `1/1`"
+        explanation: "Readiness does not show ownership."
+    correct_option: a
+    explanation: "A Pod with no owner reference has no controller that recreates it."

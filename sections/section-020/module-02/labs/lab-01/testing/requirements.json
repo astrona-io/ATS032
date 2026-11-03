@@ -1,0 +1,219 @@
+{
+  "context": "kind-astro-ats-032-lab-020-02-01",
+  "resources": [
+    {
+      "kind": "serviceaccount",
+      "name": "probe",
+      "namespace": "starfleet",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "ServiceAccount",
+        "metadata": {
+          "name": "probe",
+          "namespace": "starfleet"
+        },
+        "automountServiceAccountToken": false
+      }
+    },
+    {
+      "kind": "serviceaccount",
+      "name": "default",
+      "namespace": "starfleet",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "ServiceAccount",
+        "metadata": {
+          "name": "default",
+          "namespace": "starfleet"
+        },
+        "automountServiceAccountToken": false
+      }
+    },
+    {
+      "kind": "deployment",
+      "name": "probe",
+      "namespace": "starfleet",
+      "expected": {
+        "spec": {
+          "replicas": 2,
+          "template": {
+            "spec": {
+              "serviceAccountName": "probe"
+            }
+          }
+        }
+      },
+      "state": "deployment"
+    },
+    {
+      "kind": "serviceaccount",
+      "name": "pod-lister",
+      "namespace": "starfleet",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "ServiceAccount",
+        "metadata": {
+          "name": "pod-lister",
+          "namespace": "starfleet"
+        }
+      }
+    },
+    {
+      "kind": "role",
+      "name": "pod-lister",
+      "namespace": "starfleet",
+      "expected": {
+        "apiVersion": "rbac.authorization.k8s.io/v1",
+        "kind": "Role",
+        "metadata": {
+          "name": "pod-lister",
+          "namespace": "starfleet"
+        },
+        "rules": [
+          {
+            "apiGroups": [
+              ""
+            ],
+            "resources": [
+              "pods"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "kind": "rolebinding",
+      "name": "pod-lister",
+      "namespace": "starfleet",
+      "expected": {
+        "apiVersion": "rbac.authorization.k8s.io/v1",
+        "kind": "RoleBinding",
+        "metadata": {
+          "name": "pod-lister",
+          "namespace": "starfleet"
+        },
+        "roleRef": {
+          "apiGroup": "rbac.authorization.k8s.io",
+          "kind": "Role",
+          "name": "pod-lister"
+        },
+        "subjects": [
+          {
+            "kind": "ServiceAccount",
+            "name": "pod-lister",
+            "namespace": "starfleet"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "pod",
+      "name": "pod-lister",
+      "namespace": "starfleet",
+      "expected": {
+        "spec": {
+          "serviceAccountName": "pod-lister"
+        }
+      },
+      "state": "pod"
+    }
+  ],
+  "behavior": [
+    {
+      "args": [
+        "kubectl",
+        "-n",
+        "starfleet",
+        "exec",
+        "deploy/probe",
+        "--",
+        "sh",
+        "-c",
+        "test ! -e /var/run/secrets/kubernetes.io/serviceaccount/token && printf absent"
+      ],
+      "equals": "absent"
+    },
+    {
+      "args": [
+        "kubectl",
+        "auth",
+        "can-i",
+        "get",
+        "pods",
+        "-n",
+        "starfleet",
+        "--as=system:serviceaccount:starfleet:pod-lister"
+      ],
+      "equals": "yes"
+    },
+    {
+      "args": [
+        "kubectl",
+        "auth",
+        "can-i",
+        "delete",
+        "pods",
+        "-n",
+        "starfleet",
+        "--as=system:serviceaccount:starfleet:pod-lister"
+      ],
+      "denied": true,
+      "failure_markers": [
+        "no"
+      ],
+      "equals": "no"
+    },
+    {
+      "args": [
+        "kubectl",
+        "auth",
+        "can-i",
+        "get",
+        "pods",
+        "-n",
+        "outpost",
+        "--as=system:serviceaccount:starfleet:pod-lister"
+      ],
+      "denied": true,
+      "failure_markers": [
+        "no"
+      ],
+      "equals": "no"
+    },
+    {
+      "args": [
+        "kubectl",
+        "auth",
+        "can-i",
+        "get",
+        "pods",
+        "-n",
+        "starfleet",
+        "--as=system:serviceaccount:starfleet:default"
+      ],
+      "denied": true,
+      "failure_markers": [
+        "no"
+      ],
+      "equals": "no"
+    },
+    {
+      "args": [
+        "kubectl",
+        "-n",
+        "starfleet",
+        "get",
+        "rolebinding",
+        "default-pod-access"
+      ],
+      "denied": true,
+      "failure_markers": [
+        "not found"
+      ]
+    }
+  ]
+}

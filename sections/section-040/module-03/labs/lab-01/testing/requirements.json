@@ -1,0 +1,88 @@
+{
+  "context": "kind-astro-ats-032-lab-040-03-01",
+  "resources": [
+    {
+      "kind": "poddisruptionbudget",
+      "name": "probe",
+      "namespace": "starfleet",
+      "expected": {
+        "apiVersion": "policy/v1",
+        "kind": "PodDisruptionBudget",
+        "metadata": {
+          "name": "probe",
+          "namespace": "starfleet"
+        },
+        "spec": {
+          "maxUnavailable": 1,
+          "selector": {
+            "matchLabels": {
+              "app": "probe"
+            }
+          }
+        }
+      }
+    },
+    {
+      "kind": "configmap",
+      "name": "post-maintenance-record",
+      "namespace": "starfleet",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "ConfigMap",
+        "metadata": {
+          "name": "post-maintenance-record",
+          "namespace": "starfleet"
+        },
+        "data": {
+          "nodes-ready": "3",
+          "probe-ready": "2",
+          "result": "verified"
+        }
+      }
+    },
+    {
+      "kind": "deployment",
+      "name": "probe",
+      "namespace": "starfleet",
+      "state": "deployment",
+      "expected": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": {
+          "name": "probe",
+          "namespace": "starfleet"
+        },
+        "spec": {
+          "replicas": 2,
+          "selector": {
+            "matchLabels": {
+              "app": "probe",
+              "release": "probe"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "behavior": [
+    {
+      "args": [
+        "kubectl",
+        "-n",
+        "starfleet",
+        "exec",
+        "shuttle",
+        "--",
+        "wget",
+        "-q",
+        "-T",
+        "3",
+        "-O-",
+        "http://probe/"
+      ],
+      "contains": [
+        "version=v1"
+      ]
+    }
+  ]
+}

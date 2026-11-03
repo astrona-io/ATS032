@@ -1,0 +1,216 @@
+# Knowledge check for section 030, module 02. Contract:
+# schemas/question-bank.schema.json. Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats032-030-02
+course_id: ATS032
+exam_code: CKS
+status: draft
+provenance: "Original practice material written for this course; not official exam questions."
+scope:
+  type: section
+  id: section-030
+  title: "Restrict Access To The Kubernetes API"
+placement:
+  position: after
+  reading: sections/section-030/module-02/course-04-summary.md
+questions:
+  - id: ats032-030-02-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Tell a missing credential from an invalid one."
+    source_readings:
+      - sections/section-030/module-02/course-01-authentication-methods-and-identities.md
+    prompt: "A request carries a bearer token that no authentication method accepts, and `--anonymous-auth` is `true`. What does the API server return?"
+    options:
+      - id: a
+        text: "`401 Unauthorized`"
+        explanation: "Correct."
+      - id: b
+        text: "`200` with the identity `system:anonymous`"
+        explanation: "Anonymous treatment is only for requests with no credential."
+      - id: c
+        text: "`403 Forbidden`"
+        explanation: "A `403` needs a known identity that authorization refused."
+    correct_option: a
+    explanation: "A credential that fails verification is rejected. Only a request without any credential can become anonymous."
+
+  - id: ats032-030-02-q02
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Name the user name format of a ServiceAccount."
+    source_readings:
+      - sections/section-030/module-02/course-01-authentication-methods-and-identities.md
+    prompt: "Which user name does the API server use for the ServiceAccount `lister` in the namespace `starfleet`?"
+    options:
+      - id: a
+        text: "`lister@starfleet`"
+        explanation: "That is not a Kubernetes format."
+      - id: b
+        text: "`system:serviceaccount:starfleet:lister`"
+        explanation: "Correct."
+      - id: c
+        text: "`system:node:lister`"
+        explanation: "That format is used for kubelets."
+    correct_option: b
+    explanation: "The format is `system:serviceaccount:<namespace>:<name>`, and the groups include `system:serviceaccounts:starfleet`."
+
+  - id: ats032-030-02-q03
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain what decoding a token proves."
+    source_readings:
+      - sections/section-030/module-02/course-01-authentication-methods-and-identities.md
+    prompt: "A person decodes the middle part of a ServiceAccount token and reads the expected `sub` claim. What does this prove?"
+    options:
+      - id: a
+        text: "The token is valid and not expired"
+        explanation: "Decoding does not check the signature or the expiry."
+      - id: b
+        text: "Nothing about validity: it shows the claims, and only the API server checks the signature"
+        explanation: "Correct."
+      - id: c
+        text: "The ServiceAccount still exists"
+        explanation: "Only the API server can check that."
+    correct_option: b
+    explanation: "Anyone can read the claims. Validation needs the signing key, which only the API server holds."
+
+  - id: ats032-030-02-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Identify the weakness of client certificates."
+    source_readings:
+      - sections/section-030/module-02/course-01-authentication-methods-and-identities.md
+    prompt: "Why is a client certificate a weak credential for a person who leaves the team?"
+    options:
+      - id: a
+        text: "It cannot be revoked before it expires"
+        explanation: "Correct."
+      - id: b
+        text: "It cannot contain a group"
+        explanation: "The organization field becomes a group."
+      - id: c
+        text: "It is sent in plain text"
+        explanation: "It is used over TLS."
+    correct_option: a
+    explanation: "Kubernetes has no certificate revocation list, so a leaked or old certificate works until its expiry."
+
+  - id: ats032-030-02-q05
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Name the identity of an anonymous request."
+    source_readings:
+      - sections/section-030/module-02/course-02-anonymous-access-in-practice.md
+    prompt: "With `--anonymous-auth=true`, which user and group does a request with no credential receive?"
+    options:
+      - id: a
+        text: "`system:anonymous` in `system:unauthenticated`"
+        explanation: "Correct."
+      - id: b
+        text: "`system:serviceaccount:default:default`"
+        explanation: "That needs a token."
+      - id: c
+        text: "`system:masters`"
+        explanation: "That group is for administrators with a certificate."
+    correct_option: a
+    explanation: "The request then goes through authorization with that name and group."
+
+  - id: ats032-030-02-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Judge the effect of a binding to the unauthenticated group."
+    source_readings:
+      - sections/section-030/module-02/course-02-anonymous-access-in-practice.md
+    prompt: "A ClusterRoleBinding gives `view` to the group `system:unauthenticated`. What is the effect?"
+    options:
+      - id: a
+        text: "Only callers inside the cluster can read objects"
+        explanation: "The grant does not depend on the source address."
+      - id: b
+        text: "No effect, because anonymous requests skip authorization"
+        explanation: "They go through authorization like any request."
+      - id: c
+        text: "Any caller that can reach the API port can read the objects that `view` covers"
+        explanation: "Correct."
+    correct_option: c
+    explanation: "Authorization finds the binding for the anonymous names and allows the request."
+
+  - id: ats032-030-02-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Choose the right way to close an anonymous grant."
+    source_readings:
+      - sections/section-030/module-02/course-02-anonymous-access-in-practice.md
+    prompt: "The ClusterRoleBinding `anonymous-viewer` gives `view` to `system:unauthenticated`. What is the correct fix?"
+    options:
+      - id: a
+        text: "Delete the binding `anonymous-viewer`"
+        explanation: "Correct. The role `view` itself stays for other bindings."
+      - id: b
+        text: "Edit the role `system:public-info-viewer`"
+        explanation: "The API server resets built-in roles, and the role is not the cause."
+      - id: c
+        text: "Delete the role `view`"
+        explanation: "Other subjects use that role, and the API server restores it."
+    correct_option: a
+    explanation: "Remove the binding that names the anonymous subject. Leave built-in roles alone."
+
+  - id: ats032-030-02-q08
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Explain a risk of switching anonymous access off."
+    source_readings:
+      - sections/section-030/module-02/course-02-anonymous-access-in-practice.md
+    prompt: "On a kubeadm cluster, `--anonymous-auth=false` is set without any other change. What can happen?"
+    options:
+      - id: a
+        text: "Every ServiceAccount token stops working"
+        explanation: "Tokens do not depend on anonymous access."
+      - id: b
+        text: "The probes of the API server Pod get `401` and the kubelet can restart the Pod"
+        explanation: "Correct."
+      - id: c
+        text: "Authorization switches to `AlwaysAllow`"
+        explanation: "The authorization mode does not change."
+    correct_option: b
+    explanation: "The static Pod probes call `/livez` and `/readyz` without a credential. A path list in the structured authentication configuration avoids the problem."
+
+  - id: ats032-030-02-q09
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Read the authorizer chain."
+    source_readings:
+      - sections/section-030/module-02/course-03-authorization-modes-and-impersonation.md
+    prompt: "The flag is `--authorization-mode=Node,RBAC`. A request is not allowed by `Node` and not allowed by `RBAC`. What is the result?"
+    options:
+      - id: a
+        text: "`403 Forbidden`"
+        explanation: "Correct."
+      - id: b
+        text: "`401 Unauthorized`"
+        explanation: "The caller was identified, so this is not an authentication error."
+      - id: c
+        text: "The request is allowed because no mode denied it"
+        explanation: "A request needs one allow."
+    correct_option: a
+    explanation: "Authorization needs one authorizer to allow the request. Without an allow, the answer is `403`."
+
+  - id: ats032-030-02-q10
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Judge the risk of the impersonate verb."
+    source_readings:
+      - sections/section-030/module-02/course-03-authorization-modes-and-impersonation.md
+    prompt: "Why is a ClusterRole that allows `impersonate` on `users` and `groups` a high-risk grant?"
+    options:
+      - id: a
+        text: "The holder can send requests as any identity it names, including an administrator"
+        explanation: "Correct."
+      - id: b
+        text: "It lets the holder delete the user accounts"
+        explanation: "Kubernetes has no user objects."
+      - id: c
+        text: "It disables audit logging for the holder"
+        explanation: "Audit logs record the impersonated identity and the real caller."
+    correct_option: a
+    explanation: "Impersonation is authorized before the request continues as the other identity, so the holder gets the rights of the identity it names."

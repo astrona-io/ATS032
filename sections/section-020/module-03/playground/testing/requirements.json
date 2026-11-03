@@ -1,0 +1,201 @@
+{
+  "context": "kind-astro-ats-032-playground-020-03",
+  "resources": [
+    {
+      "kind": "role",
+      "name": "config-reader",
+      "namespace": "outpost",
+      "expected": {
+        "apiVersion": "rbac.authorization.k8s.io/v1",
+        "kind": "Role",
+        "metadata": {
+          "name": "config-reader",
+          "namespace": "outpost"
+        },
+        "rules": [
+          {
+            "apiGroups": [
+              ""
+            ],
+            "resources": [
+              "configmaps"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "kind": "rolebinding",
+      "name": "config-reader",
+      "namespace": "outpost",
+      "expected": {
+        "apiVersion": "rbac.authorization.k8s.io/v1",
+        "kind": "RoleBinding",
+        "metadata": {
+          "name": "config-reader",
+          "namespace": "outpost"
+        },
+        "roleRef": {
+          "apiGroup": "rbac.authorization.k8s.io",
+          "kind": "Role",
+          "name": "config-reader"
+        },
+        "subjects": [
+          {
+            "kind": "ServiceAccount",
+            "name": "ledger",
+            "namespace": "outpost"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "pod",
+      "name": "ledger-client",
+      "namespace": "outpost",
+      "expected": {
+        "spec": {
+          "serviceAccountName": "ledger",
+          "automountServiceAccountToken": false,
+          "volumes": [
+            {
+              "name": "ledger-token",
+              "projected": {
+                "sources": [
+                  {
+                    "serviceAccountToken": {
+                      "path": "token",
+                      "expirationSeconds": 3600
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "archive-reader",
+      "namespace": "outpost",
+      "expected": {
+        "spec": {
+          "serviceAccountName": "archive"
+        }
+      },
+      "state": "pod"
+    }
+  ],
+  "behavior": [
+    {
+      "args": [
+        "kubectl",
+        "auth",
+        "can-i",
+        "get",
+        "configmaps",
+        "-n",
+        "outpost",
+        "--as=system:serviceaccount:outpost:ledger"
+      ],
+      "equals": "yes"
+    },
+    {
+      "args": [
+        "kubectl",
+        "auth",
+        "can-i",
+        "delete",
+        "configmaps",
+        "-n",
+        "outpost",
+        "--as=system:serviceaccount:outpost:ledger"
+      ],
+      "denied": true,
+      "failure_markers": [
+        "no"
+      ],
+      "equals": "no"
+    },
+    {
+      "args": [
+        "kubectl",
+        "auth",
+        "can-i",
+        "get",
+        "secrets",
+        "-n",
+        "outpost",
+        "--as=system:serviceaccount:outpost:ledger"
+      ],
+      "denied": true,
+      "failure_markers": [
+        "no"
+      ],
+      "equals": "no"
+    },
+    {
+      "args": [
+        "kubectl",
+        "auth",
+        "can-i",
+        "list",
+        "pods",
+        "-n",
+        "outpost",
+        "--as=system:serviceaccount:outpost:archive"
+      ],
+      "denied": true,
+      "failure_markers": [
+        "no"
+      ],
+      "equals": "no"
+    },
+    {
+      "args": [
+        "kubectl",
+        "-n",
+        "outpost",
+        "get",
+        "secret",
+        "ledger-legacy-token"
+      ],
+      "denied": true,
+      "failure_markers": [
+        "not found"
+      ]
+    },
+    {
+      "args": [
+        "kubectl",
+        "get",
+        "clusterrolebinding",
+        "ledger-edit"
+      ],
+      "denied": true,
+      "failure_markers": [
+        "not found"
+      ]
+    },
+    {
+      "args": [
+        "kubectl",
+        "-n",
+        "outpost",
+        "get",
+        "rolebinding",
+        "outpost-all-view"
+      ],
+      "denied": true,
+      "failure_markers": [
+        "not found"
+      ]
+    }
+  ]
+}

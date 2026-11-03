@@ -1,0 +1,20 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: probe
+  namespace: starfleet
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: probe
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: post-maintenance-record
+  namespace: starfleet
+data:
+  nodes-ready: "3"
+  probe-ready: "2"
+  result: verified

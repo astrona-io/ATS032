@@ -1,0 +1,216 @@
+# Knowledge check for section 020, module 03. Contract:
+# schemas/question-bank.schema.json. Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats032-020-03
+course_id: ATS032
+exam_code: CKS
+status: draft
+provenance: "Original practice material written for this course; not official exam questions."
+scope:
+  type: section
+  id: section-020
+  title: "Restrict ServiceAccount Credentials"
+placement:
+  position: after
+  reading: sections/section-020/module-03/course-04-summary.md
+questions:
+  - id: ats032-020-03-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Read an automount audit column."
+    source_readings:
+      - sections/section-020/module-03/course-01-find-which-pods-use-which-serviceaccount.md
+    prompt: "The AUTOMOUNT column of a pod listing shows `<none>` for a pod. What does it mean?"
+    options:
+      - id: a
+        text: "The pod has no token"
+        explanation: "The field is simply not set."
+      - id: b
+        text: "The pod field is not set, so the ServiceAccount field decides, and with neither set the token is mounted"
+        explanation: "Correct."
+      - id: c
+        text: "The pod is not allowed to run"
+        explanation: "The field does not affect admission."
+    correct_option: b
+    explanation: "An empty cell means not set, not disabled."
+
+  - id: ats032-020-03-q02
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Find tokens that automount settings do not show."
+    source_readings:
+      - sections/section-020/module-03/course-01-find-which-pods-use-which-serviceaccount.md
+    prompt: "A pod has `automountServiceAccountToken: false`. Can it still hold a ServiceAccount token?"
+    options:
+      - id: a
+        text: "No, the setting blocks all tokens"
+        explanation: "A projected volume is independent."
+      - id: b
+        text: "Yes, through a projected `serviceAccountToken` volume in its own spec"
+        explanation: "Correct."
+      - id: c
+        text: "Yes, but only for one minute"
+        explanation: "The lifetime is set by the volume."
+    correct_option: b
+    explanation: "An audit must read the volumes as well as the automount fields."
+
+  - id: ats032-020-03-q03
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Check a mount safely."
+    source_readings:
+      - sections/section-020/module-03/course-01-find-which-pods-use-which-serviceaccount.md
+    prompt: "What is the safe way to prove that a pod holds a token?"
+    options:
+      - id: a
+        text: "List the files in `/var/run/secrets/kubernetes.io/serviceaccount` with `kubectl exec`"
+        explanation: "Correct. It does not print the token."
+      - id: b
+        text: "Print the file `token`"
+        explanation: "This exposes a valid credential."
+      - id: c
+        text: "Describe the ServiceAccount"
+        explanation: "It does not show the pod mount."
+    correct_option: a
+    explanation: "Check that the directory exists. Never print the token."
+
+  - id: ats032-020-03-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Follow a group binding."
+    source_readings:
+      - sections/section-020/module-03/course-02-audit-grants-that-reach-serviceaccounts.md
+    prompt: "A RoleBinding gives `view` to the group `system:serviceaccounts:outpost`. Which accounts receive `view` in `outpost`?"
+    options:
+      - id: a
+        text: "Only accounts with token mounting on"
+        explanation: "The mount setting does not matter for permissions."
+      - id: b
+        text: "Every ServiceAccount of the namespace `outpost`, whatever its mount setting"
+        explanation: "Correct."
+      - id: c
+        text: "Only the `default` account"
+        explanation: "The group has all accounts."
+    correct_option: b
+    explanation: "The group contains every account of the namespace."
+
+  - id: ats032-020-03-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Find the scope of a ClusterRoleBinding."
+    source_readings:
+      - sections/section-020/module-03/course-02-audit-grants-that-reach-serviceaccounts.md
+    prompt: "A ClusterRoleBinding gives `edit` to a ServiceAccount of `outpost`. Where does the grant apply?"
+    options:
+      - id: a
+        text: "Only in `outpost`"
+        explanation: "That is the scope of a RoleBinding."
+      - id: b
+        text: "In every namespace"
+        explanation: "Correct."
+      - id: c
+        text: "Only in `kube-system`"
+        explanation: "The binding has no such limit."
+    correct_option: b
+    explanation: "A ClusterRoleBinding applies cluster-wide."
+
+  - id: ats032-020-03-q06
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Rate a finding by its permissions."
+    source_readings:
+      - sections/section-020/module-03/course-02-audit-grants-that-reach-serviceaccounts.md
+    prompt: "`edit` is bound to an account. Why is it a priority finding?"
+    options:
+      - id: a
+        text: "It lets the account read and change most objects, including Secrets"
+        explanation: "Correct."
+      - id: b
+        text: "It adds a second token to the account"
+        explanation: "Bindings do not add tokens."
+      - id: c
+        text: "It turns on token mounting"
+        explanation: "Bindings do not change mounting."
+    correct_option: a
+    explanation: "Reading Secrets exposes credentials, so check these rights first."
+
+  - id: ats032-020-03-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Get effective permissions."
+    source_readings:
+      - sections/section-020/module-03/course-02-audit-grants-that-reach-serviceaccounts.md
+    prompt: "Which command lists what the account `archive` in `outpost` can do, including group bindings?"
+    options:
+      - id: a
+        text: "`kubectl auth can-i --list -n outpost --as=system:serviceaccount:outpost:archive`"
+        explanation: "Correct."
+      - id: b
+        text: "`kubectl get serviceaccount archive -o yaml`"
+        explanation: "It shows no permissions."
+      - id: c
+        text: "`kubectl describe pod archive-reader`"
+        explanation: "It shows no permissions."
+    correct_option: a
+    explanation: "The API server combines every binding that applies."
+
+  - id: ats032-020-03-q08
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Find legacy token Secrets."
+    source_readings:
+      - sections/section-020/module-03/course-03-audit-tokens-secrets-lifetimes-and-audience.md
+    prompt: "Which command lists long-lived ServiceAccount token Secrets in all namespaces?"
+    options:
+      - id: a
+        text: "`kubectl get secrets -A --field-selector type=kubernetes.io/service-account-token`"
+        explanation: "Correct."
+      - id: b
+        text: "`kubectl get serviceaccounts -A`"
+        explanation: "It lists accounts, not Secrets."
+      - id: c
+        text: "`kubectl get tokens -A`"
+        explanation: "Tokens are not an API resource."
+    correct_option: a
+    explanation: "Filter Secrets by their type."
+
+  - id: ats032-020-03-q09
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Test a token with another audience."
+    source_readings:
+      - sections/section-020/module-03/course-03-audit-tokens-secrets-lifetimes-and-audience.md
+    prompt: "A token created with `--audience=ledger` is sent to the API server with `kubectl --token`. What happens?"
+    options:
+      - id: a
+        text: "The request is refused as `Unauthorized`"
+        explanation: "Correct. The API server accepts only its own audience."
+      - id: b
+        text: "The request succeeds with the permissions of the account"
+        explanation: "The audience does not match."
+      - id: c
+        text: "The token is converted to the default audience"
+        explanation: "Tokens are not converted."
+    correct_option: a
+    explanation: "Audience decides who accepts the token."
+
+  - id: ats032-020-03-q10
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Rate a long projected token."
+    source_readings:
+      - sections/section-020/module-03/course-03-audit-tokens-secrets-lifetimes-and-audience.md
+    prompt: "A pod mounts a projected token with `expirationSeconds: 86400`. How do you judge it?"
+    options:
+      - id: a
+        text: "It is safe, because it is projected"
+        explanation: "A projected token with a long lifetime stays useful for that long if stolen."
+      - id: b
+        text: "It is a finding. Use a shorter lifetime, not below 600 seconds"
+        explanation: "Correct."
+      - id: c
+        text: "It is invalid, because the maximum is 3600"
+        explanation: "The API server accepts it."
+    correct_option: b
+    explanation: "Short lifetimes limit the damage of a stolen token."

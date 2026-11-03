@@ -1,0 +1,216 @@
+# Knowledge check for section 020, module 02. Contract:
+# schemas/question-bank.schema.json. Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats032-020-02
+course_id: ATS032
+exam_code: CKS
+status: draft
+provenance: "Original practice material written for this course; not official exam questions."
+scope:
+  type: section
+  id: section-020
+  title: "Restrict ServiceAccount Credentials"
+placement:
+  position: after
+  reading: sections/section-020/module-02/course-04-summary.md
+questions:
+  - id: ats032-020-02-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Explain why workloads should not share a ServiceAccount."
+    source_readings:
+      - sections/section-020/module-02/course-01-one-serviceaccount-for-each-workload.md
+    prompt: "Two Deployments in one namespace use the `default` ServiceAccount. A Role is bound to `default` for the first Deployment. What is the effect?"
+    options:
+      - id: a
+        text: "Only the first Deployment receives the Role"
+        explanation: "RBAC checks the account, not the Deployment."
+      - id: b
+        text: "Both Deployments receive the Role, because they are the same subject"
+        explanation: "Correct. RBAC knows only the subject name."
+      - id: c
+        text: "The second Deployment is rejected"
+        explanation: "Nothing rejects it."
+    correct_option: b
+    explanation: "Pods that use the same account are the same subject and share every permission."
+
+  - id: ats032-020-02-q02
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Assign a ServiceAccount to a Deployment."
+    source_readings:
+      - sections/section-020/module-02/course-01-one-serviceaccount-for-each-workload.md
+    prompt: "Which field of a Deployment names the ServiceAccount its pods use?"
+    options:
+      - id: a
+        text: "`spec.serviceAccountName`"
+        explanation: "This is the field of a pod, not of the Deployment."
+      - id: b
+        text: "`spec.template.spec.serviceAccountName`"
+        explanation: "Correct. It is in the pod template."
+      - id: c
+        text: "`metadata.serviceAccount`"
+        explanation: "There is no such field."
+    correct_option: b
+    explanation: "The pod template carries the field, and `kubectl set serviceaccount` changes it."
+
+  - id: ats032-020-02-q03
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Know that a pod cannot change its ServiceAccount."
+    source_readings:
+      - sections/section-020/module-02/course-01-one-serviceaccount-for-each-workload.md
+    prompt: "A running bare pod must use a new ServiceAccount. What must you do?"
+    options:
+      - id: a
+        text: "Patch `spec.serviceAccountName` on the running pod"
+        explanation: "The API server rejects the change."
+      - id: b
+        text: "Delete the pod and create it again with the new field"
+        explanation: "Correct."
+      - id: c
+        text: "Restart the kubelet on the node"
+        explanation: "This does not change the pod object."
+    correct_option: b
+    explanation: "The ServiceAccount of a pod is fixed at creation. A Deployment achieves the change through a rollout."
+
+  - id: ats032-020-02-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Predict what happens when a Deployment names a missing ServiceAccount."
+    source_readings:
+      - sections/section-020/module-02/course-01-one-serviceaccount-for-each-workload.md
+    prompt: "A Deployment is changed to use a ServiceAccount that does not exist. What do you see?"
+    options:
+      - id: a
+        text: "The Deployment is accepted but its ReplicaSet cannot create pods, and the events report the error"
+        explanation: "Correct."
+      - id: b
+        text: "The Deployment falls back to `default`"
+        explanation: "There is no fallback."
+      - id: c
+        text: "The existing pods are deleted at once and recreated with `default`"
+        explanation: "New pods are not created at all."
+    correct_option: a
+    explanation: "Pod creation is rejected at admission, so the ReplicaSet fails to create pods."
+
+  - id: ats032-020-02-q05
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Choose the smallest Role for a workload."
+    source_readings:
+      - sections/section-020/module-02/course-02-grant-only-what-the-workload-uses.md
+    prompt: "A client must read pods in its own namespace and nothing else. Which rule fits?"
+    options:
+      - id: a
+        text: "Verbs `get` and `list` on `pods` in a Role"
+        explanation: "Correct."
+      - id: b
+        text: "Verb `*` on resource `*` in a Role"
+        explanation: "This grants everything."
+      - id: c
+        text: "Verbs `get` and `list` on `pods` in a ClusterRoleBinding to `cluster-admin`"
+        explanation: "This grants far more than needed."
+    correct_option: a
+    explanation: "Name only the verbs and resources the workload uses, in a namespaced Role."
+
+  - id: ats032-020-02-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Choose the right binding kind for a one-namespace workload."
+    source_readings:
+      - sections/section-020/module-02/course-02-grant-only-what-the-workload-uses.md
+    prompt: "Which object gives a Role to one ServiceAccount in one namespace only?"
+    options:
+      - id: a
+        text: "A RoleBinding in that namespace"
+        explanation: "Correct."
+      - id: b
+        text: "A ClusterRoleBinding"
+        explanation: "It applies in every namespace."
+      - id: c
+        text: "A ServiceAccount annotation"
+        explanation: "Annotations grant nothing."
+    correct_option: a
+    explanation: "A RoleBinding applies the Role only in the namespace of the binding."
+
+  - id: ats032-020-02-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Test a ServiceAccount without running the workload."
+    source_readings:
+      - sections/section-020/module-02/course-02-grant-only-what-the-workload-uses.md
+    prompt: "Which command asks whether the account `shuttle-reader` in `starfleet` may delete pods there?"
+    options:
+      - id: a
+        text: "`kubectl auth can-i delete pods -n starfleet --as=system:serviceaccount:starfleet:shuttle-reader`"
+        explanation: "Correct."
+      - id: b
+        text: "`kubectl get rolebinding shuttle-reader -o yaml`"
+        explanation: "It shows the binding but not the effective answer."
+      - id: c
+        text: "`kubectl exec shuttle-reader -- delete pods`"
+        explanation: "There is no such command in the pod."
+    correct_option: a
+    explanation: "`can-i` with `--as` asks the API server for the effective answer."
+
+  - id: ats032-020-02-q08
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Know the limit of resourceNames."
+    source_readings:
+      - sections/section-020/module-02/course-02-grant-only-what-the-workload-uses.md
+    prompt: "A rule lists `resourceNames: [\"probe-code\"]` with the verb `list`. Which statement is correct?"
+    options:
+      - id: a
+        text: "The account can list only that ConfigMap in any request"
+        explanation: "`list` is not limited this way."
+      - id: b
+        text: "The names limit `get`, `update` and `delete`, but a plain `list` is not limited"
+        explanation: "Correct. List and watch need a field selector on the name."
+      - id: c
+        text: "The rule is rejected by the API server"
+        explanation: "It is accepted."
+    correct_option: b
+    explanation: "Use resourceNames for verbs that address one object, not to limit list or watch."
+
+  - id: ats032-020-02-q09
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Remove a grant from the default ServiceAccount."
+    source_readings:
+      - sections/section-020/module-02/course-03-clean-up-the-default-serviceaccount.md
+    prompt: "`default` can read pods because of a RoleBinding. Which action removes the grant and keeps the Role?"
+    options:
+      - id: a
+        text: "Delete the RoleBinding"
+        explanation: "Correct. The binding connects the subject to the Role."
+      - id: b
+        text: "Delete the ServiceAccount `default`"
+        explanation: "The controller creates it again, and bindings may still apply."
+      - id: c
+        text: "Set `automountServiceAccountToken: false` on it"
+        explanation: "This stops the mount, not the permissions."
+    correct_option: a
+    explanation: "The binding is the grant. Mounting and permissions are separate controls."
+
+  - id: ats032-020-02-q10
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Apply the default account cleanup safely."
+    source_readings:
+      - sections/section-020/module-02/course-03-clean-up-the-default-serviceaccount.md
+    prompt: "A team wants to turn off mounting for the `default` accounts of its namespaces. What is the safe approach?"
+    options:
+      - id: a
+        text: "Patch the `default` account in each namespace the team owns and leave system namespaces alone"
+        explanation: "Correct."
+      - id: b
+        text: "Patch the `default` account in all namespaces, including `kube-system`"
+        explanation: "System components are managed by Kubernetes and the patch can change how they start."
+      - id: c
+        text: "Delete the `default` account in each namespace"
+        explanation: "It is recreated."
+    correct_option: a
+    explanation: "Patch named namespaces, and add provisioning or admission control for new namespaces."

@@ -1,0 +1,141 @@
+{
+  "context": "kind-astro-ats-032-lab-030-03-01",
+  "resources": [
+    {
+      "kind": "namespace",
+      "name": "outpost",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "Namespace",
+        "metadata": {
+          "name": "outpost",
+          "labels": {
+            "pod-security.kubernetes.io/enforce": "baseline"
+          }
+        }
+      },
+      "namespace": null
+    },
+    {
+      "kind": "validatingadmissionpolicy",
+      "name": "no-nodeport",
+      "expected": {
+        "apiVersion": "admissionregistration.k8s.io/v1",
+        "kind": "ValidatingAdmissionPolicy",
+        "metadata": {
+          "name": "no-nodeport"
+        }
+      },
+      "namespace": null
+    },
+    {
+      "kind": "validatingadmissionpolicybinding",
+      "name": "no-nodeport-outpost",
+      "expected": {
+        "apiVersion": "admissionregistration.k8s.io/v1",
+        "kind": "ValidatingAdmissionPolicyBinding",
+        "metadata": {
+          "name": "no-nodeport-outpost"
+        },
+        "spec": {
+          "policyName": "no-nodeport",
+          "validationActions": [
+            "Deny"
+          ]
+        }
+      },
+      "namespace": null
+    }
+  ],
+  "behavior": [
+    {
+      "args": [
+        "kubectl",
+        "-n",
+        "outpost",
+        "run",
+        "priv",
+        "--image=docker.io/library/busybox:1.37.0",
+        "--privileged",
+        "--dry-run=server",
+        "-o",
+        "name"
+      ],
+      "denied": true,
+      "failure_markers": [
+        "violates podsecurity"
+      ]
+    },
+    {
+      "args": [
+        "kubectl",
+        "-n",
+        "outpost",
+        "create",
+        "service",
+        "nodeport",
+        "demo",
+        "--tcp=80:80",
+        "--dry-run=server",
+        "-o",
+        "name"
+      ],
+      "denied": true,
+      "failure_markers": [
+        "denied request"
+      ]
+    },
+    {
+      "args": [
+        "kubectl",
+        "-n",
+        "outpost",
+        "create",
+        "service",
+        "clusterip",
+        "demo",
+        "--tcp=80:80",
+        "--dry-run=server",
+        "-o",
+        "name"
+      ],
+      "contains": [
+        "service/demo"
+      ]
+    },
+    {
+      "args": [
+        "kubectl",
+        "-n",
+        "starfleet",
+        "create",
+        "service",
+        "nodeport",
+        "demo",
+        "--tcp=80:80",
+        "--dry-run=server",
+        "-o",
+        "name"
+      ],
+      "contains": [
+        "service/demo"
+      ]
+    },
+    {
+      "args": [
+        "kubectl",
+        "-n",
+        "outpost",
+        "run",
+        "plain",
+        "--image=docker.io/library/busybox:1.37.0",
+        "--dry-run=server",
+        "-o",
+        "name"
+      ],
+      "contains": [
+        "pod/plain"
+      ]
+    }
+  ]
+}

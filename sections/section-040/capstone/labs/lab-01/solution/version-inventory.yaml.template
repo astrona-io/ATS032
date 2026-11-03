@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: version-inventory
+  namespace: starfleet
+data:
+  server-version: <SERVER_VERSION>
+  kubelet-worker: <KUBELET_WORKER>
+  container-runtime-worker: <CONTAINER_RUNTIME_WORKER>
+  probe-image: <PROBE_IMAGE>

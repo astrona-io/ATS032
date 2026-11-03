@@ -1,469 +1,274 @@
-# Final domain knowledge check across all sections.
+---
 schema_version: 1
 kind: question_bank
 id: ats032-final
 course_id: ATS032
 exam_code: CKS
 status: draft
-provenance: Original practice material written for this course; not official exam questions.
+provenance: Original practice material written for this course; not official exam
+  questions.
 scope:
   type: domain
   id: final
   title: Final Domain Quiz
 questions:
-- id: ats032-final-q01
+- id: ats032-final-010-q01
   type: single_choice
-  difficulty: beginner
-  learning_objective: Name the RBAC object that limits a grant to one namespace.
+  difficulty: advanced
+  learning_objective: Order the steps of a safe rewrite.
   source_readings:
-  - sections/section-010/module-01/course-01-roles-bindings-and-scope.md
-  prompt: Which RBAC object lists rules that apply only inside its own namespace?
+  - sections/section-010/module-02/course-03-rewrite-a-broad-grant-as-least-privilege.md
+  prompt: A workload holds a broad ClusterRoleBinding. Which order replaces it with
+    a narrow grant without an outage?
   options:
   - id: a
-    text: "`ClusterRole`"
-    explanation: A ClusterRole is not tied to a namespace. Its reach depends on the binding.
+    text: Delete the broad binding, then create the narrow grant
+    explanation: The workload has no access in between.
   - id: b
-    text: "`ClusterRoleBinding`"
-    explanation: A ClusterRoleBinding gives a ClusterRole in every namespace.
+    text: Create and test the narrow grant, delete the broad binding, then test the
+      denied actions
+    explanation: Correct. The workload is never without access, and the final test
+      shows what stays allowed.
   - id: c
-    text: "`Role`"
-    explanation: Correct. A Role lists rules for one namespace.
-  correct_option: c
-  explanation: A Role is namespaced and holds rules for its own namespace. A ClusterRole is a cluster-wide definition.
-- id: ats032-final-q02
-  type: single_choice
-  difficulty: beginner
-  learning_objective: Write the core API group correctly in an RBAC rule.
-  source_readings:
-  - sections/section-010/module-01/course-01-roles-bindings-and-scope.md
-  prompt: A rule must cover Pods, which are in the core API group. What goes in `apiGroups`?
-  options:
-  - id: a
-    text: '`["core"]`'
-    explanation: There is no API group named core. The rule would match nothing.
-  - id: b
-    text: '`[""]`'
-    explanation: Correct. The core group is the empty string.
-  - id: c
-    text: '`["v1"]`'
-    explanation: "`v1` is a version, not an API group."
+    text: Create the narrow grant and keep the broad binding, because RBAC picks the
+      smaller grant
+    explanation: RBAC grants add up. The broad binding keeps all of its access.
   correct_option: b
-  explanation: The core API group, which holds Pods, Services, ConfigMaps and Secrets, is written as the empty string.
-- id: ats032-final-q03
-  type: single_choice
-  difficulty: beginner
-  learning_objective: Test the permissions of a ServiceAccount with kubectl auth can-i.
-  source_readings:
-  - sections/section-010/module-01/course-01-roles-bindings-and-scope.md
-  prompt: A cluster administrator runs `kubectl auth can-i list secrets -n outpost` to test the ServiceAccount `shuttle` in `starfleet`. The answer is `yes`, but the ServiceAccount has no grants. What is wrong?
-  options:
-  - id: a
-    text: The command has no `--as=system:serviceaccount:starfleet:shuttle`, so it tested the administrator
-    explanation: Correct. Without `--as`, the answer is for the caller, who is cluster-admin.
-  - id: b
-    text: RBAC allows every action until a deny rule is added
-    explanation: RBAC denies by default and has no deny rule.
-  - id: c
-    text: "`can-i` only supports the verb `get`"
-    explanation: "`can-i` supports every verb."
-  correct_option: a
-  explanation: "`kubectl auth can-i` answers for the identity that runs it unless `--as` names another identity."
-- id: ats032-final-q04
+  explanation: Add the narrow grant, test it, remove the broad one, and test the denied
+    actions last.
+- id: ats032-final-010-q02
   type: single_choice
   difficulty: intermediate
-  learning_objective: Explain the reach of a RoleBinding that references a ClusterRole.
+  learning_objective: Explain how an aggregated ClusterRole gets its rules.
   source_readings:
-  - sections/section-010/module-01/course-02-clusterroles-reuse-and-escalation-prevention.md
-  prompt: A RoleBinding in `outpost` references the ClusterRole `view` and names the ServiceAccount `starfleet/shuttle`. Where can `shuttle` read Pods?
+  - sections/section-010/module-03/course-02-built-in-and-aggregated-clusterroles.md
+  prompt: An aggregated ClusterRole has an `aggregationRule` with a label selector.
+    Where do its rules come from?
   options:
   - id: a
-    text: In every namespace
-    explanation: That needs a ClusterRoleBinding.
+    text: From the `rules` field that the author writes in it
+    explanation: The controller overwrites any rules written by hand.
   - id: b
-    text: Only in `starfleet`, the namespace of the ServiceAccount
-    explanation: The reach follows the namespace of the binding, not of the subject.
+    text: From the rules of every ClusterRole that carries the matching label, copied
+      by a controller
+    explanation: Correct. The aggregated role holds a copy of those rules.
   - id: c
-    text: Only in `outpost`, the namespace of the RoleBinding
-    explanation: Correct. A RoleBinding limits a ClusterRole to its own namespace.
-  correct_option: c
-  explanation: The binding decides the reach. A RoleBinding gives the ClusterRole rules only in the namespace where the binding exists.
-- id: ats032-final-q05
-  type: single_choice
-  difficulty: intermediate
-  learning_objective: Know which built-in ClusterRole omits Secrets.
-  source_readings:
-  - sections/section-010/module-01/course-02-clusterroles-reuse-and-escalation-prevention.md
-  prompt: A team needs read-only access to most objects in a namespace, and must not read Secrets. Which built-in ClusterRole fits, bound with a RoleBinding?
-  options:
-  - id: a
-    text: "`edit`"
-    explanation: "`edit` includes read and write access to Secrets."
-  - id: b
-    text: "`admin`"
-    explanation: "`admin` includes Secrets and also manages Roles and RoleBindings."
-  - id: c
-    text: "`view`"
-    explanation: Correct. `view` is read-only and leaves out Secrets.
-  correct_option: c
-  explanation: "`view` allows read-only access to most namespaced objects and does not include Secrets."
-- id: ats032-final-q06
-  type: single_choice
-  difficulty: intermediate
-  learning_objective: Explain the escalation check on Role creation.
-  source_readings:
-  - sections/section-010/module-01/course-02-clusterroles-reuse-and-escalation-prevention.md
-  prompt: A ServiceAccount may create Roles in `outpost` but has no permission on Secrets. It tries to create a Role that allows `get` on Secrets. What happens?
-  options:
-  - id: a
-    text: The Role is created and is inactive until an administrator approves it
-    explanation: RBAC has no approval state for Roles.
-  - id: b
-    text: The API server rejects the request because the ServiceAccount would grant permissions it does not hold
-    explanation: Correct. This is the escalation prevention check.
-  - id: c
-    text: The Role is created, but it grants nothing to its creator
-    explanation: The request is rejected at creation; the Role does not exist.
+    text: From the RoleBindings that name it
+    explanation: Bindings do not carry rules.
   correct_option: b
-  explanation: A caller can create a Role only if it already holds every permission in it, or holds the `escalate` verb.
-- id: ats032-final-q07
+  explanation: A controller copies the rules of every ClusterRole with a matching
+    label into the aggregated role.
+- id: ats032-final-010-q03
   type: single_choice
-  difficulty: beginner
-  learning_objective: Explain which ServiceAccount a pod uses when none is named.
+  difficulty: advanced
+  learning_objective: Explain what a wildcard in verbs matches.
   source_readings:
-  - sections/section-020/module-01/course-01-serviceaccounts-and-the-default-token.md
-  prompt: A pod manifest has no `serviceAccountName`. Which ServiceAccount does the pod use?
+  - sections/section-010/module-03/course-03-remove-wildcards-and-narrow-rules.md
+  prompt: 'A Role has `verbs: ["*"]` for `resources: ["pods"]`. Which action does
+    it allow?'
   options:
   - id: a
-    text: No ServiceAccount, so the pod cannot call the API
-    explanation: Admission always sets an account on the pod.
+    text: Only the verbs `get`, `list` and `watch`
+    explanation: The wildcard matches every verb.
   - id: b
-    text: The ServiceAccount named `default` in the pod's namespace
-    explanation: Correct. The ServiceAccount admission controller sets it.
+    text: Every verb on Pods, including `delete` and `deletecollection`
+    explanation: Correct. The wildcard matches every verb, including the ones that
+      are added later.
   - id: c
-    text: The ServiceAccount of the node that runs the pod
-    explanation: Nodes are not ServiceAccounts.
+    text: Every verb on every resource of the namespace
+    explanation: The resource list still limits the rule to Pods.
   correct_option: b
-  explanation: Every namespace has a `default` ServiceAccount, and pods without a named account use it.
-- id: ats032-final-q08
-  type: single_choice
-  difficulty: beginner
-  learning_objective: Name the mount path of the ServiceAccount credentials.
-  source_readings:
-  - sections/section-020/module-01/course-01-serviceaccounts-and-the-default-token.md
-  prompt: Where does the kubelet mount the ServiceAccount token, the CA bundle and the namespace file in a container?
-  options:
-  - id: a
-    text: "`/etc/kubernetes/pki`"
-    explanation: That is the certificate directory on control-plane nodes.
-  - id: b
-    text: "`/var/lib/kubelet/serviceaccount`"
-    explanation: That path is on the node, not in the container.
-  - id: c
-    text: "`/var/run/secrets/kubernetes.io/serviceaccount`"
-    explanation: Correct. It holds `token`, `ca.crt` and `namespace`.
-  correct_option: c
-  explanation: The projected volume is mounted at `/var/run/secrets/kubernetes.io/serviceaccount` in every container.
-- id: ats032-final-q09
-  type: single_choice
-  difficulty: beginner
-  learning_objective: Check whether a pod has a token without exposing it.
-  source_readings:
-  - sections/section-020/module-01/course-01-serviceaccounts-and-the-default-token.md
-  prompt: What is the safe way to check that a pod has a ServiceAccount token mounted?
-  options:
-  - id: a
-    text: List the files in `/var/run/secrets/kubernetes.io/serviceaccount` with `kubectl exec`
-    explanation: Correct. It proves the mount without printing the token.
-  - id: b
-    text: Print the file `token` and read the JWT
-    explanation: Printing the token exposes a valid credential.
-  - id: c
-    text: Run `kubectl get secrets` and look for a token Secret
-    explanation: Projected tokens are not stored in Secrets.
-  correct_option: a
-  explanation: Check that the directory and the file exist. Never print the token.
-- id: ats032-final-q10
+  explanation: A wildcard in `verbs` matches every verb on the listed resources.
+- id: ats032-final-020-q01
   type: single_choice
   difficulty: intermediate
-  learning_objective: Apply the precedence between pod and ServiceAccount automount settings.
+  learning_objective: Choose a binding that keeps a workload least privileged.
   source_readings:
-  - sections/section-020/module-01/course-02-disable-automounting-and-minimize-permissions.md
-  prompt: 'A ServiceAccount sets `automountServiceAccountToken: false`. A pod that uses it sets `automountServiceAccountToken: true` in its `spec`. Is the token mounted?'
+  - sections/section-020/module-02/course-02-grant-only-what-the-workload-uses.md
+  prompt: A workload in one namespace must read pods there. Which setup is least privileged?
   options:
   - id: a
-    text: No, the ServiceAccount value always wins
-    explanation: The pod value takes precedence.
+    text: A dedicated ServiceAccount, a Role with `get` and `list` on `pods`, and
+      a RoleBinding
+    explanation: Correct.
   - id: b
-    text: Yes, the pod value takes precedence over the ServiceAccount
+    text: The `default` ServiceAccount with a ClusterRoleBinding to `view`
+    explanation: "`default` is shared and the binding applies in every namespace."
+  - id: c
+    text: A dedicated ServiceAccount bound to `cluster-admin`
+    explanation: This grants far more than needed.
+  correct_option: a
+  explanation: Use one account, a narrow Role and a RoleBinding.
+- id: ats032-final-020-q02
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Recognise that a group binding reaches accounts with mounting
+    off.
+  source_readings:
+  - sections/section-020/module-03/course-02-audit-grants-that-reach-serviceaccounts.md
+  prompt: A RoleBinding gives `view` to the group `system:serviceaccounts:outpost`.
+    The account `archive` in `outpost` has token mounting turned off. Can `archive`
+    list pods in `outpost`?
+  options:
+  - id: a
+    text: No, because it has no token mounted
+    explanation: Permissions come from bindings, not from the mount.
+  - id: b
+    text: Yes, because the group contains every ServiceAccount of the namespace
     explanation: Correct.
   - id: c
-    text: The pod is rejected because the two values conflict
-    explanation: There is no conflict check. The pod is accepted.
+    text: No, because group bindings do not apply to ServiceAccounts
+    explanation: They do apply.
   correct_option: b
-  explanation: The pod-level field overrides the ServiceAccount field. Use an admission policy to enforce a rule for all pods.
-- id: ats032-final-q11
+  explanation: The mount setting limits theft from a container, not the permissions
+    of the account.
+- id: ats032-final-020-q03
   type: single_choice
-  difficulty: intermediate
-  learning_objective: Know when an automount change takes effect.
+  difficulty: advanced
+  learning_objective: Test a token with another audience.
   source_readings:
-  - sections/section-020/module-01/course-02-disable-automounting-and-minimize-permissions.md
-  prompt: 'An administrator patches the `default` ServiceAccount of a namespace with `automountServiceAccountToken: false`. What happens to pods that already run?'
+  - sections/section-020/module-03/course-03-audit-tokens-secrets-lifetimes-and-audience.md
+  prompt: A token is created with `kubectl create token archive --audience=ledger`.
+    What does the API server do when it receives this token?
   options:
   - id: a
-    text: They keep their token until they are recreated
-    explanation: Correct. The field is read when a pod is created.
+    text: It accepts the token with the permissions of `archive`
+    explanation: The audience does not match.
   - id: b
-    text: The kubelet removes the token from them within a minute
-    explanation: The kubelet does not remove volumes from running pods.
-  - id: c
-    text: They are restarted automatically
-    explanation: No controller restarts pods after a ServiceAccount change.
-  correct_option: a
-  explanation: The setting is read at pod creation. Delete and recreate the pods, or roll out the Deployment.
-- id: ats032-final-q12
-  type: single_choice
-  difficulty: intermediate
-  learning_objective: Identify the risky binding for new ServiceAccounts.
-  source_readings:
-  - sections/section-020/module-01/course-02-disable-automounting-and-minimize-permissions.md
-  prompt: An application in namespace `starfleet` fails with `Forbidden`. Which fix keeps the namespace least privileged?
-  options:
-  - id: a
-    text: Bind a Role with the missing verb to the `default` ServiceAccount
-    explanation: Every pod that uses `default` would receive the grant.
-  - id: b
-    text: Bind `cluster-admin` to the group `system:serviceaccounts:starfleet`
-    explanation: This gives full control to every ServiceAccount of the namespace.
-  - id: c
-    text: Create a dedicated ServiceAccount, grant it the missing verb only, and set it on the Deployment
-    explanation: Correct. Only that workload receives the grant.
-  correct_option: c
-  explanation: Use one ServiceAccount per workload that calls the API and grant only what it uses.
-- id: ats032-final-q13
-  type: single_choice
-  difficulty: beginner
-  learning_objective: Name the order of the API server checks.
-  source_readings:
-  - sections/section-030/module-01/course-01-how-an-api-request-is-checked.md
-  prompt: In which order does the API server check a write request?
-  options:
-  - id: a
-    text: Admission, authorization, authentication
-    explanation: Admission runs last.
-  - id: b
-    text: Authentication, admission, authorization
-    explanation: Authorization comes before admission.
-  - id: c
-    text: Authentication, authorization, admission
-    explanation: Correct.
-  correct_option: c
-  explanation: The server first identifies the caller, then checks the permission, then lets admission change or reject the object.
-- id: ats032-final-q14
-  type: single_choice
-  difficulty: beginner
-  learning_objective: Tell a 401 from a 403.
-  source_readings:
-  - sections/section-030/module-01/course-01-how-an-api-request-is-checked.md
-  prompt: A request with a valid ServiceAccount token returns `403 Forbidden`. What does it mean?
-  options:
-  - id: a
-    text: The identity is known, and no authorization rule allows the action
-    explanation: Correct.
-  - id: b
-    text: The token is expired or unknown
-    explanation: That returns 401.
-  - id: c
-    text: An admission controller rejected the object
-    explanation: Admission errors name the plugin or policy that rejected the write.
-  correct_option: a
-  explanation: A 403 is an authorization result. The caller was authenticated.
-- id: ats032-final-q15
-  type: single_choice
-  difficulty: beginner
-  learning_objective: Name the identity of an unauthenticated request.
-  source_readings:
-  - sections/section-030/module-01/course-01-how-an-api-request-is-checked.md
-  prompt: With `--anonymous-auth=true`, which user and group does a request without credentials receive?
-  options:
-  - id: a
-    text: "`system:anonymous` in `system:unauthenticated`"
-    explanation: Correct.
-  - id: b
-    text: "`system:serviceaccount:default:default`"
-    explanation: That is a ServiceAccount identity and needs a token.
-  - id: c
-    text: "`system:masters`"
-    explanation: That group is cluster-admin and needs a certificate.
-  correct_option: a
-  explanation: The request is still authorized. Only the rules that name those subjects apply.
-- id: ats032-final-q16
-  type: single_choice
-  difficulty: intermediate
-  learning_objective: Judge the risk of a broad binding to anonymous users.
-  source_readings:
-  - sections/section-030/module-01/course-01-how-an-api-request-is-checked.md
-  prompt: A ClusterRoleBinding gives `view` to the group `system:unauthenticated`. What is the effect?
-  options:
-  - id: a
-    text: No effect, because anonymous requests never reach authorization
-    explanation: They do reach authorization.
-  - id: b
-    text: Any host that can reach the API port can read objects that `view` covers, without a credential
+    text: It refuses the token as `Unauthorized`, because it accepts only its own
+      audience
     explanation: Correct.
   - id: c
-    text: Only requests from inside the cluster can use it
-    explanation: The grant does not depend on the source.
+    text: It accepts the token for read requests only
+    explanation: There is no such rule.
   correct_option: b
-  explanation: Anonymous callers are authorized like any other. A broad role bound to their group opens that access to the network.
-- id: ats032-final-q17
+  explanation: The audience names the party that accepts the token.
+- id: ats032-final-030-q01
   type: single_choice
   difficulty: intermediate
-  learning_objective: Explain the failure policy of an admission webhook.
+  learning_objective: Judge the effect of a binding to the unauthenticated group.
   source_readings:
-  - sections/section-030/module-01/course-01-how-an-api-request-is-checked.md
-  prompt: 'A validating webhook enforces a security rule and has `failurePolicy: Ignore`. The webhook service is down. What happens to matching requests?'
+  - sections/section-030/module-02/course-02-anonymous-access-in-practice.md
+  prompt: A ClusterRoleBinding gives the `view` ClusterRole to the group `system:unauthenticated`.
+    Which statement is true?
   options:
   - id: a
-    text: They are rejected
-    explanation: That is the behavior of `Fail`.
+    text: Any caller that can reach the API port can read the objects that `view`
+      covers
+    explanation: Correct. Anonymous requests are authorized like any request, and
+      the binding names their group.
   - id: b
-    text: They wait until the service returns
-    explanation: The request does not wait indefinitely.
+    text: Only requests from inside the cluster can use the grant
+    explanation: The grant does not depend on the source address.
   - id: c
-    text: They are allowed without the check
-    explanation: Correct.
-  correct_option: c
-  explanation: With `Ignore`, a failed call is skipped. Use `Fail` for a rule that must always apply.
-- id: ats032-final-q18
+    text: The grant has no effect because anonymous requests skip authorization
+    explanation: Anonymous requests go through authorization.
+  correct_option: a
+  explanation: The fix is to delete the binding that names the anonymous subject.
+- id: ats032-final-030-q02
   type: single_choice
   difficulty: intermediate
-  learning_objective: Scope a Role for a workload identity.
+  learning_objective: Explain the result of an invalid bearer token.
   source_readings:
-  - sections/section-030/module-01/course-02-a-narrow-workload-identity.md
-  prompt: A Pod must list Services in its own namespace. Which grant is the narrowest that works?
+  - sections/section-030/module-02/course-01-authentication-methods-and-identities.md
+  prompt: "`--anonymous-auth` is `true`. A request sends a bearer token that no authentication
+    method accepts. What does the API server return?"
   options:
   - id: a
-    text: A Role with `get`, `list` on `services`, bound to a dedicated ServiceAccount in that namespace
-    explanation: Correct.
+    text: "`401 Unauthorized`"
+    explanation: Correct. A credential that fails verification is rejected.
   - id: b
-    text: The `view` ClusterRole bound with a ClusterRoleBinding
-    explanation: It grants read access to many resources in every namespace.
+    text: "`200` as `system:anonymous`"
+    explanation: Anonymous treatment applies only to requests with no credential.
   - id: c
-    text: A Role with `*` verbs on `services`, bound to `default`
-    explanation: It is broad in verbs and shared by every Pod that uses `default`.
+    text: "`403 Forbidden`"
+    explanation: A `403` needs a known identity that authorization refused.
   correct_option: a
-  explanation: Name exact resources and verbs, keep the scope to one namespace, and use a dedicated ServiceAccount.
-- id: ats032-final-q19
+  explanation: Only a request with no credential can become anonymous.
+- id: ats032-final-030-q03
   type: single_choice
-  difficulty: beginner
-  learning_objective: Explain why upgrades are a security control.
+  difficulty: intermediate
+  learning_objective: Choose a failure policy for a security webhook.
   source_readings:
-  - sections/section-040/module-01/course-01-versions-skew-and-support.md
-  prompt: Why does a cluster on an old minor version stay exposed to known vulnerabilities?
+  - sections/section-030/module-03/course-03-admission-webhooks-and-failure-policy.md
+  prompt: A validating webhook enforces a security rule that must always apply. Which
+    `failurePolicy` fits, and what is the cost?
   options:
   - id: a
-    text: Only the most recent minor versions receive fixes, and an older one gets none
-    explanation: Correct.
+    text: "`Ignore`, and the cost is that the rule is skipped when the service is
+      down"
+    explanation: That makes the rule a bypass whenever the call fails.
   - id: b
-    text: Old versions block security updates for other components
-    explanation: Components are independent in this respect.
+    text: "`Fail`, and the cost is that matching requests are rejected when the service
+      is down"
+    explanation: Correct. Exclude the namespace of the webhook and `kube-system` to
+      avoid a deadlock.
   - id: c
-    text: Vulnerabilities only affect the newest release
-    explanation: Published flaws affect the versions that contain them.
-  correct_option: a
-  explanation: The project maintains the newest three minor versions. Upgrading is the only way to receive fixes.
-- id: ats032-final-q20
-  type: single_choice
-  difficulty: beginner
-  learning_objective: Apply the skew rule for the kubelet.
-  source_readings:
-  - sections/section-040/module-01/course-01-versions-skew-and-support.md
-  prompt: The API server runs 1.35. Which kubelet version is supported?
-  options:
-  - id: a
-    text: '1.36'
-    explanation: A kubelet may not be newer than the API server.
-  - id: b
-    text: '1.32'
-    explanation: Correct. It is three minor versions older.
-  - id: c
-    text: '1.31'
-    explanation: It is four minor versions older, which is outside the policy.
+    text: Either one, because the policy only affects the log
+    explanation: The policy decides whether a failed call rejects or admits the request.
   correct_option: b
-  explanation: The kubelet may be the same version or up to three minor versions older than the API server.
-- id: ats032-final-q21
+  explanation: Use `Fail` for a rule that must always apply and keep the webhook out
+    of the namespaces that it needs to run.
+- id: ats032-final-040-q01
   type: single_choice
   difficulty: beginner
-  learning_objective: Name the order of an upgrade.
+  learning_objective: Name a source that publishes Kubernetes vulnerabilities.
   source_readings:
-  - sections/section-040/module-01/course-01-versions-skew-and-support.md
-  prompt: Which order is correct for a minor version upgrade?
+  - sections/section-040/module-02/course-01-where-vulnerabilities-are-published.md
+  prompt: Which source lets a script watch for new Kubernetes CVEs?
   options:
   - id: a
-    text: Kubelets on workers, then the control plane
-    explanation: Kubelets may not be newer than the API server.
+    text: The official CVE feed, published as JSON and RSS
+    explanation: Correct.
   - id: b
-    text: All nodes at the same moment
-    explanation: It removes capacity and gives no way to stop on a problem.
+    text: The release notes of the next minor version
+    explanation: Release notes are written for people and are not a machine-readable
+      feed.
   - id: c
-    text: Control plane first, then workers one at a time
+    text: The kubelet log of each node
+    explanation: The log records node events, not published vulnerabilities.
+  correct_option: a
+  explanation: The official feed is structured, so a script can compare new entries
+    with the versions that the cluster runs.
+- id: ats032-final-040-q02
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain why a node can still refuse Pods after uncordon.
+  source_readings:
+  - sections/section-040/module-03/course-02-verify-the-cluster-after-an-upgrade.md
+  prompt: After kubectl uncordon, a node still refuses new Pods and shows the taint
+    maintenance=patching:NoSchedule. What is the fix?
+  options:
+  - id: a
+    text: Remove the taint with kubectl taint nodes NODE maintenance=patching:NoSchedule-
+    explanation: Correct.
+  - id: b
+    text: Drain the node again
+    explanation: A drain does not remove a taint.
+  - id: c
+    text: Wait for the taint to expire
+    explanation: A taint stays until someone removes it.
+  correct_option: a
+  explanation: A custom taint is separate from the unschedulable flag, and uncordon
+    does not change it.
+- id: ats032-final-040-q03
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Choose between fixing forward and restoring etcd.
+  source_readings:
+  - sections/section-040/module-03/course-03-rollback-limits-and-restore-drills.md
+  prompt: After an upgrade the control plane is healthy and one application fails.
+    What is the best response?
+  options:
+  - id: a
+    text: Downgrade the API server to the previous minor version
+    explanation: Kubernetes does not support a downgrade.
+  - id: b
+    text: Restore etcd from the pre-upgrade snapshot
+    explanation: A restore removes every change made since the snapshot.
+  - id: c
+    text: Fix forward on the new version
     explanation: Correct.
   correct_option: c
-  explanation: The API server must not be older than the components that talk to it.
-- id: ats032-final-q22
-  type: single_choice
-  difficulty: intermediate
-  learning_objective: Distinguish the node maintenance commands.
-  source_readings:
-  - sections/section-040/module-01/course-02-cordon-drain-and-disruption-budgets.md
-  prompt: What does `kubectl cordon <node>` do?
-  options:
-  - id: a
-    text: Marks the node unschedulable and leaves running Pods in place
-    explanation: Correct.
-  - id: b
-    text: Evicts every Pod and marks the node unschedulable
-    explanation: That is `kubectl drain`.
-  - id: c
-    text: Removes the node from the cluster
-    explanation: That is `kubectl delete node`.
-  correct_option: a
-  explanation: Drain adds eviction to the cordon. Uncordon reverses it.
-- id: ats032-final-q23
-  type: single_choice
-  difficulty: intermediate
-  learning_objective: Explain why a drain refuses a Pod.
-  source_readings:
-  - sections/section-040/module-01/course-02-cordon-drain-and-disruption-budgets.md
-  prompt: "`kubectl drain` stops because the node runs a Pod that no controller owns. Which statement is correct?"
-  options:
-  - id: a
-    text: Add `--ignore-daemonsets` and the Pod moves
-    explanation: That flag is for DaemonSet Pods.
-  - id: b
-    text: The Pod is recreated elsewhere automatically
-    explanation: Nothing owns it, so nothing recreates it.
-  - id: c
-    text: "`--force` would delete the Pod and it would not return"
-    explanation: Correct.
-  correct_option: c
-  explanation: Move or recreate the bare Pod yourself, or accept its loss with `--force`.
-- id: ats032-final-q24
-  type: single_choice
-  difficulty: intermediate
-  learning_objective: Read a PodDisruptionBudget.
-  source_readings:
-  - sections/section-040/module-01/course-02-cordon-drain-and-disruption-budgets.md
-  prompt: 'A Deployment has two replicas and a PodDisruptionBudget with `minAvailable: 2`. What happens when you drain a node that runs one replica?'
-  options:
-  - id: a
-    text: The eviction is refused and the drain waits until its timeout
-    explanation: Correct.
-  - id: b
-    text: The replica is evicted and the budget is ignored
-    explanation: Evictions respect the budget.
-  - id: c
-    text: The budget is lowered automatically
-    explanation: Budgets are not changed by Kubernetes.
-  correct_option: a
-  explanation: No Pod may be down, so no eviction is allowed. Fix the budget or add replicas.
+  explanation: Restoring is for a damaged control plane or damaged data, not for one
+    failing application.

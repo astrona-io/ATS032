@@ -1,0 +1,304 @@
+{
+  "context": "kind-astro-ats-032-lab-020-capstone-01",
+  "resources": [
+    {
+      "kind": "serviceaccount",
+      "name": "probe",
+      "namespace": "starfleet",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "ServiceAccount",
+        "metadata": {
+          "name": "probe",
+          "namespace": "starfleet"
+        },
+        "automountServiceAccountToken": false
+      }
+    },
+    {
+      "kind": "serviceaccount",
+      "name": "default",
+      "namespace": "starfleet",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "ServiceAccount",
+        "metadata": {
+          "name": "default",
+          "namespace": "starfleet"
+        },
+        "automountServiceAccountToken": false
+      }
+    },
+    {
+      "kind": "deployment",
+      "name": "probe",
+      "namespace": "starfleet",
+      "expected": {
+        "spec": {
+          "replicas": 2,
+          "template": {
+            "spec": {
+              "serviceAccountName": "probe"
+            }
+          }
+        }
+      },
+      "state": "deployment"
+    },
+    {
+      "kind": "role",
+      "name": "shuttle-reader",
+      "namespace": "starfleet",
+      "expected": {
+        "apiVersion": "rbac.authorization.k8s.io/v1",
+        "kind": "Role",
+        "metadata": {
+          "name": "shuttle-reader",
+          "namespace": "starfleet"
+        },
+        "rules": [
+          {
+            "apiGroups": [
+              ""
+            ],
+            "resources": [
+              "pods"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "kind": "rolebinding",
+      "name": "shuttle-reader",
+      "namespace": "starfleet",
+      "expected": {
+        "apiVersion": "rbac.authorization.k8s.io/v1",
+        "kind": "RoleBinding",
+        "metadata": {
+          "name": "shuttle-reader",
+          "namespace": "starfleet"
+        },
+        "roleRef": {
+          "apiGroup": "rbac.authorization.k8s.io",
+          "kind": "Role",
+          "name": "shuttle-reader"
+        },
+        "subjects": [
+          {
+            "kind": "ServiceAccount",
+            "name": "shuttle-reader",
+            "namespace": "starfleet"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "pod",
+      "name": "shuttle",
+      "namespace": "starfleet",
+      "expected": {
+        "spec": {
+          "serviceAccountName": "shuttle-reader",
+          "automountServiceAccountToken": false,
+          "volumes": [
+            {
+              "name": "api-token",
+              "projected": {
+                "sources": [
+                  {
+                    "serviceAccountToken": {
+                      "path": "token",
+                      "expirationSeconds": 900
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "drifter",
+      "namespace": "outpost",
+      "expected": {
+        "spec": {
+          "automountServiceAccountToken": false
+        }
+      },
+      "state": "pod"
+    }
+  ],
+  "behavior": [
+    {
+      "args": [
+        "kubectl",
+        "-n",
+        "starfleet",
+        "exec",
+        "deploy/probe",
+        "--",
+        "sh",
+        "-c",
+        "test ! -e /var/run/secrets/kubernetes.io/serviceaccount/token && printf absent"
+      ],
+      "equals": "absent"
+    },
+    {
+      "args": [
+        "kubectl",
+        "-n",
+        "outpost",
+        "exec",
+        "drifter",
+        "--",
+        "sh",
+        "-c",
+        "test ! -e /var/run/secrets/kubernetes.io/serviceaccount/token && printf absent"
+      ],
+      "equals": "absent"
+    },
+    {
+      "args": [
+        "kubectl",
+        "-n",
+        "starfleet",
+        "exec",
+        "shuttle",
+        "--",
+        "sh",
+        "-c",
+        "test -s /var/run/tokens/token && printf present"
+      ],
+      "equals": "present"
+    },
+    {
+      "args": [
+        "kubectl",
+        "auth",
+        "can-i",
+        "get",
+        "pods",
+        "-n",
+        "starfleet",
+        "--as=system:serviceaccount:starfleet:shuttle-reader"
+      ],
+      "equals": "yes"
+    },
+    {
+      "args": [
+        "kubectl",
+        "auth",
+        "can-i",
+        "delete",
+        "pods",
+        "-n",
+        "starfleet",
+        "--as=system:serviceaccount:starfleet:shuttle-reader"
+      ],
+      "denied": true,
+      "failure_markers": [
+        "no"
+      ],
+      "equals": "no"
+    },
+    {
+      "args": [
+        "kubectl",
+        "auth",
+        "can-i",
+        "get",
+        "secrets",
+        "-n",
+        "starfleet",
+        "--as=system:serviceaccount:starfleet:shuttle-reader"
+      ],
+      "denied": true,
+      "failure_markers": [
+        "no"
+      ],
+      "equals": "no"
+    },
+    {
+      "args": [
+        "kubectl",
+        "auth",
+        "can-i",
+        "get",
+        "pods",
+        "-n",
+        "starfleet",
+        "--as=system:serviceaccount:starfleet:default"
+      ],
+      "denied": true,
+      "failure_markers": [
+        "no"
+      ],
+      "equals": "no"
+    },
+    {
+      "args": [
+        "kubectl",
+        "auth",
+        "can-i",
+        "list",
+        "pods",
+        "-n",
+        "starfleet",
+        "--as=system:serviceaccount:outpost:default"
+      ],
+      "denied": true,
+      "failure_markers": [
+        "no"
+      ],
+      "equals": "no"
+    },
+    {
+      "args": [
+        "kubectl",
+        "-n",
+        "starfleet",
+        "get",
+        "rolebinding",
+        "default-pod-access"
+      ],
+      "denied": true,
+      "failure_markers": [
+        "not found"
+      ]
+    },
+    {
+      "args": [
+        "kubectl",
+        "get",
+        "clusterrolebinding",
+        "outpost-view-all"
+      ],
+      "denied": true,
+      "failure_markers": [
+        "not found"
+      ]
+    },
+    {
+      "args": [
+        "kubectl",
+        "-n",
+        "outpost",
+        "get",
+        "secret",
+        "drifter-legacy-token"
+      ],
+      "denied": true,
+      "failure_markers": [
+        "not found"
+      ]
+    }
+  ]
+}

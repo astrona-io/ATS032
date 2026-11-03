@@ -1,0 +1,216 @@
+# Knowledge check for section 030, module 03. Contract:
+# schemas/question-bank.schema.json. Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats032-030-03
+course_id: ATS032
+exam_code: CKS
+status: draft
+provenance: "Original practice material written for this course; not official exam questions."
+scope:
+  type: section
+  id: section-030
+  title: "Restrict Access To The Kubernetes API"
+placement:
+  position: after
+  reading: sections/section-030/module-03/course-04-summary.md
+questions:
+  - id: ats032-030-03-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Place admission in the request path."
+    source_readings:
+      - sections/section-030/module-03/course-01-pod-security-admission.md
+    prompt: "A user with `cluster-admin` creates a privileged Pod in a namespace that enforces `baseline`. What happens?"
+    options:
+      - id: a
+        text: "The Pod is created, because `cluster-admin` skips admission"
+        explanation: "Admission applies to every caller."
+      - id: b
+        text: "The request is rejected by Pod Security admission"
+        explanation: "Correct."
+      - id: c
+        text: "The request is rejected by RBAC"
+        explanation: "RBAC allows the verb. Admission checks the content."
+    correct_option: b
+    explanation: "Admission runs after authorization and does not look at who the caller is."
+
+  - id: ats032-030-03-q02
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Name the Pod Security Standards."
+    source_readings:
+      - sections/section-030/module-03/course-01-pod-security-admission.md
+    prompt: "Which list shows the three Pod Security Standards from least to most restrictive?"
+    options:
+      - id: a
+        text: "baseline, privileged, restricted"
+        explanation: "Privileged is the least restrictive."
+      - id: b
+        text: "privileged, baseline, restricted"
+        explanation: "Correct."
+      - id: c
+        text: "restricted, baseline, privileged"
+        explanation: "This list is reversed."
+    correct_option: b
+    explanation: "Privileged has no limits, baseline blocks known privilege escalation and restricted follows current hardening practice."
+
+  - id: ats032-030-03-q03
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Set a Pod Security mode."
+    source_readings:
+      - sections/section-030/module-03/course-01-pod-security-admission.md
+    prompt: "Which command makes the namespace `outpost` reject Pods that violate `baseline`?"
+    options:
+      - id: a
+        text: "`kubectl label namespace outpost pod-security.kubernetes.io/enforce=baseline`"
+        explanation: "Correct."
+      - id: b
+        text: "`kubectl label namespace outpost pod-security.kubernetes.io/warn=baseline`"
+        explanation: "The `warn` mode only returns a warning."
+      - id: c
+        text: "`kubectl annotate namespace outpost pod-security=baseline`"
+        explanation: "The controller reads labels with a fixed key."
+    correct_option: a
+    explanation: "The key has the form `pod-security.kubernetes.io/<mode>`, and `enforce` is the mode that rejects."
+
+  - id: ats032-030-03-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain the effect of a label on existing Pods."
+    source_readings:
+      - sections/section-030/module-03/course-01-pod-security-admission.md
+    prompt: "A namespace already runs a Pod that violates `baseline`. An administrator adds the enforce label `baseline`. What happens to the running Pod?"
+    options:
+      - id: a
+        text: "It is deleted at once"
+        explanation: "The controller does not remove running Pods."
+      - id: b
+        text: "It keeps running, and the controller can print a warning"
+        explanation: "Correct."
+      - id: c
+        text: "It is restarted with a safe configuration"
+        explanation: "The controller does not change Pods."
+    correct_option: b
+    explanation: "Only new Pods are checked. Existing Pods need their own clean-up."
+
+  - id: ats032-030-03-q05
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Find where a Pod Security rejection shows."
+    source_readings:
+      - sections/section-030/module-03/course-01-pod-security-admission.md
+    prompt: "A Deployment in an enforcing namespace shows fewer ready replicas than desired, and the Deployment was accepted. Where is the Pod Security error?"
+    options:
+      - id: a
+        text: "In the events of the ReplicaSet, because it creates the Pods"
+        explanation: "Correct."
+      - id: b
+        text: "In the status of the namespace"
+        explanation: "The namespace has no such field."
+      - id: c
+        text: "In the Deployment manifest that the user sent"
+        explanation: "The error is returned when a Pod is created."
+    correct_option: a
+    explanation: "The check applies to Pods. The ReplicaSet gets the rejection when it tries to create them."
+
+  - id: ats032-030-03-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Describe the two objects of a ValidatingAdmissionPolicy."
+    source_readings:
+      - sections/section-030/module-03/course-02-validatingadmissionpolicy-with-cel.md
+    prompt: "A ValidatingAdmissionPolicy exists and matches Services, and no binding exists. What is the effect?"
+    options:
+      - id: a
+        text: "Matching Services are rejected"
+        explanation: "Nothing is enforced without a binding."
+      - id: b
+        text: "Matching Services are rejected only in `kube-system`"
+        explanation: "There is no default scope."
+      - id: c
+        text: "Nothing is enforced"
+        explanation: "Correct."
+    correct_option: c
+    explanation: "The binding switches the policy on and chooses the namespaces and actions."
+
+  - id: ats032-030-03-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Choose a validation action for a new rule."
+    source_readings:
+      - sections/section-030/module-03/course-02-validatingadmissionpolicy-with-cel.md
+    prompt: "A team adds a new rule and wants to see what it would reject without blocking anyone. Which `validationActions` fit?"
+    options:
+      - id: a
+        text: "`Warn` and `Audit`"
+        explanation: "Correct."
+      - id: b
+        text: "`Deny`"
+        explanation: "It rejects requests."
+      - id: c
+        text: "An empty list"
+        explanation: "The field needs at least one action."
+    correct_option: a
+    explanation: "Warn and Audit admit the request and report the violation. Switch to Deny when the report is clean."
+
+  - id: ats032-030-03-q08
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Read the CEL expression."
+    source_readings:
+      - sections/section-030/module-03/course-02-validatingadmissionpolicy-with-cel.md
+    prompt: "The validation expression is `object.spec.type != 'NodePort'`. For which Service does the request pass?"
+    options:
+      - id: a
+        text: "A Service of type `NodePort`"
+        explanation: "The expression is false for it."
+      - id: b
+        text: "A Service of type `ClusterIP`"
+        explanation: "Correct."
+      - id: c
+        text: "No Service"
+        explanation: "The expression is true for every type other than `NodePort`."
+    correct_option: b
+    explanation: "The request is allowed when the expression is true."
+
+  - id: ats032-030-03-q09
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain failurePolicy Ignore."
+    source_readings:
+      - sections/section-030/module-03/course-03-admission-webhooks-and-failure-policy.md
+    prompt: "A security webhook has `failurePolicy: Ignore`, and its Service is down. What happens to matching requests?"
+    options:
+      - id: a
+        text: "They are rejected"
+        explanation: "That is the behaviour of `Fail`."
+      - id: b
+        text: "They are admitted without the check"
+        explanation: "Correct."
+      - id: c
+        text: "They wait until the Service returns"
+        explanation: "The API server does not wait beyond the timeout."
+    correct_option: b
+    explanation: "With `Ignore`, a failed call is skipped, so the rule stops applying."
+
+  - id: ats032-030-03-q10
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Avoid a webhook deadlock."
+    source_readings:
+      - sections/section-030/module-03/course-03-admission-webhooks-and-failure-policy.md
+    prompt: "A webhook with `failurePolicy: Fail` runs as a Pod in the same cluster and matches Pods in every namespace. What can go wrong?"
+    options:
+      - id: a
+        text: "Mutating webhooks stop running"
+        explanation: "The failure affects the same webhook."
+      - id: b
+        text: "The webhook Pod cannot be recreated, because its own creation is rejected"
+        explanation: "Correct."
+      - id: c
+        text: "Pod Security admission turns itself off"
+        explanation: "Pod Security admission does not depend on webhooks."
+    correct_option: b
+    explanation: "Exclude the namespace of the webhook and `kube-system` with a `namespaceSelector`."

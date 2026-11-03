@@ -1,0 +1,216 @@
+# Knowledge check for section 040, module 03. Contract:
+# schemas/question-bank.schema.json. Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats032-040-03
+course_id: ATS032
+exam_code: CKS
+status: draft
+provenance: "Original practice material written for this course; not official exam questions."
+scope:
+  type: section
+  id: section-040
+  title: "Upgrade Kubernetes To Avoid Vulnerabilities"
+placement:
+  position: after
+  reading: sections/section-040/module-03/course-04-summary.md
+questions:
+  - id: ats032-040-03-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Explain why a kernel patch needs a reboot."
+    source_readings:
+      - sections/section-040/module-03/course-01-patch-the-operating-system-and-container-runtime-on-nodes.md
+    prompt: "A node installs a patched kernel package. Why is the node still running the old kernel?"
+    options:
+      - id: a
+        text: "The running kernel is the one that booted, so the new one runs only after a reboot"
+        explanation: "Correct."
+      - id: b
+        text: "Kubernetes blocks kernel updates on nodes"
+        explanation: "Kubernetes does not control the host packages."
+      - id: c
+        text: "The `kubelet` restarts the kernel at midnight"
+        explanation: "The kubelet does not restart the kernel."
+    correct_option: a
+    explanation: "A kernel package changes files on disk. The new kernel starts at the next boot."
+
+  - id: ats032-040-03-q02
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Name the layers patched outside the Kubernetes upgrade."
+    source_readings:
+      - sections/section-040/module-03/course-01-patch-the-operating-system-and-container-runtime-on-nodes.md
+    prompt: "Which layers of a node does `kubeadm upgrade` NOT patch?"
+    options:
+      - id: a
+        text: "The API server and controller manager"
+        explanation: "`kubeadm upgrade` upgrades these."
+      - id: b
+        text: "The operating system packages, the kernel and the container runtime"
+        explanation: "Correct."
+      - id: c
+        text: "The static Pod manifests"
+        explanation: "`kubeadm upgrade` rewrites them."
+    correct_option: b
+    explanation: "These layers need the distribution tools and their own security records."
+
+  - id: ats032-040-03-q03
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Order the steps of node patching."
+    source_readings:
+      - sections/section-040/module-03/course-01-patch-the-operating-system-and-container-runtime-on-nodes.md
+    prompt: "Which order is correct for patching one node?"
+    options:
+      - id: a
+        text: "Patch, drain, reboot, uncordon"
+        explanation: "Draining must happen before the node is patched or restarted."
+      - id: b
+        text: "Reboot, drain, patch, uncordon"
+        explanation: "Rebooting first stops all Pods at once."
+      - id: c
+        text: "Cordon and drain, patch, reboot if needed, uncordon, check"
+        explanation: "Correct."
+    correct_option: c
+    explanation: "The node is emptied first so that no workload is affected by the patch or the reboot."
+
+  - id: ats032-040-03-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Find a leftover taint."
+    source_readings:
+      - sections/section-040/module-03/course-01-patch-the-operating-system-and-container-runtime-on-nodes.md
+    prompt: "After `kubectl uncordon`, a node still refuses new Pods. The description shows the taint `maintenance=patching:NoSchedule`. What is the cause and the fix?"
+    options:
+      - id: a
+        text: "Uncordon removes only its own state; remove the taint with `kubectl taint nodes <node> maintenance=patching:NoSchedule-`"
+        explanation: "Correct."
+      - id: b
+        text: "The node needs a reboot; run `kubectl drain` again"
+        explanation: "A drain would not remove a taint."
+      - id: c
+        text: "The taint expires after one hour"
+        explanation: "Taints stay until someone removes them."
+    correct_option: a
+    explanation: "A custom taint is separate from the unschedulable flag, and uncordon does not change it."
+
+  - id: ats032-040-03-q05
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Choose the endpoints that prove the API server."
+    source_readings:
+      - sections/section-040/module-03/course-02-verify-the-cluster-after-an-upgrade.md
+    prompt: "Which pair of endpoints shows whether the API server process is alive and whether it can serve requests?"
+    options:
+      - id: a
+        text: "`/livez` and `/readyz`"
+        explanation: "Correct."
+      - id: b
+        text: "`/version` and `/metrics`"
+        explanation: "They show the version and metrics, not health checks."
+      - id: c
+        text: "`/api` and `/apis`"
+        explanation: "They list the API groups."
+    correct_option: a
+    explanation: "`/livez` reports liveness and `/readyz` reports readiness; `verbose` lists each check."
+
+  - id: ats032-040-03-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Read a Pending Pod after a window."
+    source_readings:
+      - sections/section-040/module-03/course-02-verify-the-cluster-after-an-upgrade.md
+    prompt: "After a window one replica is Pending. The Deployment forbids two replicas on one node and one worker is cordoned. What does deleting the Pending Pod do?"
+    options:
+      - id: a
+        text: "It schedules the Pod on the cordoned worker"
+        explanation: "A cordoned node accepts no new Pods."
+      - id: b
+        text: "It removes the cause"
+        explanation: "The cause is on the node, not in the Pod."
+      - id: c
+        text: "The controller creates a new Pod that stays Pending for the same reason"
+        explanation: "Correct."
+    correct_option: c
+    explanation: "Repair the node by uncordoning it and removing any taint."
+
+  - id: ats032-040-03-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Read a disruption budget after a window."
+    source_readings:
+      - sections/section-040/module-03/course-02-verify-the-cluster-after-an-upgrade.md
+    prompt: "A budget protects a Deployment of two replicas and `ALLOWED DISRUPTIONS` is 0. What is the effect?"
+    options:
+      - id: a
+        text: "No effect until a node is drained, when the drain waits"
+        explanation: "Correct."
+      - id: b
+        text: "The Deployment scales up by itself"
+        explanation: "Budgets do not scale a Deployment."
+      - id: c
+        text: "The Pods are deleted"
+        explanation: "Budgets only limit voluntary evictions."
+    correct_option: a
+    explanation: "The next drain waits until its timeout because no eviction is allowed."
+
+  - id: ats032-040-03-q08
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Use the deprecated API metric."
+    source_readings:
+      - sections/section-040/module-03/course-02-verify-the-cluster-after-an-upgrade.md
+    prompt: "Which API server metric lists requests to deprecated APIs and the release that removes them?"
+    options:
+      - id: a
+        text: "`apiserver_requested_deprecated_apis`"
+        explanation: "Correct."
+      - id: b
+        text: "`kubelet_running_pods`"
+        explanation: "It counts Pods on a kubelet."
+      - id: c
+        text: "`etcd_db_total_size_in_bytes`"
+        explanation: "It reports the etcd database size."
+    correct_option: a
+    explanation: "The labels include the group, version, resource and `removed_release`."
+
+  - id: ats032-040-03-q09
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Choose between fixing forward and restoring."
+    source_readings:
+      - sections/section-040/module-03/course-03-rollback-limits-and-restore-drills.md
+    prompt: "After an upgrade the control plane is healthy, and one application fails. What is the best response?"
+    options:
+      - id: a
+        text: "Downgrade the API server to the previous minor version"
+        explanation: "Kubernetes does not support a downgrade."
+      - id: b
+        text: "Restore etcd from the pre-upgrade snapshot"
+        explanation: "A restore removes every change made since the snapshot."
+      - id: c
+        text: "Fix forward on the new version"
+        explanation: "Correct."
+    correct_option: c
+    explanation: "Restore is for a damaged control plane or damaged data."
+
+  - id: ats032-040-03-q10
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Plan a trustworthy snapshot routine."
+    source_readings:
+      - sections/section-040/module-03/course-03-rollback-limits-and-restore-drills.md
+    prompt: "Which practice makes an etcd snapshot trustworthy for a restore?"
+    options:
+      - id: a
+        text: "Take one snapshot a year and keep it on the control-plane disk"
+        explanation: "It is old and lost with the disk."
+      - id: b
+        text: "Take snapshots on a schedule, verify them, copy them off the host and run restore drills on a spare host"
+        explanation: "Correct."
+      - id: c
+        text: "Never check the file because `etcdctl` always writes a valid one"
+        explanation: "A zero-size or incomplete file is possible."
+    correct_option: b
+    explanation: "A snapshot must be recent, verified, protected and proven by a drill."

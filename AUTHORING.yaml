@@ -1,5 +1,7 @@
+---
 version: 1
-approval: Maintainer requested CKA and CKS playgrounds and graded labs on 2026-10-13, superseding the earlier reading-only scope.
+approval: Maintainer requested CKA and CKS playgrounds and graded labs on 2026-10-13,
+  superseding the earlier reading-only scope.
 course:
   id: ATS032
   certification:
@@ -10,7 +12,8 @@ course:
     weight: 15
     competencies:
     - Use Role Based Access Controls to minimize exposure
-    - Exercise caution in using service accounts e.g. disable defaults, minimize permissions on newly created ones
+    - Exercise caution in using service accounts e.g. disable defaults, minimize permissions
+      on newly created ones
     - Restrict access to Kubernetes API
     - Upgrade Kubernetes to avoid vulnerabilities
 defaults:
@@ -25,16 +28,19 @@ sections:
 - id: section-010
   title: Use Role Based Access Controls to minimize exposure
   curriculum_item: Use Role Based Access Controls to minimize exposure
-  capstone: false
+  capstone: true
   section_quiz: false
   modules:
   - id: module-01
     title: Minimize Exposure With Role Based Access Control
     objectives:
-    - Build a Role and a RoleBinding and prove its verb, resource and namespace limits with kubectl auth can-i.
-    - Explain how the binding type decides the reach of a ClusterRole and which built-in ClusterRoles exist.
+    - Build a Role and a RoleBinding and prove its verb, resource and namespace limits
+      with kubectl auth can-i.
+    - Explain how the binding type decides the reach of a ClusterRole and which built-in
+      ClusterRoles exist.
     - Explain the escalation check and the verbs escalate, bind and impersonate.
-    - Find the bindings that keep an action alive and list the effective access of an identity.
+    - Find the bindings that keep an action alive and list the effective access of
+      an identity.
     outline:
     - Roles, Bindings And Scope
     - ClusterRoles, Reuse And Escalation Prevention
@@ -52,22 +58,90 @@ sections:
     - id: lab-01
       path: sections/section-010/module-01/labs/lab-01
       after_reading: sections/section-010/module-01/course-01-roles-bindings-and-scope.md
-      objective: Grant a ServiceAccount only Pod read access in the required namespace and verify denied operations.
+      objective: Grant a ServiceAccount only Pod read access in the required namespace
+        and verify denied operations.
       status: draft
       runtime_verification: pending
     quiz: sections/section-010/module-01/quiz.yaml
+  - id: module-02
+    title: Audit And Narrow Effective Access
+    objectives:
+    - Test an identity for a verb, resource, resource name, subresource, URL, group
+      and namespace with kubectl auth can-i.
+    - List every binding that reaches an identity, including through its groups, and
+      read the rules behind each match.
+    - Replace a broad grant with a narrow Role and RoleBinding in the order add, test,
+      remove, test.
+    - Explain why resourceNames cannot limit a create request.
+    outline:
+    - Ask The Authorizer Precisely
+    - Find Every Grant That Reaches An Identity
+    - Rewrite A Broad Grant As Least Privilege
+    playground: true
+    module_lab: true
+    sources:
+    - reading: sections/section-010/module-02/course-01-ask-the-authorizer-precisely.md
+      adapted_from: 
+    - reading: sections/section-010/module-02/course-02-find-every-grant-for-an-identity.md
+      adapted_from: 
+    - reading: sections/section-010/module-02/course-03-rewrite-a-broad-grant-as-least-privilege.md
+      adapted_from: 
+    labs:
+    - id: lab-01
+      path: sections/section-010/module-02/labs/lab-01
+      after_reading: sections/section-010/module-02/course-03-rewrite-a-broad-grant-as-least-privilege.md
+      objective: Replace a cluster-wide ClusterRoleBinding with a namespaced Role
+        and RoleBinding and verify allowed and denied actions.
+      status: draft
+      runtime_verification: pending
+    quiz: sections/section-010/module-02/quiz.yaml
+  - id: module-03
+    title: Subjects, Built-In Roles And Wildcards
+    objectives:
+    - Write bindings with User, Group and ServiceAccount subjects and explain where
+      the names come from.
+    - Name the default ClusterRoles and bindings and explain how aggregated ClusterRoles
+      collect rules from labelled roles.
+    - Find wildcards in Roles and replace them with explicit lists.
+    - Prove the result with allowed and denied tests as a member of a group.
+    outline:
+    - Users, Groups And ServiceAccounts As Subjects
+    - Built-In And Aggregated ClusterRoles
+    - Remove Wildcards And Narrow Rules
+    playground: true
+    module_lab: true
+    sources:
+    - reading: sections/section-010/module-03/course-01-users-groups-and-serviceaccounts-as-subjects.md
+      adapted_from: 
+    - reading: sections/section-010/module-03/course-02-built-in-and-aggregated-clusterroles.md
+      adapted_from: 
+    - reading: sections/section-010/module-03/course-03-remove-wildcards-and-narrow-rules.md
+      adapted_from: 
+    labs:
+    - id: lab-01
+      path: sections/section-010/module-03/labs/lab-01
+      after_reading: sections/section-010/module-03/course-03-remove-wildcards-and-narrow-rules.md
+      objective: Replace a wildcard rule in a group Role with explicit resources and
+        verbs and verify allowed and denied actions.
+      status: draft
+      runtime_verification: pending
+    quiz: sections/section-010/module-03/quiz.yaml
 - id: section-020
-  title: Exercise caution in using service accounts e.g. disable defaults, minimize permissions on newly created ones
-  curriculum_item: Exercise caution in using service accounts e.g. disable defaults, minimize permissions on newly created ones
-  capstone: false
+  title: Exercise caution in using service accounts e.g. disable defaults, minimize
+    permissions on newly created ones
+  curriculum_item: Exercise caution in using service accounts e.g. disable defaults,
+    minimize permissions on newly created ones
+  capstone: true
   section_quiz: false
   modules:
   - id: module-01
     title: Restrict ServiceAccount Credentials
     objectives:
     - Explain how a pod gets its ServiceAccount and what the kubelet mounts.
-    - Disable token mounting in a ServiceAccount and in a pod and state which setting wins.
-    - Request a short-lived token and set an audience and a lifetime on a projected token.
+    - Disable token mounting in a ServiceAccount and in a pod and state which setting
+      wins.
+    - Request a short-lived token and set an audience and a lifetime on a projected
+      token.
     - Identify and audit long-lived ServiceAccount token Secrets.
     outline:
     - ServiceAccounts And The Default Token
@@ -90,10 +164,73 @@ sections:
       status: draft
       runtime_verification: pending
     quiz: sections/section-020/module-01/quiz.yaml
+  - id: module-02
+    title: Dedicated Least-Privilege ServiceAccounts
+    objectives:
+    - Create a ServiceAccount for one workload and assign it to a Deployment.
+    - Explain why the ServiceAccount of a pod cannot change after creation.
+    - Write a Role with a minimal rule list and bind it to one ServiceAccount.
+    - Test what a ServiceAccount may do with kubectl auth can-i and --as.
+    - Find and remove grants on the default ServiceAccount and turn off its token
+      mounting.
+    outline:
+    - One ServiceAccount For Each Workload
+    - Grant Only What The Workload Uses
+    - Clean Up The Default ServiceAccount
+    playground: true
+    module_lab: true
+    sources:
+    - reading: sections/section-020/module-02/course-01-one-serviceaccount-for-each-workload.md
+      adapted_from: 
+    - reading: sections/section-020/module-02/course-02-grant-only-what-the-workload-uses.md
+      adapted_from: 
+    - reading: sections/section-020/module-02/course-03-clean-up-the-default-serviceaccount.md
+      adapted_from: 
+    labs:
+    - id: lab-01
+      path: sections/section-020/module-02/labs/lab-01
+      after_reading: sections/section-020/module-02/course-03-clean-up-the-default-serviceaccount.md
+      objective: Move a workload to a dedicated ServiceAccount, create one narrow
+        grant and remove the grant from the default account.
+      status: draft
+      runtime_verification: pending
+    quiz: sections/section-020/module-02/quiz.yaml
+  - id: module-03
+    title: Audit ServiceAccount Use And Tokens
+    objectives:
+    - List every pod with its ServiceAccount and automount setting and tell which
+      pods hold a token.
+    - Find bindings that reach a ServiceAccount directly or through a ServiceAccount
+      group.
+    - Check effective permissions of a ServiceAccount with kubectl auth can-i --list.
+    - List long-lived token Secrets and read projected token lifetimes.
+    - Test a token with another audience against the API server.
+    outline:
+    - Find Which Pods Use Which ServiceAccount
+    - Audit Grants That Reach ServiceAccounts
+    - 'Audit Tokens: Secrets, Lifetimes And Audience'
+    playground: true
+    module_lab: true
+    sources:
+    - reading: sections/section-020/module-03/course-01-find-which-pods-use-which-serviceaccount.md
+      adapted_from: 
+    - reading: sections/section-020/module-03/course-02-audit-grants-that-reach-serviceaccounts.md
+      adapted_from: 
+    - reading: sections/section-020/module-03/course-03-audit-tokens-secrets-lifetimes-and-audience.md
+      adapted_from: 
+    labs:
+    - id: lab-01
+      path: sections/section-020/module-03/labs/lab-01
+      after_reading: sections/section-020/module-03/course-03-audit-tokens-secrets-lifetimes-and-audience.md
+      objective: Remove over-broad grants, a long-lived token Secret and a long projected
+        token, and keep the one permission the workload needs.
+      status: draft
+      runtime_verification: pending
+    quiz: sections/section-020/module-03/quiz.yaml
 - id: section-030
   title: Restrict access to Kubernetes API
   curriculum_item: Restrict access to Kubernetes API
-  capstone: false
+  capstone: true
   section_quiz: false
   modules:
   - id: module-01
@@ -101,8 +238,10 @@ sections:
     objectives:
     - Name the three checks of a request and the status code of each failure.
     - Test anonymous and authenticated access from inside a pod.
-    - Give a workload a ServiceAccount with a Role for one resource and verify allowed and denied requests.
-    - Name the API server and kubelet settings for anonymous access, authorization, NodeRestriction and audit logging.
+    - Give a workload a ServiceAccount with a Role for one resource and verify allowed
+      and denied requests.
+    - Name the API server and kubelet settings for anonymous access, authorization,
+      NodeRestriction and audit logging.
     outline:
     - How An API Request Is Checked
     - A Narrow Workload Identity
@@ -120,22 +259,86 @@ sections:
     - id: lab-01
       path: sections/section-030/module-01/labs/lab-01
       after_reading: sections/section-030/module-01/course-02-a-narrow-workload-identity.md
-      objective: Run the application with a narrow identity and authenticate a real API request from its container.
+      objective: Run the application with a narrow identity and authenticate a real
+        API request from its container.
       status: draft
       runtime_verification: pending
     quiz: sections/section-030/module-01/quiz.yaml
+  - id: module-02
+    title: Authentication, Anonymous Access And Authorization Modes
+    objectives:
+    - Name the authentication methods of the API server and the identity each produces.
+    - Explain why an invalid token returns 401 and is not treated as anonymous.
+    - Find and remove a binding that gives anonymous callers access to cluster data
+      while keeping health and version access.
+    - Name the authorization modes, explain how they combine and say why AlwaysAllow
+      must never be used.
+    - Test an identity with --as and explain why the impersonate verb is high risk.
+    outline:
+    - Authentication Methods And Identities
+    - Anonymous Access In Practice
+    - Authorization Modes And Impersonation
+    playground: true
+    module_lab: true
+    sources:
+    - reading: sections/section-030/module-02/course-01-authentication-methods-and-identities.md
+      adapted_from: 
+    - reading: sections/section-030/module-02/course-02-anonymous-access-in-practice.md
+      adapted_from: 
+    - reading: sections/section-030/module-02/course-03-authorization-modes-and-impersonation.md
+      adapted_from: 
+    labs:
+    - id: lab-01
+      path: sections/section-030/module-02/labs/lab-01
+      after_reading: sections/section-030/module-02/course-02-anonymous-access-in-practice.md
+      objective: Remove the binding that gives anonymous callers access to cluster
+        data without breaking health access or a named team binding.
+      status: draft
+      runtime_verification: pending
+    quiz: sections/section-030/module-02/quiz.yaml
+  - id: module-03
+    title: Admission Control For API Writes
+    objectives:
+    - Say where admission sits in the request path and why cluster-admin is not exempt.
+    - Set the Pod Security Standards and modes with namespace labels.
+    - Write a ValidatingAdmissionPolicy and a binding that limit a rule to one namespace.
+    - Explain failurePolicy and the risk of a webhook that fails open.
+    outline:
+    - Pod Security Admission
+    - ValidatingAdmissionPolicy With CEL
+    - Admission Webhooks And Failure Policy
+    playground: true
+    module_lab: true
+    sources:
+    - reading: sections/section-030/module-03/course-01-pod-security-admission.md
+      adapted_from: 
+    - reading: sections/section-030/module-03/course-02-validatingadmissionpolicy-with-cel.md
+      adapted_from: 
+    - reading: sections/section-030/module-03/course-03-admission-webhooks-and-failure-policy.md
+      adapted_from: 
+    labs:
+    - id: lab-01
+      path: sections/section-030/module-03/labs/lab-01
+      after_reading: sections/section-030/module-03/course-02-validatingadmissionpolicy-with-cel.md
+      objective: Reject privileged Pods and NodePort Services in one namespace with
+        Pod Security labels and a ValidatingAdmissionPolicy.
+      status: draft
+      runtime_verification: pending
+    quiz: sections/section-030/module-03/quiz.yaml
 - id: section-040
   title: Upgrade Kubernetes to avoid vulnerabilities
   curriculum_item: Upgrade Kubernetes to avoid vulnerabilities
-  capstone: false
+  capstone: true
   section_quiz: false
   modules:
   - id: module-01
     title: Upgrade Kubernetes To Avoid Vulnerabilities
     objectives:
     - State the version skew rules and the supported upgrade order.
-    - Cordon, drain and uncordon a node and explain how a PodDisruptionBudget limits a drain.
-    - Write the kubeadm upgrade commands for the first control-plane node, other control-plane nodes and workers.
+    - Cordon, drain and uncordon a node and explain how a PodDisruptionBudget limits
+      a drain.
+    - Write the kubeadm upgrade commands for the first control-plane node, other control-plane
+      nodes and workers.
     - Take and check an etcd snapshot and verify the cluster after an upgrade.
     outline:
     - Versions, Skew And Support
@@ -157,7 +360,69 @@ sections:
     - id: lab-01
       path: sections/section-040/module-01/labs/lab-01
       after_reading: sections/section-040/module-01/course-02-cordon-drain-and-disruption-budgets.md
-      objective: Respect disruption limits while draining and returning an isolated worker to service.
+      objective: Respect disruption limits while draining and returning an isolated
+        worker to service.
       status: draft
       runtime_verification: pending
     quiz: sections/section-040/module-01/quiz.yaml
+  - id: module-02
+    title: Track Vulnerabilities And Inventory Versions
+    objectives:
+    - Name the sources that publish Kubernetes vulnerabilities and read a CVSS score
+      and a patch release.
+    - Read the versions of nodes, the API server, the container runtime and the images
+      that a cluster runs.
+    - Triage a vulnerability against the inventory and group nodes into patch waves.
+    outline:
+    - Where Vulnerabilities Are Published
+    - Inventory What The Cluster Runs
+    - Triage A Vulnerability And Plan Patch Waves
+    playground: true
+    module_lab: true
+    sources:
+    - reading: sections/section-040/module-02/course-01-where-vulnerabilities-are-published.md
+      adapted_from: 
+    - reading: sections/section-040/module-02/course-02-inventory-what-the-cluster-runs.md
+      adapted_from: 
+    - reading: sections/section-040/module-02/course-03-triage-a-vulnerability-and-plan-patch-waves.md
+      adapted_from: 
+    labs:
+    - id: lab-01
+      path: sections/section-040/module-02/labs/lab-01
+      after_reading: sections/section-040/module-02/course-03-triage-a-vulnerability-and-plan-patch-waves.md
+      objective: Record the real versions of a cluster in one ConfigMap and label
+        each node with its patch wave.
+      status: draft
+      runtime_verification: pending
+    quiz: sections/section-040/module-02/quiz.yaml
+  - id: module-03
+    title: Patch Nodes And Verify The Upgraded Cluster
+    objectives:
+    - Patch the operating system, kernel and container runtime of a node one node
+      at a time.
+    - Verify a cluster in layers after maintenance and repair a node left cordoned
+      or tainted.
+    - Decide between fixing forward and restoring etcd, and prove a restore with a
+      drill.
+    outline:
+    - Patch The Operating System And Container Runtime On Nodes
+    - Verify The Cluster After An Upgrade
+    - Rollback Limits And Restore Drills
+    playground: true
+    module_lab: true
+    sources:
+    - reading: sections/section-040/module-03/course-01-patch-the-operating-system-and-container-runtime-on-nodes.md
+      adapted_from: 
+    - reading: sections/section-040/module-03/course-02-verify-the-cluster-after-an-upgrade.md
+      adapted_from: 
+    - reading: sections/section-040/module-03/course-03-rollback-limits-and-restore-drills.md
+      adapted_from: 
+    labs:
+    - id: lab-01
+      path: sections/section-040/module-03/labs/lab-01
+      after_reading: sections/section-040/module-03/course-02-verify-the-cluster-after-an-upgrade.md
+      objective: Find and repair a cordoned node, a leftover taint, a Pending Pod
+        and a blocking disruption budget.
+      status: draft
+      runtime_verification: pending
+    quiz: sections/section-040/module-03/quiz.yaml

@@ -1,0 +1,216 @@
+# Knowledge check for section 010, module 03. Contract:
+# schemas/question-bank.schema.json. Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats032-010-03
+course_id: ATS032
+exam_code: CKS
+status: draft
+provenance: "Original practice material written for this course; not official exam questions."
+scope:
+  type: section
+  id: section-010
+  title: "Subjects, Built-In Roles And Wildcards"
+placement:
+  position: after
+  reading: sections/section-010/module-03/course-04-summary.md
+questions:
+  - id: ats032-010-03-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Explain where user names and groups come from."
+    source_readings:
+      - sections/section-010/module-03/course-01-users-groups-and-serviceaccounts-as-subjects.md
+    prompt: "A client certificate has the subject `/CN=jane/O=outpost-observers`. Which identity does the API server see?"
+    options:
+      - id: a
+        text: "The user `jane` in the group `outpost-observers`"
+        explanation: "Correct. The CN is the user name and each O field is a group."
+      - id: b
+        text: "The user `outpost-observers` in the group `jane`"
+        explanation: "The fields are the other way round."
+      - id: c
+        text: "No identity, because RBAC has no User objects"
+        explanation: "Authentication produces the names. RBAC needs no object for them."
+    correct_option: a
+    explanation: "The Common Name becomes the user name and each Organization field becomes a group."
+
+  - id: ats032-010-03-q02
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Know what RBAC checks in a subject."
+    source_readings:
+      - sections/section-010/module-03/course-01-users-groups-and-serviceaccounts-as-subjects.md
+    prompt: "A RoleBinding names the user `ghost`, and no such user exists. What happens when the binding is applied?"
+    options:
+      - id: a
+        text: "The API server rejects the binding"
+        explanation: "RBAC does not look up users."
+      - id: b
+        text: "The API server accepts it and the grant reaches nobody until an identity with that name appears"
+        explanation: "Correct. Names are matched as text."
+      - id: c
+        text: "The API server creates the user"
+        explanation: "Kubernetes has no User object to create."
+    correct_option: b
+    explanation: "Subject names are compared as text with the names from authentication. They are not checked when the binding is created."
+
+  - id: ats032-010-03-q03
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Write a ServiceAccount subject correctly."
+    source_readings:
+      - sections/section-010/module-03/course-01-users-groups-and-serviceaccounts-as-subjects.md
+    prompt: "Which field must a `ServiceAccount` subject have in addition to `kind` and `name`?"
+    options:
+      - id: a
+        text: "`apiGroup: rbac.authorization.k8s.io`"
+        explanation: "That field is for User and Group subjects, and a ServiceAccount subject must not have it."
+      - id: b
+        text: "`namespace`"
+        explanation: "Correct. A ServiceAccount is a namespaced identity."
+      - id: c
+        text: "`uid`"
+        explanation: "The subject has no UID field."
+    correct_option: b
+    explanation: "A ServiceAccount subject needs the namespace of the ServiceAccount."
+
+  - id: ats032-010-03-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Test a binding to a group."
+    source_readings:
+      - sections/section-010/module-03/course-01-users-groups-and-serviceaccounts-as-subjects.md
+    prompt: "Which command tests a grant that a RoleBinding gives to the group `outpost-observers`?"
+    options:
+      - id: a
+        text: "`kubectl auth can-i list pods -n outpost --as=anyone --as-group=outpost-observers`"
+        explanation: "Correct. The group carries the access, so any user name works."
+      - id: b
+        text: "`kubectl auth can-i list pods -n outpost --as=outpost-observers`"
+        explanation: "That names a user with the same name as the group, which is not a member of the group."
+      - id: c
+        text: "`kubectl get group outpost-observers`"
+        explanation: "There is no Group object."
+    correct_option: a
+    explanation: "Impersonate any user with `--as` and add the group with `--as-group`."
+
+  - id: ats032-010-03-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Name the group of the cluster-admin binding."
+    source_readings:
+      - sections/section-010/module-03/course-02-built-in-and-aggregated-clusterroles.md
+    prompt: "Which group is bound to `cluster-admin` by default?"
+    options:
+      - id: a
+        text: "`system:authenticated`"
+        explanation: "That group receives only basic discovery and self-check roles."
+      - id: b
+        text: "`system:masters`"
+        explanation: "Correct. Identities in this group have full control."
+      - id: c
+        text: "`system:serviceaccounts`"
+        explanation: "That group has no default `cluster-admin` binding."
+    correct_option: b
+    explanation: "The default binding gives `cluster-admin` to `system:masters`, and the API server re-creates it at startup."
+
+  - id: ats032-010-03-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain how an aggregated ClusterRole gets its rules."
+    source_readings:
+      - sections/section-010/module-03/course-02-built-in-and-aggregated-clusterroles.md
+    prompt: "An aggregated ClusterRole has an `aggregationRule` with a label selector. Where do its rules come from?"
+    options:
+      - id: a
+        text: "From the `rules` field that the author writes in it"
+        explanation: "The controller overwrites any rules written by hand."
+      - id: b
+        text: "From the rules of every ClusterRole that carries the matching label, copied by a controller"
+        explanation: "Correct. The aggregated role holds a copy of those rules."
+      - id: c
+        text: "From the RoleBindings that name it"
+        explanation: "Bindings do not carry rules."
+    correct_option: b
+    explanation: "A controller copies the rules of every ClusterRole with a matching label into the aggregated role."
+
+  - id: ats032-010-03-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Reason about label mistakes in aggregation."
+    source_readings:
+      - sections/section-010/module-03/course-02-built-in-and-aggregated-clusterroles.md
+    prompt: "A new ClusterRole should extend an aggregated role, but the aggregated role does not show its rules after a minute. What is the most likely cause?"
+    options:
+      - id: a
+        text: "The label of the new role differs from the selector in the aggregated role"
+        explanation: "Correct. Selectors match labels exactly."
+      - id: b
+        text: "Aggregated roles update only when the cluster restarts"
+        explanation: "The controller updates them within moments."
+      - id: c
+        text: "A RoleBinding must be re-created first"
+        explanation: "The binding is not part of the aggregation."
+    correct_option: a
+    explanation: "The selector matches labels exactly. A mismatched role is left out without an error."
+
+  - id: ats032-010-03-q08
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Explain what a wildcard in verbs matches."
+    source_readings:
+      - sections/section-010/module-03/course-03-remove-wildcards-and-narrow-rules.md
+    prompt: "A Role has `verbs: [\"*\"]` for `resources: [\"pods\"]`. Which action does it allow?"
+    options:
+      - id: a
+        text: "Only the verbs `get`, `list` and `watch`"
+        explanation: "The wildcard matches every verb."
+      - id: b
+        text: "Every verb on Pods, including `delete` and `deletecollection`"
+        explanation: "Correct. The wildcard matches every verb, including the ones that are added later."
+      - id: c
+        text: "Every verb on every resource of the namespace"
+        explanation: "The resource list still limits the rule to Pods."
+    correct_option: b
+    explanation: "A wildcard in `verbs` matches every verb on the listed resources."
+
+  - id: ats032-010-03-q09
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Find the correct apiGroups value for a Deployment rule."
+    source_readings:
+      - sections/section-010/module-03/course-03-remove-wildcards-and-narrow-rules.md
+    prompt: "A rewritten rule must allow `get` on Deployments, but a test as the crew still fails. The rule has `apiGroups: [\"\"]` and `resources: [\"deployments\"]`. What is wrong?"
+    options:
+      - id: a
+        text: "Deployments are in the `apps` group, not the core group"
+        explanation: "Correct. The empty string is only the core group."
+      - id: b
+        text: "`deployments` must be written in capitals"
+        explanation: "Resource names are lower case."
+      - id: c
+        text: "A rule cannot name Deployments"
+        explanation: "A rule can name any resource type."
+    correct_option: a
+    explanation: "Use `apiGroups: [\"apps\"]` for Deployments."
+
+  - id: ats032-010-03-q10
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Choose the safe way to replace a role rule."
+    source_readings:
+      - sections/section-010/module-03/course-03-remove-wildcards-and-narrow-rules.md
+    prompt: "A wildcard Role is bound to a group. How do you replace the wildcard without breaking the binding?"
+    options:
+      - id: a
+        text: "Delete the Role, then create a new Role with another name"
+        explanation: "The binding then points at a Role that does not exist."
+      - id: b
+        text: "Apply the new rules to the Role with the same name and namespace"
+        explanation: "Correct. The binding keeps its target."
+      - id: c
+        text: "Delete the binding, because the Role updates itself"
+        explanation: "A Role never updates itself."
+    correct_option: b
+    explanation: "Apply the explicit rules to the existing Role in place, then test allowed and denied actions."
