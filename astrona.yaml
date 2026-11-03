@@ -75,6 +75,7 @@ modules:
     title: 'Knowledge Check: Minimize Exposure With Role Based Access Control'
     path: sections/section-010/module-01/quiz.yaml
     question_count: 10
+    pass_score: 70
 - id: module-020
   title: Restrict ServiceAccount Credentials
   description: Control how ServiceAccount credentials reach pods, turn off unneeded tokens, and use short-lived bound tokens.
@@ -120,6 +121,7 @@ modules:
     title: 'Knowledge Check: Restrict ServiceAccount Credentials'
     path: sections/section-020/module-01/quiz.yaml
     question_count: 10
+    pass_score: 70
 - id: module-030
   title: Restrict Access To The Kubernetes API
   description: Follow a request through authentication, authorization and admission, and harden the API server and kubelet.
@@ -165,6 +167,7 @@ modules:
     title: 'Knowledge Check: Restrict Access To The Kubernetes API'
     path: sections/section-030/module-01/quiz.yaml
     question_count: 10
+    pass_score: 70
 - id: module-040
   title: Upgrade Kubernetes To Avoid Vulnerabilities
   description: Plan a supported upgrade, drain nodes safely, run the kubeadm sequence and protect the cluster with an etcd snapshot.
@@ -213,3 +216,8 @@ modules:
     title: 'Knowledge Check: Upgrade Kubernetes To Avoid Vulnerabilities'
     path: sections/section-040/module-01/quiz.yaml
     question_count: 10
+    pass_score: 70
+  - type: quiz
+    title: Final Domain Quiz
+    path: sections/final-domain-quiz.yaml
+    pass_score: 70

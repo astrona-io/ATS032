@@ -1,0 +1,469 @@
+# Final domain knowledge check across all sections.
+schema_version: 1
+kind: question_bank
+id: ats032-final
+course_id: ATS032
+exam_code: CKS
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: domain
+  id: final
+  title: Final Domain Quiz
+questions:
+- id: ats032-final-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Name the RBAC object that limits a grant to one namespace.
+  source_readings:
+  - sections/section-010/module-01/course-01-roles-bindings-and-scope.md
+  prompt: Which RBAC object lists rules that apply only inside its own namespace?
+  options:
+  - id: a
+    text: "`ClusterRole`"
+    explanation: A ClusterRole is not tied to a namespace. Its reach depends on the binding.
+  - id: b
+    text: "`ClusterRoleBinding`"
+    explanation: A ClusterRoleBinding gives a ClusterRole in every namespace.
+  - id: c
+    text: "`Role`"
+    explanation: Correct. A Role lists rules for one namespace.
+  correct_option: c
+  explanation: A Role is namespaced and holds rules for its own namespace. A ClusterRole is a cluster-wide definition.
+- id: ats032-final-q02
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Write the core API group correctly in an RBAC rule.
+  source_readings:
+  - sections/section-010/module-01/course-01-roles-bindings-and-scope.md
+  prompt: A rule must cover Pods, which are in the core API group. What goes in `apiGroups`?
+  options:
+  - id: a
+    text: '`["core"]`'
+    explanation: There is no API group named core. The rule would match nothing.
+  - id: b
+    text: '`[""]`'
+    explanation: Correct. The core group is the empty string.
+  - id: c
+    text: '`["v1"]`'
+    explanation: "`v1` is a version, not an API group."
+  correct_option: b
+  explanation: The core API group, which holds Pods, Services, ConfigMaps and Secrets, is written as the empty string.
+- id: ats032-final-q03
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Test the permissions of a ServiceAccount with kubectl auth can-i.
+  source_readings:
+  - sections/section-010/module-01/course-01-roles-bindings-and-scope.md
+  prompt: A cluster administrator runs `kubectl auth can-i list secrets -n outpost` to test the ServiceAccount `shuttle` in `starfleet`. The answer is `yes`, but the ServiceAccount has no grants. What is wrong?
+  options:
+  - id: a
+    text: The command has no `--as=system:serviceaccount:starfleet:shuttle`, so it tested the administrator
+    explanation: Correct. Without `--as`, the answer is for the caller, who is cluster-admin.
+  - id: b
+    text: RBAC allows every action until a deny rule is added
+    explanation: RBAC denies by default and has no deny rule.
+  - id: c
+    text: "`can-i` only supports the verb `get`"
+    explanation: "`can-i` supports every verb."
+  correct_option: a
+  explanation: "`kubectl auth can-i` answers for the identity that runs it unless `--as` names another identity."
+- id: ats032-final-q04
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain the reach of a RoleBinding that references a ClusterRole.
+  source_readings:
+  - sections/section-010/module-01/course-02-clusterroles-reuse-and-escalation-prevention.md
+  prompt: A RoleBinding in `outpost` references the ClusterRole `view` and names the ServiceAccount `starfleet/shuttle`. Where can `shuttle` read Pods?
+  options:
+  - id: a
+    text: In every namespace
+    explanation: That needs a ClusterRoleBinding.
+  - id: b
+    text: Only in `starfleet`, the namespace of the ServiceAccount
+    explanation: The reach follows the namespace of the binding, not of the subject.
+  - id: c
+    text: Only in `outpost`, the namespace of the RoleBinding
+    explanation: Correct. A RoleBinding limits a ClusterRole to its own namespace.
+  correct_option: c
+  explanation: The binding decides the reach. A RoleBinding gives the ClusterRole rules only in the namespace where the binding exists.
+- id: ats032-final-q05
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Know which built-in ClusterRole omits Secrets.
+  source_readings:
+  - sections/section-010/module-01/course-02-clusterroles-reuse-and-escalation-prevention.md
+  prompt: A team needs read-only access to most objects in a namespace, and must not read Secrets. Which built-in ClusterRole fits, bound with a RoleBinding?
+  options:
+  - id: a
+    text: "`edit`"
+    explanation: "`edit` includes read and write access to Secrets."
+  - id: b
+    text: "`admin`"
+    explanation: "`admin` includes Secrets and also manages Roles and RoleBindings."
+  - id: c
+    text: "`view`"
+    explanation: Correct. `view` is read-only and leaves out Secrets.
+  correct_option: c
+  explanation: "`view` allows read-only access to most namespaced objects and does not include Secrets."
+- id: ats032-final-q06
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain the escalation check on Role creation.
+  source_readings:
+  - sections/section-010/module-01/course-02-clusterroles-reuse-and-escalation-prevention.md
+  prompt: A ServiceAccount may create Roles in `outpost` but has no permission on Secrets. It tries to create a Role that allows `get` on Secrets. What happens?
+  options:
+  - id: a
+    text: The Role is created and is inactive until an administrator approves it
+    explanation: RBAC has no approval state for Roles.
+  - id: b
+    text: The API server rejects the request because the ServiceAccount would grant permissions it does not hold
+    explanation: Correct. This is the escalation prevention check.
+  - id: c
+    text: The Role is created, but it grants nothing to its creator
+    explanation: The request is rejected at creation; the Role does not exist.
+  correct_option: b
+  explanation: A caller can create a Role only if it already holds every permission in it, or holds the `escalate` verb.
+- id: ats032-final-q07
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain which ServiceAccount a pod uses when none is named.
+  source_readings:
+  - sections/section-020/module-01/course-01-serviceaccounts-and-the-default-token.md
+  prompt: A pod manifest has no `serviceAccountName`. Which ServiceAccount does the pod use?
+  options:
+  - id: a
+    text: No ServiceAccount, so the pod cannot call the API
+    explanation: Admission always sets an account on the pod.
+  - id: b
+    text: The ServiceAccount named `default` in the pod's namespace
+    explanation: Correct. The ServiceAccount admission controller sets it.
+  - id: c
+    text: The ServiceAccount of the node that runs the pod
+    explanation: Nodes are not ServiceAccounts.
+  correct_option: b
+  explanation: Every namespace has a `default` ServiceAccount, and pods without a named account use it.
+- id: ats032-final-q08
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Name the mount path of the ServiceAccount credentials.
+  source_readings:
+  - sections/section-020/module-01/course-01-serviceaccounts-and-the-default-token.md
+  prompt: Where does the kubelet mount the ServiceAccount token, the CA bundle and the namespace file in a container?
+  options:
+  - id: a
+    text: "`/etc/kubernetes/pki`"
+    explanation: That is the certificate directory on control-plane nodes.
+  - id: b
+    text: "`/var/lib/kubelet/serviceaccount`"
+    explanation: That path is on the node, not in the container.
+  - id: c
+    text: "`/var/run/secrets/kubernetes.io/serviceaccount`"
+    explanation: Correct. It holds `token`, `ca.crt` and `namespace`.
+  correct_option: c
+  explanation: The projected volume is mounted at `/var/run/secrets/kubernetes.io/serviceaccount` in every container.
+- id: ats032-final-q09
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Check whether a pod has a token without exposing it.
+  source_readings:
+  - sections/section-020/module-01/course-01-serviceaccounts-and-the-default-token.md
+  prompt: What is the safe way to check that a pod has a ServiceAccount token mounted?
+  options:
+  - id: a
+    text: List the files in `/var/run/secrets/kubernetes.io/serviceaccount` with `kubectl exec`
+    explanation: Correct. It proves the mount without printing the token.
+  - id: b
+    text: Print the file `token` and read the JWT
+    explanation: Printing the token exposes a valid credential.
+  - id: c
+    text: Run `kubectl get secrets` and look for a token Secret
+    explanation: Projected tokens are not stored in Secrets.
+  correct_option: a
+  explanation: Check that the directory and the file exist. Never print the token.
+- id: ats032-final-q10
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Apply the precedence between pod and ServiceAccount automount settings.
+  source_readings:
+  - sections/section-020/module-01/course-02-disable-automounting-and-minimize-permissions.md
+  prompt: 'A ServiceAccount sets `automountServiceAccountToken: false`. A pod that uses it sets `automountServiceAccountToken: true` in its `spec`. Is the token mounted?'
+  options:
+  - id: a
+    text: No, the ServiceAccount value always wins
+    explanation: The pod value takes precedence.
+  - id: b
+    text: Yes, the pod value takes precedence over the ServiceAccount
+    explanation: Correct.
+  - id: c
+    text: The pod is rejected because the two values conflict
+    explanation: There is no conflict check. The pod is accepted.
+  correct_option: b
+  explanation: The pod-level field overrides the ServiceAccount field. Use an admission policy to enforce a rule for all pods.
+- id: ats032-final-q11
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Know when an automount change takes effect.
+  source_readings:
+  - sections/section-020/module-01/course-02-disable-automounting-and-minimize-permissions.md
+  prompt: 'An administrator patches the `default` ServiceAccount of a namespace with `automountServiceAccountToken: false`. What happens to pods that already run?'
+  options:
+  - id: a
+    text: They keep their token until they are recreated
+    explanation: Correct. The field is read when a pod is created.
+  - id: b
+    text: The kubelet removes the token from them within a minute
+    explanation: The kubelet does not remove volumes from running pods.
+  - id: c
+    text: They are restarted automatically
+    explanation: No controller restarts pods after a ServiceAccount change.
+  correct_option: a
+  explanation: The setting is read at pod creation. Delete and recreate the pods, or roll out the Deployment.
+- id: ats032-final-q12
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Identify the risky binding for new ServiceAccounts.
+  source_readings:
+  - sections/section-020/module-01/course-02-disable-automounting-and-minimize-permissions.md
+  prompt: An application in namespace `starfleet` fails with `Forbidden`. Which fix keeps the namespace least privileged?
+  options:
+  - id: a
+    text: Bind a Role with the missing verb to the `default` ServiceAccount
+    explanation: Every pod that uses `default` would receive the grant.
+  - id: b
+    text: Bind `cluster-admin` to the group `system:serviceaccounts:starfleet`
+    explanation: This gives full control to every ServiceAccount of the namespace.
+  - id: c
+    text: Create a dedicated ServiceAccount, grant it the missing verb only, and set it on the Deployment
+    explanation: Correct. Only that workload receives the grant.
+  correct_option: c
+  explanation: Use one ServiceAccount per workload that calls the API and grant only what it uses.
+- id: ats032-final-q13
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Name the order of the API server checks.
+  source_readings:
+  - sections/section-030/module-01/course-01-how-an-api-request-is-checked.md
+  prompt: In which order does the API server check a write request?
+  options:
+  - id: a
+    text: Admission, authorization, authentication
+    explanation: Admission runs last.
+  - id: b
+    text: Authentication, admission, authorization
+    explanation: Authorization comes before admission.
+  - id: c
+    text: Authentication, authorization, admission
+    explanation: Correct.
+  correct_option: c
+  explanation: The server first identifies the caller, then checks the permission, then lets admission change or reject the object.
+- id: ats032-final-q14
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Tell a 401 from a 403.
+  source_readings:
+  - sections/section-030/module-01/course-01-how-an-api-request-is-checked.md
+  prompt: A request with a valid ServiceAccount token returns `403 Forbidden`. What does it mean?
+  options:
+  - id: a
+    text: The identity is known, and no authorization rule allows the action
+    explanation: Correct.
+  - id: b
+    text: The token is expired or unknown
+    explanation: That returns 401.
+  - id: c
+    text: An admission controller rejected the object
+    explanation: Admission errors name the plugin or policy that rejected the write.
+  correct_option: a
+  explanation: A 403 is an authorization result. The caller was authenticated.
+- id: ats032-final-q15
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Name the identity of an unauthenticated request.
+  source_readings:
+  - sections/section-030/module-01/course-01-how-an-api-request-is-checked.md
+  prompt: With `--anonymous-auth=true`, which user and group does a request without credentials receive?
+  options:
+  - id: a
+    text: "`system:anonymous` in `system:unauthenticated`"
+    explanation: Correct.
+  - id: b
+    text: "`system:serviceaccount:default:default`"
+    explanation: That is a ServiceAccount identity and needs a token.
+  - id: c
+    text: "`system:masters`"
+    explanation: That group is cluster-admin and needs a certificate.
+  correct_option: a
+  explanation: The request is still authorized. Only the rules that name those subjects apply.
+- id: ats032-final-q16
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Judge the risk of a broad binding to anonymous users.
+  source_readings:
+  - sections/section-030/module-01/course-01-how-an-api-request-is-checked.md
+  prompt: A ClusterRoleBinding gives `view` to the group `system:unauthenticated`. What is the effect?
+  options:
+  - id: a
+    text: No effect, because anonymous requests never reach authorization
+    explanation: They do reach authorization.
+  - id: b
+    text: Any host that can reach the API port can read objects that `view` covers, without a credential
+    explanation: Correct.
+  - id: c
+    text: Only requests from inside the cluster can use it
+    explanation: The grant does not depend on the source.
+  correct_option: b
+  explanation: Anonymous callers are authorized like any other. A broad role bound to their group opens that access to the network.
+- id: ats032-final-q17
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain the failure policy of an admission webhook.
+  source_readings:
+  - sections/section-030/module-01/course-01-how-an-api-request-is-checked.md
+  prompt: 'A validating webhook enforces a security rule and has `failurePolicy: Ignore`. The webhook service is down. What happens to matching requests?'
+  options:
+  - id: a
+    text: They are rejected
+    explanation: That is the behavior of `Fail`.
+  - id: b
+    text: They wait until the service returns
+    explanation: The request does not wait indefinitely.
+  - id: c
+    text: They are allowed without the check
+    explanation: Correct.
+  correct_option: c
+  explanation: With `Ignore`, a failed call is skipped. Use `Fail` for a rule that must always apply.
+- id: ats032-final-q18
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Scope a Role for a workload identity.
+  source_readings:
+  - sections/section-030/module-01/course-02-a-narrow-workload-identity.md
+  prompt: A Pod must list Services in its own namespace. Which grant is the narrowest that works?
+  options:
+  - id: a
+    text: A Role with `get`, `list` on `services`, bound to a dedicated ServiceAccount in that namespace
+    explanation: Correct.
+  - id: b
+    text: The `view` ClusterRole bound with a ClusterRoleBinding
+    explanation: It grants read access to many resources in every namespace.
+  - id: c
+    text: A Role with `*` verbs on `services`, bound to `default`
+    explanation: It is broad in verbs and shared by every Pod that uses `default`.
+  correct_option: a
+  explanation: Name exact resources and verbs, keep the scope to one namespace, and use a dedicated ServiceAccount.
+- id: ats032-final-q19
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain why upgrades are a security control.
+  source_readings:
+  - sections/section-040/module-01/course-01-versions-skew-and-support.md
+  prompt: Why does a cluster on an old minor version stay exposed to known vulnerabilities?
+  options:
+  - id: a
+    text: Only the most recent minor versions receive fixes, and an older one gets none
+    explanation: Correct.
+  - id: b
+    text: Old versions block security updates for other components
+    explanation: Components are independent in this respect.
+  - id: c
+    text: Vulnerabilities only affect the newest release
+    explanation: Published flaws affect the versions that contain them.
+  correct_option: a
+  explanation: The project maintains the newest three minor versions. Upgrading is the only way to receive fixes.
+- id: ats032-final-q20
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Apply the skew rule for the kubelet.
+  source_readings:
+  - sections/section-040/module-01/course-01-versions-skew-and-support.md
+  prompt: The API server runs 1.35. Which kubelet version is supported?
+  options:
+  - id: a
+    text: '1.36'
+    explanation: A kubelet may not be newer than the API server.
+  - id: b
+    text: '1.32'
+    explanation: Correct. It is three minor versions older.
+  - id: c
+    text: '1.31'
+    explanation: It is four minor versions older, which is outside the policy.
+  correct_option: b
+  explanation: The kubelet may be the same version or up to three minor versions older than the API server.
+- id: ats032-final-q21
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Name the order of an upgrade.
+  source_readings:
+  - sections/section-040/module-01/course-01-versions-skew-and-support.md
+  prompt: Which order is correct for a minor version upgrade?
+  options:
+  - id: a
+    text: Kubelets on workers, then the control plane
+    explanation: Kubelets may not be newer than the API server.
+  - id: b
+    text: All nodes at the same moment
+    explanation: It removes capacity and gives no way to stop on a problem.
+  - id: c
+    text: Control plane first, then workers one at a time
+    explanation: Correct.
+  correct_option: c
+  explanation: The API server must not be older than the components that talk to it.
+- id: ats032-final-q22
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Distinguish the node maintenance commands.
+  source_readings:
+  - sections/section-040/module-01/course-02-cordon-drain-and-disruption-budgets.md
+  prompt: What does `kubectl cordon <node>` do?
+  options:
+  - id: a
+    text: Marks the node unschedulable and leaves running Pods in place
+    explanation: Correct.
+  - id: b
+    text: Evicts every Pod and marks the node unschedulable
+    explanation: That is `kubectl drain`.
+  - id: c
+    text: Removes the node from the cluster
+    explanation: That is `kubectl delete node`.
+  correct_option: a
+  explanation: Drain adds eviction to the cordon. Uncordon reverses it.
+- id: ats032-final-q23
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain why a drain refuses a Pod.
+  source_readings:
+  - sections/section-040/module-01/course-02-cordon-drain-and-disruption-budgets.md
+  prompt: "`kubectl drain` stops because the node runs a Pod that no controller owns. Which statement is correct?"
+  options:
+  - id: a
+    text: Add `--ignore-daemonsets` and the Pod moves
+    explanation: That flag is for DaemonSet Pods.
+  - id: b
+    text: The Pod is recreated elsewhere automatically
+    explanation: Nothing owns it, so nothing recreates it.
+  - id: c
+    text: "`--force` would delete the Pod and it would not return"
+    explanation: Correct.
+  correct_option: c
+  explanation: Move or recreate the bare Pod yourself, or accept its loss with `--force`.
+- id: ats032-final-q24
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Read a PodDisruptionBudget.
+  source_readings:
+  - sections/section-040/module-01/course-02-cordon-drain-and-disruption-budgets.md
+  prompt: 'A Deployment has two replicas and a PodDisruptionBudget with `minAvailable: 2`. What happens when you drain a node that runs one replica?'
+  options:
+  - id: a
+    text: The eviction is refused and the drain waits until its timeout
+    explanation: Correct.
+  - id: b
+    text: The replica is evicted and the budget is ignored
+    explanation: Evictions respect the budget.
+  - id: c
+    text: The budget is lowered automatically
+    explanation: Budgets are not changed by Kubernetes.
+  correct_option: a
+  explanation: No Pod may be down, so no eviction is allowed. Fix the budget or add replicas.
