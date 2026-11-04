@@ -60,7 +60,7 @@ sections:
       after_reading: sections/section-010/module-01/course-01-roles-bindings-and-scope.md
       objective: Grant a ServiceAccount only Pod read access in the required namespace
         and verify denied operations.
-      status: draft
+      status: alpha
       runtime_verification: pending
     quiz: sections/section-010/module-01/quiz.yaml
   - id: module-02
@@ -92,7 +92,7 @@ sections:
       after_reading: sections/section-010/module-02/course-03-rewrite-a-broad-grant-as-least-privilege.md
       objective: Replace a cluster-wide ClusterRoleBinding with a namespaced Role
         and RoleBinding and verify allowed and denied actions.
-      status: draft
+      status: alpha
       runtime_verification: pending
     quiz: sections/section-010/module-02/quiz.yaml
   - id: module-03
@@ -123,7 +123,7 @@ sections:
       after_reading: sections/section-010/module-03/course-03-remove-wildcards-and-narrow-rules.md
       objective: Replace a wildcard rule in a group Role with explicit resources and
         verbs and verify allowed and denied actions.
-      status: draft
+      status: alpha
       runtime_verification: pending
     quiz: sections/section-010/module-03/quiz.yaml
 - id: section-020
@@ -161,7 +161,7 @@ sections:
       path: sections/section-020/module-01/labs/lab-01
       after_reading: sections/section-020/module-01/course-02-disable-automounting-and-minimize-permissions.md
       objective: Run a workload without mounting credentials it does not need.
-      status: draft
+      status: alpha
       runtime_verification: pending
     quiz: sections/section-020/module-01/quiz.yaml
   - id: module-02
@@ -192,7 +192,7 @@ sections:
       after_reading: sections/section-020/module-02/course-03-clean-up-the-default-serviceaccount.md
       objective: Move a workload to a dedicated ServiceAccount, create one narrow
         grant and remove the grant from the default account.
-      status: draft
+      status: alpha
       runtime_verification: pending
     quiz: sections/section-020/module-02/quiz.yaml
   - id: module-03
@@ -224,7 +224,7 @@ sections:
       after_reading: sections/section-020/module-03/course-03-audit-tokens-secrets-lifetimes-and-audience.md
       objective: Remove over-broad grants, a long-lived token Secret and a long projected
         token, and keep the one permission the workload needs.
-      status: draft
+      status: alpha
       runtime_verification: pending
     quiz: sections/section-020/module-03/quiz.yaml
 - id: section-030
@@ -261,7 +261,7 @@ sections:
       after_reading: sections/section-030/module-01/course-02-a-narrow-workload-identity.md
       objective: Run the application with a narrow identity and authenticate a real
         API request from its container.
-      status: draft
+      status: alpha
       runtime_verification: pending
     quiz: sections/section-030/module-01/quiz.yaml
   - id: module-02
@@ -293,7 +293,7 @@ sections:
       after_reading: sections/section-030/module-02/course-02-anonymous-access-in-practice.md
       objective: Remove the binding that gives anonymous callers access to cluster
         data without breaking health access or a named team binding.
-      status: draft
+      status: alpha
       runtime_verification: pending
     quiz: sections/section-030/module-02/quiz.yaml
   - id: module-03
@@ -322,7 +322,7 @@ sections:
       after_reading: sections/section-030/module-03/course-02-validatingadmissionpolicy-with-cel.md
       objective: Reject privileged Pods and NodePort Services in one namespace with
         Pod Security labels and a ValidatingAdmissionPolicy.
-      status: draft
+      status: alpha
       runtime_verification: pending
     quiz: sections/section-030/module-03/quiz.yaml
 - id: section-040
@@ -362,7 +362,7 @@ sections:
       after_reading: sections/section-040/module-01/course-02-cordon-drain-and-disruption-budgets.md
       objective: Respect disruption limits while draining and returning an isolated
         worker to service.
-      status: draft
+      status: alpha
       runtime_verification: pending
     quiz: sections/section-040/module-01/quiz.yaml
   - id: module-02
@@ -392,7 +392,7 @@ sections:
       after_reading: sections/section-040/module-02/course-03-triage-a-vulnerability-and-plan-patch-waves.md
       objective: Record the real versions of a cluster in one ConfigMap and label
         each node with its patch wave.
-      status: draft
+      status: alpha
       runtime_verification: pending
     quiz: sections/section-040/module-02/quiz.yaml
   - id: module-03
@@ -423,6 +423,6 @@ sections:
       after_reading: sections/section-040/module-03/course-02-verify-the-cluster-after-an-upgrade.md
       objective: Find and repair a cordoned node, a leftover taint, a Pending Pod
         and a blocking disruption budget.
-      status: draft
+      status: alpha
       runtime_verification: pending
     quiz: sections/section-040/module-03/quiz.yaml
