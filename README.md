@@ -27,3 +27,8 @@ This course has 4 ungraded module playgrounds and 4 draft independent labs. Task
 | 020/01 | Disable Unneeded ServiceAccount Tokens |
 | 030/01 | Use A Workload Identity For An API Request |
 | 040/01 | Drain And Return A Worker To Service |
+
+## Authoring and verification
+
+See [AUTHORING.md](AUTHORING.md) for the lab lifecycle and review workflow, and
+[LAB-COVERAGE.md](LAB-COVERAGE.md) for preparation lessons and graded outcomes.
