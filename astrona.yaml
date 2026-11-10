@@ -54,6 +54,7 @@ modules:
   - type: lab
     title: Grant Namespace Pod Read Access
     path: sections/section-010/module-01/labs/lab-01
+    examScope: namespace
     difficulty: intermediate
     estimated_duration: 20m
     topic: rbac
@@ -99,6 +100,7 @@ modules:
   - type: lab
     title: Rewrite A Broad Grant As Least Privilege
     path: sections/section-010/module-02/labs/lab-01
+    examScope: cluster
     difficulty: intermediate
     estimated_duration: 25m
     topic: rbac-audit
@@ -139,6 +141,7 @@ modules:
   - type: lab
     title: Remove Wildcards From A Group Role
     path: sections/section-010/module-03/labs/lab-01
+    examScope: namespace
     difficulty: intermediate
     estimated_duration: 25m
     topic: rbac-wildcards
@@ -205,6 +208,7 @@ modules:
   - type: lab
     title: Disable Unneeded ServiceAccount Tokens
     path: sections/section-020/module-01/labs/lab-01
+    examScope: namespace
     difficulty: intermediate
     estimated_duration: 25m
     topic: token-minimization
@@ -246,6 +250,7 @@ modules:
   - type: lab
     title: Give Each Workload Its Own Least-Privilege ServiceAccount
     path: sections/section-020/module-02/labs/lab-01
+    examScope: namespace
     difficulty: intermediate
     estimated_duration: 25m
     topic: serviceaccount-least-privilege
@@ -285,6 +290,7 @@ modules:
   - type: lab
     title: Remove ServiceAccount Findings From A Namespace
     path: sections/section-020/module-03/labs/lab-01
+    examScope: cluster
     difficulty: intermediate
     estimated_duration: 25m
     topic: serviceaccount-audit
@@ -349,6 +355,7 @@ modules:
   - type: lab
     title: Use A Workload Identity For An API Request
     path: sections/section-030/module-01/labs/lab-01
+    examScope: namespace
     difficulty: intermediate
     estimated_duration: 25m
     topic: serviceaccount-api
@@ -388,6 +395,7 @@ modules:
   - type: lab
     title: Remove Anonymous Access To The API
     path: sections/section-030/module-02/labs/lab-01
+    examScope: cluster
     difficulty: intermediate
     estimated_duration: 25m
     topic: anonymous-access
@@ -427,6 +435,7 @@ modules:
   - type: lab
     title: Enforce Admission Rules In A Namespace
     path: sections/section-030/module-03/labs/lab-01
+    examScope: cluster
     difficulty: intermediate
     estimated_duration: 25m
     topic: admission-rules

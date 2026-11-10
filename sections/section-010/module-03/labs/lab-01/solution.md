@@ -16,13 +16,13 @@ Keep this connection selected for every command below.
 
 ## Diagnose The Starting State
 
-The `starfleet` and `outpost` namespaces exist. In `outpost`, the Role `crew-operator` uses the wildcard `*` for API groups, resources and verbs, and the RoleBinding `outpost-crew-operator` gives it to the group `outpost-crew`. A group is a set of users named in the identity that authentication produces. The crew only needs to read Pods, Services and ConfigMaps and to manage Deployments in `outpost`.
+The `starfleet-032-010-03-01` and `outpost-032-010-03-01` namespaces exist. In `outpost-032-010-03-01`, the Role `crew-operator` uses the wildcard `*` for API groups, resources and verbs, and the RoleBinding `outpost-crew-operator` gives it to the group `outpost-crew`. A group is a set of users named in the identity that authentication produces. The crew only needs to read Pods, Services and ConfigMaps and to manage Deployments in `outpost-032-010-03-01`.
 
 Act as a member of the group and try an action that the crew does not need:
 
 ```sh
-kubectl auth can-i get secrets -n outpost --as=jane --as-group=outpost-crew
-kubectl -n outpost get role crew-operator -o yaml
+kubectl auth can-i get secrets -n outpost-032-010-03-01 --as=jane --as-group=outpost-crew
+kubectl -n outpost-032-010-03-01 get role crew-operator -o yaml
 ```
 
 The first command prints `yes`, because the wildcard matches Secrets. The second command shows the rule with `'*'` in all three lists. Role-Based Access Control (RBAC) has no deny rule, so the only way to remove the access is to replace the rule.
@@ -36,7 +36,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: crew-operator
-  namespace: outpost
+  namespace: outpost-032-010-03-01
 rules:
 - apiGroups:
   - ''
@@ -73,11 +73,11 @@ kubectl apply -f crew-operator.yaml
 Observe the actual result with these bounded checks. No example transcript is provided as evidence of a completed run.
 
 ```sh
-kubectl auth can-i list pods -n outpost --as=jane --as-group=outpost-crew
-kubectl auth can-i delete deployments.apps -n outpost --as=jane --as-group=outpost-crew
-kubectl auth can-i get secrets -n outpost --as=jane --as-group=outpost-crew
-kubectl auth can-i get pods/log -n outpost --as=jane --as-group=outpost-crew
-kubectl auth can-i list pods -n starfleet --as=jane --as-group=outpost-crew
+kubectl auth can-i list pods -n outpost-032-010-03-01 --as=jane --as-group=outpost-crew
+kubectl auth can-i delete deployments.apps -n outpost-032-010-03-01 --as=jane --as-group=outpost-crew
+kubectl auth can-i get secrets -n outpost-032-010-03-01 --as=jane --as-group=outpost-crew
+kubectl auth can-i get pods/log -n outpost-032-010-03-01 --as=jane --as-group=outpost-crew
+kubectl auth can-i list pods -n starfleet-032-010-03-01 --as=jane --as-group=outpost-crew
 ```
 
 The first two commands print `yes`. The other three print `no`. Pod logs are the subresource `pods/log`, so the rule for `pods` does not cover them. The denied answers exit with status 1, which is expected.

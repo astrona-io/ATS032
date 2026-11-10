@@ -1,38 +1,42 @@
 {
   "context": "kind-astro-ats-032-lab-020-02-01",
+  "cluster": "astro-ats-032-lab-020-02-01",
+  "namespace": "starfleet-032-020-02-01",
   "resources": [
     {
       "kind": "serviceaccount",
       "name": "probe",
-      "namespace": "starfleet",
+      "namespace": "starfleet-032-020-02-01",
       "expected": {
         "apiVersion": "v1",
         "kind": "ServiceAccount",
         "metadata": {
           "name": "probe",
-          "namespace": "starfleet"
+          "namespace": "starfleet-032-020-02-01"
         },
         "automountServiceAccountToken": false
-      }
+      },
+      "outcome": "probe-serviceaccount"
     },
     {
       "kind": "serviceaccount",
       "name": "default",
-      "namespace": "starfleet",
+      "namespace": "starfleet-032-020-02-01",
       "expected": {
         "apiVersion": "v1",
         "kind": "ServiceAccount",
         "metadata": {
           "name": "default",
-          "namespace": "starfleet"
+          "namespace": "starfleet-032-020-02-01"
         },
         "automountServiceAccountToken": false
-      }
+      },
+      "outcome": "default-account-locked"
     },
     {
       "kind": "deployment",
       "name": "probe",
-      "namespace": "starfleet",
+      "namespace": "starfleet-032-020-02-01",
       "expected": {
         "spec": {
           "replicas": 2,
@@ -43,31 +47,33 @@
           }
         }
       },
-      "state": "deployment"
+      "state": "deployment",
+      "outcome": "probe-serviceaccount"
     },
     {
       "kind": "serviceaccount",
       "name": "pod-lister",
-      "namespace": "starfleet",
+      "namespace": "starfleet-032-020-02-01",
       "expected": {
         "apiVersion": "v1",
         "kind": "ServiceAccount",
         "metadata": {
           "name": "pod-lister",
-          "namespace": "starfleet"
+          "namespace": "starfleet-032-020-02-01"
         }
-      }
+      },
+      "outcome": "pod-lister-rbac"
     },
     {
       "kind": "role",
       "name": "pod-lister",
-      "namespace": "starfleet",
+      "namespace": "starfleet-032-020-02-01",
       "expected": {
         "apiVersion": "rbac.authorization.k8s.io/v1",
         "kind": "Role",
         "metadata": {
           "name": "pod-lister",
-          "namespace": "starfleet"
+          "namespace": "starfleet-032-020-02-01"
         },
         "rules": [
           {
@@ -83,18 +89,19 @@
             ]
           }
         ]
-      }
+      },
+      "outcome": "pod-lister-rbac"
     },
     {
       "kind": "rolebinding",
       "name": "pod-lister",
-      "namespace": "starfleet",
+      "namespace": "starfleet-032-020-02-01",
       "expected": {
         "apiVersion": "rbac.authorization.k8s.io/v1",
         "kind": "RoleBinding",
         "metadata": {
           "name": "pod-lister",
-          "namespace": "starfleet"
+          "namespace": "starfleet-032-020-02-01"
         },
         "roleRef": {
           "apiGroup": "rbac.authorization.k8s.io",
@@ -105,21 +112,23 @@
           {
             "kind": "ServiceAccount",
             "name": "pod-lister",
-            "namespace": "starfleet"
+            "namespace": "starfleet-032-020-02-01"
           }
         ]
-      }
+      },
+      "outcome": "pod-lister-rbac"
     },
     {
       "kind": "pod",
       "name": "pod-lister",
-      "namespace": "starfleet",
+      "namespace": "starfleet-032-020-02-01",
       "expected": {
         "spec": {
           "serviceAccountName": "pod-lister"
         }
       },
-      "state": "pod"
+      "state": "pod",
+      "outcome": "pod-lister-pod"
     }
   ],
   "behavior": [
@@ -127,7 +136,7 @@
       "args": [
         "kubectl",
         "-n",
-        "starfleet",
+        "starfleet-032-020-02-01",
         "exec",
         "deploy/probe",
         "--",
@@ -135,7 +144,8 @@
         "-c",
         "test ! -e /var/run/secrets/kubernetes.io/serviceaccount/token && printf absent"
       ],
-      "equals": "absent"
+      "equals": "absent",
+      "outcome": "probe-serviceaccount"
     },
     {
       "args": [
@@ -145,10 +155,11 @@
         "get",
         "pods",
         "-n",
-        "starfleet",
-        "--as=system:serviceaccount:starfleet:pod-lister"
+        "starfleet-032-020-02-01",
+        "--as=system:serviceaccount:starfleet-032-020-02-01:pod-lister"
       ],
-      "equals": "yes"
+      "equals": "yes",
+      "outcome": "pod-lister-rbac"
     },
     {
       "args": [
@@ -158,14 +169,15 @@
         "delete",
         "pods",
         "-n",
-        "starfleet",
-        "--as=system:serviceaccount:starfleet:pod-lister"
+        "starfleet-032-020-02-01",
+        "--as=system:serviceaccount:starfleet-032-020-02-01:pod-lister"
       ],
       "denied": true,
       "failure_markers": [
         "no"
       ],
-      "equals": "no"
+      "equals": "no",
+      "outcome": "pod-lister-rbac"
     },
     {
       "args": [
@@ -175,14 +187,15 @@
         "get",
         "pods",
         "-n",
-        "outpost",
-        "--as=system:serviceaccount:starfleet:pod-lister"
+        "outpost-032-020-02-01",
+        "--as=system:serviceaccount:starfleet-032-020-02-01:pod-lister"
       ],
       "denied": true,
       "failure_markers": [
         "no"
       ],
-      "equals": "no"
+      "equals": "no",
+      "outcome": "pod-lister-rbac"
     },
     {
       "args": [
@@ -192,20 +205,21 @@
         "get",
         "pods",
         "-n",
-        "starfleet",
-        "--as=system:serviceaccount:starfleet:default"
+        "starfleet-032-020-02-01",
+        "--as=system:serviceaccount:starfleet-032-020-02-01:default"
       ],
       "denied": true,
       "failure_markers": [
         "no"
       ],
-      "equals": "no"
+      "equals": "no",
+      "outcome": "default-account-locked"
     },
     {
       "args": [
         "kubectl",
         "-n",
-        "starfleet",
+        "starfleet-032-020-02-01",
         "get",
         "rolebinding",
         "default-pod-access"
@@ -213,7 +227,8 @@
       "denied": true,
       "failure_markers": [
         "not found"
-      ]
+      ],
+      "outcome": "default-account-locked"
     }
   ]
 }

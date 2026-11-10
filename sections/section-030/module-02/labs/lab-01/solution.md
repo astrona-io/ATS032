@@ -20,7 +20,7 @@ Anonymous requests receive the user `system:anonymous` and the group `system:una
 
 ```sh
 kubectl get clusterrolebindings -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.roleRef.name}{"\t"}{.subjects[*].name}{"\n"}{end}'
-kubectl auth can-i list pods -n starfleet --as=system:anonymous --as-group=system:unauthenticated
+kubectl auth can-i list pods -n starfleet-032-030-02-01 --as=system:anonymous --as-group=system:unauthenticated
 ```
 
 The first command lists the bindings with the role and the subjects. The line for `anonymous-viewer` shows `view` and `system:unauthenticated`. The second command prints `yes`, which confirms the effect. The binding `ops-viewer` names a different group and is not part of the fault.
@@ -36,12 +36,12 @@ kubectl delete clusterrolebinding anonymous-viewer
 The anonymous request is sent from a `probe` Pod, and the status code is printed. The authorizer needs a short time to see the change, so repeat a request that still shows `200`.
 
 ```sh
-kubectl -n starfleet exec deployment/probe -- python -c "import ssl,urllib.request as r,urllib.error as e;c=ssl.create_default_context(cafile='/var/run/secrets/kubernetes.io/serviceaccount/ca.crt')
+kubectl -n starfleet-032-030-02-01 exec deployment/probe -- python -c "import ssl,urllib.request as r,urllib.error as e;c=ssl.create_default_context(cafile='/var/run/secrets/kubernetes.io/serviceaccount/ca.crt')
 try:
-    print(r.urlopen('https://kubernetes.default.svc/api/v1/namespaces/starfleet/pods',context=c,timeout=5).status)
+    print(r.urlopen('https://kubernetes.default.svc/api/v1/namespaces/starfleet-032-030-02-01/pods',context=c,timeout=5).status)
 except e.HTTPError as x:
     print(x.code)"
-kubectl auth can-i list pods -n starfleet --as=ops-user --as-group=ops
+kubectl auth can-i list pods -n starfleet-032-030-02-01 --as=ops-user --as-group=ops
 ```
 
 The first command prints `403`. Replace the path with `/version` and the same command prints `200`. The second command prints `yes`.

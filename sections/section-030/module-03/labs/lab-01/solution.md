@@ -19,8 +19,8 @@ Keep this connection selected throughout the task. Every script supplied by the 
 Check that nothing enforces a rule yet. A server-side dry run runs the full admission chain without storing the object:
 
 ```sh
-kubectl -n outpost run priv --image=docker.io/library/busybox:1.37.0 --privileged --dry-run=server -o name
-kubectl -n outpost create service nodeport demo --tcp=80:80 --dry-run=server -o name
+kubectl -n outpost-032-030-03-01 run priv --image=docker.io/library/busybox:1.37.0 --privileged --dry-run=server -o name
+kubectl -n outpost-032-030-03-01 create service nodeport demo --tcp=80:80 --dry-run=server -o name
 ```
 
 Both commands succeed in the starting state. Pod Security admission reads the labels of the namespace, and a ValidatingAdmissionPolicy needs a policy and a binding.
@@ -28,7 +28,7 @@ Both commands succeed in the starting state. Pod Security admission reads the la
 Label the namespace:
 
 ```sh
-kubectl label namespace outpost pod-security.kubernetes.io/enforce=baseline
+kubectl label namespace outpost-032-030-03-01 pod-security.kubernetes.io/enforce=baseline
 ```
 
 Save this as `admission-outpost.yaml`:
@@ -60,7 +60,7 @@ spec:
   matchResources:
     namespaceSelector:
       matchLabels:
-        kubernetes.io/metadata.name: outpost
+        kubernetes.io/metadata.name: outpost-032-030-03-01
 ```
 
 Apply the required change:
@@ -74,13 +74,13 @@ kubectl apply -f admission-outpost.yaml
 The binding becomes active after a short time, so repeat a request that is still admitted. A rejected request returns a nonzero status, so run each request on its own.
 
 ```sh
-kubectl -n outpost run priv --image=docker.io/library/busybox:1.37.0 --privileged --dry-run=server -o name
-kubectl -n outpost create service nodeport demo --tcp=80:80 --dry-run=server -o name
-kubectl -n outpost create service clusterip demo --tcp=80:80 --dry-run=server -o name
-kubectl -n starfleet create service nodeport demo --tcp=80:80 --dry-run=server -o name
+kubectl -n outpost-032-030-03-01 run priv --image=docker.io/library/busybox:1.37.0 --privileged --dry-run=server -o name
+kubectl -n outpost-032-030-03-01 create service nodeport demo --tcp=80:80 --dry-run=server -o name
+kubectl -n outpost-032-030-03-01 create service clusterip demo --tcp=80:80 --dry-run=server -o name
+kubectl -n starfleet-032-030-03-01 create service nodeport demo --tcp=80:80 --dry-run=server -o name
 ```
 
-The first command fails because the Pod violates the `baseline` level. The second fails with the message of the policy `no-nodeport`. The third and fourth succeed, because a ClusterIP Service is allowed and the binding selects only `outpost`.
+The first command fails because the Pod violates the `baseline` level. The second fails with the message of the policy `no-nodeport`. The third and fourth succeed, because a ClusterIP Service is allowed and the binding selects only `outpost-032-030-03-01`.
 
 
 After recording the result, remove this independent lab with `astrona destroy ats-032-lab-030-03-01`.

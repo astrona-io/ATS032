@@ -19,12 +19,12 @@ Keep this connection selected. Every script supplied by the lab refuses a differ
 Start by listing which ServiceAccount each pod uses and which bindings name the `default` account:
 
 ```sh
-kubectl -n starfleet get pods -o custom-columns=NAME:.metadata.name,SERVICEACCOUNT:.spec.serviceAccountName
-kubectl -n starfleet get rolebindings -o wide
-kubectl auth can-i get pods -n starfleet --as=system:serviceaccount:starfleet:default
+kubectl -n starfleet-032-020-02-01 get pods -o custom-columns=NAME:.metadata.name,SERVICEACCOUNT:.spec.serviceAccountName
+kubectl -n starfleet-032-020-02-01 get rolebindings -o wide
+kubectl auth can-i get pods -n starfleet-032-020-02-01 --as=system:serviceaccount:starfleet-032-020-02-01:default
 ```
 
-Every pod of `starfleet` uses `default`. The binding `default-pod-access` names the `default` account, and the last command prints `yes`, which is the finding to remove.
+Every pod of `starfleet-032-020-02-01` uses `default`. The binding `default-pod-access` names the `default` account, and the last command prints `yes`, which is the finding to remove.
 
 ## Give `probe` a dedicated account
 
@@ -35,7 +35,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: probe
-  namespace: starfleet
+  namespace: starfleet-032-020-02-01
 automountServiceAccountToken: false
 ```
 
@@ -48,8 +48,8 @@ kubectl apply -f serviceaccount-probe.yaml
 Point the Deployment at the new account. Changing the pod template starts a rollout, and the command after it waits for the rollout to finish:
 
 ```sh
-kubectl -n starfleet set serviceaccount deployment/probe probe
-kubectl -n starfleet rollout status deployment/probe --timeout=180s
+kubectl -n starfleet-032-020-02-01 set serviceaccount deployment/probe probe
+kubectl -n starfleet-032-020-02-01 rollout status deployment/probe --timeout=180s
 ```
 
 ## Create the narrow account for the pod reader
@@ -61,13 +61,13 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: pod-lister
-  namespace: starfleet
+  namespace: starfleet-032-020-02-01
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: pod-lister
-  namespace: starfleet
+  namespace: starfleet-032-020-02-01
 rules:
 - apiGroups: [""]
   resources: ["pods"]
@@ -77,7 +77,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: pod-lister
-  namespace: starfleet
+  namespace: starfleet-032-020-02-01
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -85,7 +85,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: pod-lister
-  namespace: starfleet
+  namespace: starfleet-032-020-02-01
 ```
 
 Apply it:
@@ -101,7 +101,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: pod-lister
-  namespace: starfleet
+  namespace: starfleet-032-020-02-01
 spec:
   serviceAccountName: pod-lister
   restartPolicy: Never
@@ -122,8 +122,8 @@ kubectl apply -f pod-pod-lister.yaml
 Delete the binding that names `default`, then turn off token mounting for the account:
 
 ```sh
-kubectl -n starfleet delete rolebinding default-pod-access
-kubectl -n starfleet patch serviceaccount default -p '{"automountServiceAccountToken": false}'
+kubectl -n starfleet-032-020-02-01 delete rolebinding default-pod-access
+kubectl -n starfleet-032-020-02-01 patch serviceaccount default -p '{"automountServiceAccountToken": false}'
 ```
 
 ## Verify The Result
@@ -131,12 +131,12 @@ kubectl -n starfleet patch serviceaccount default -p '{"automountServiceAccountT
 Ask the API server what each account may do, and look for the token directory in a `probe` pod. A command that prints `no` exits with status 1 on purpose.
 
 ```sh
-kubectl -n starfleet wait --for=condition=Ready pod/pod-lister --timeout=180s
-kubectl -n starfleet exec deploy/probe -- ls /var/run/secrets/kubernetes.io/serviceaccount
-kubectl auth can-i get pods -n starfleet --as=system:serviceaccount:starfleet:pod-lister
-kubectl auth can-i delete pods -n starfleet --as=system:serviceaccount:starfleet:pod-lister
-kubectl auth can-i get pods -n outpost --as=system:serviceaccount:starfleet:pod-lister
-kubectl auth can-i get pods -n starfleet --as=system:serviceaccount:starfleet:default
+kubectl -n starfleet-032-020-02-01 wait --for=condition=Ready pod/pod-lister --timeout=180s
+kubectl -n starfleet-032-020-02-01 exec deploy/probe -- ls /var/run/secrets/kubernetes.io/serviceaccount
+kubectl auth can-i get pods -n starfleet-032-020-02-01 --as=system:serviceaccount:starfleet-032-020-02-01:pod-lister
+kubectl auth can-i delete pods -n starfleet-032-020-02-01 --as=system:serviceaccount:starfleet-032-020-02-01:pod-lister
+kubectl auth can-i get pods -n outpost-032-020-02-01 --as=system:serviceaccount:starfleet-032-020-02-01:pod-lister
+kubectl auth can-i get pods -n starfleet-032-020-02-01 --as=system:serviceaccount:starfleet-032-020-02-01:default
 ```
 
 The `ls` command fails because the directory does not exist. The first `can-i` prints `yes` and the other three print `no`. A matching field alone does not prove the behavior, so run all four.

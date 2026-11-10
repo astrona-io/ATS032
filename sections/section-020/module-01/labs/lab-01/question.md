@@ -6,6 +6,8 @@ exam_objectives:
 ---
 # Disable Unneeded ServiceAccount Tokens
 
+Solve this question on: `terminal`
+
 Run a workload without mounting credentials it does not need.
 
 ## Starting state
@@ -23,10 +25,19 @@ worker_name="astro-ats-032-lab-020-01-01-worker"
 
 Keep this connection selected. Host-level commands name only this environment's node containers. They do not operate on the host operating system.
 
-## Required result
+Allow 4–6 minutes for task work. Cluster startup adds time.
 
-Create ServiceAccount no-api with automountServiceAccountToken false. Run no-token-reader as that account with Pod-level automount also false. Keep the restricted security context and writable scratch volume. The Pod must be Ready and the default service-account token path must not exist. Do not grant this identity application permissions.
+## Tasks
 
-## Verify The Result
+1. Create the ServiceAccount `no-api` in `starfleet-032-020-01-01` with `automountServiceAccountToken: false`.
+2. Run the Pod `no-token-reader` in `starfleet-032-020-01-01` as `no-api`, with `automountServiceAccountToken: false` on the Pod as well. Keep the restricted security context and the writable scratch volume.
+3. Wait until the Pod is Ready and confirm that the default token path `/var/run/secrets/kubernetes.io/serviceaccount` does not exist in it.
 
-The grader checks the required object fields and actual observations. Wait for controller convergence before submitting. Preserve the task's namespace, workload names and unrelated components.
+## Constraints
+
+- Do not grant `no-api` any application permission.
+- Keep the namespace, workload names and unrelated components.
+
+## How the answer is checked
+
+The grader runs two checks. The first checks that the ServiceAccount `no-api` does not mount a token. The second checks the fields of the Pod `no-token-reader` (ServiceAccount, automount, restricted security context, scratch volume), and that the token path is missing inside the running Pod. Both checks also ask the API server whether `no-api` can get Pods or Secrets, and fail if it can.

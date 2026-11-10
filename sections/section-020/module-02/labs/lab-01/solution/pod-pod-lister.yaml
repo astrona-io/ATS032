@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: pod-lister
-  namespace: starfleet
+  namespace: starfleet-032-020-02-01
 spec:
   serviceAccountName: pod-lister
   restartPolicy: Never

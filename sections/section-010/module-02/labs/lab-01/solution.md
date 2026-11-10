@@ -16,12 +16,12 @@ Keep this connection selected for every command below.
 
 ## Diagnose The Starting State
 
-The `starfleet` and `outpost` namespaces exist. The ServiceAccounts `scout` and `shuttle` live in `starfleet`. A ServiceAccount identifies a workload when it calls the Kubernetes application programming interface (API). The `scout` workload reads Pods in `outpost` and updates one ConfigMap named `scout-report` there. Today it holds the built-in `edit` ClusterRole in every namespace through the ClusterRoleBinding `scout-edit-everywhere`. Other grants exist that must keep working: `shuttle` reads ConfigMaps in `outpost`, and the group `starfleet-crew` has the `view` ClusterRole in `outpost`.
+The `starfleet-032-010-02-01` and `outpost-032-010-02-01` namespaces exist. The ServiceAccounts `scout` and `shuttle` live in `starfleet-032-010-02-01`. A ServiceAccount identifies a workload when it calls the Kubernetes application programming interface (API). The `scout` workload reads Pods in `outpost-032-010-02-01` and updates one ConfigMap named `scout-report` there. Today it holds the built-in `edit` ClusterRole in every namespace through the ClusterRoleBinding `scout-edit-everywhere`. Other grants exist that must keep working: `shuttle` reads ConfigMaps in `outpost-032-010-02-01`, and the group `starfleet-crew` has the `view` ClusterRole in `outpost-032-010-02-01`.
 
 Ask the authorizer what `scout` may do today, and find the binding that gives it:
 
 ```sh
-kubectl auth can-i get secrets -n outpost --as=system:serviceaccount:starfleet:scout
+kubectl auth can-i get secrets -n outpost-032-010-02-01 --as=system:serviceaccount:starfleet-032-010-02-01:scout
 kubectl get clusterrolebindings -o wide | grep scout
 ```
 
@@ -36,7 +36,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: scout-operator
-  namespace: outpost
+  namespace: outpost-032-010-02-01
 rules:
 - apiGroups:
   - ''
@@ -61,7 +61,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: scout-operator
-  namespace: outpost
+  namespace: outpost-032-010-02-01
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -69,7 +69,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: scout
-  namespace: starfleet
+  namespace: starfleet-032-010-02-01
 ```
 
 Apply it:
@@ -91,11 +91,11 @@ kubectl delete clusterrolebinding scout-edit-everywhere
 Observe the actual result with these bounded checks. No example transcript is provided as evidence of a completed run.
 
 ```sh
-kubectl auth can-i list pods -n outpost --as=system:serviceaccount:starfleet:scout
-kubectl auth can-i update configmaps/scout-report -n outpost --as=system:serviceaccount:starfleet:scout
-kubectl auth can-i get secrets -n outpost --as=system:serviceaccount:starfleet:scout
-kubectl auth can-i list pods -n starfleet --as=system:serviceaccount:starfleet:scout
-kubectl auth can-i list configmaps -n outpost --as=system:serviceaccount:starfleet:shuttle
+kubectl auth can-i list pods -n outpost-032-010-02-01 --as=system:serviceaccount:starfleet-032-010-02-01:scout
+kubectl auth can-i update configmaps/scout-report -n outpost-032-010-02-01 --as=system:serviceaccount:starfleet-032-010-02-01:scout
+kubectl auth can-i get secrets -n outpost-032-010-02-01 --as=system:serviceaccount:starfleet-032-010-02-01:scout
+kubectl auth can-i list pods -n starfleet-032-010-02-01 --as=system:serviceaccount:starfleet-032-010-02-01:scout
+kubectl auth can-i list configmaps -n outpost-032-010-02-01 --as=system:serviceaccount:starfleet-032-010-02-01:shuttle
 ```
 
 The first two commands print `yes`. The next two print `no`. The last one prints `yes`, which shows that the grant of `shuttle` was not touched. The denied answers exit with status 1, which is expected.
@@ -107,5 +107,5 @@ After recording your result, remove this lab with `astrona destroy ats-032-lab-0
 > [!WARNING]
 > - **Deleting the ClusterRoleBinding first.** The workload loses access until the new grant exists. Add the narrow grant, test it, then remove the broad one.
 > - **Adding `create` on ConfigMaps with `resourceNames`.** A create request has no object name yet, so `resourceNames` cannot limit it. Leave `create` out.
-> - **Putting the RoleBinding in `starfleet`.** The grant then applies in `starfleet`, not in `outpost`.
+> - **Putting the RoleBinding in `starfleet-032-010-02-01`.** The grant then applies in `starfleet-032-010-02-01`, not in `outpost-032-010-02-01`.
 > - **Checking only the allowed actions.** Test the denied actions too.

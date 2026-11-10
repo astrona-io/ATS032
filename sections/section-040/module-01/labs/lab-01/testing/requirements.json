@@ -1,16 +1,18 @@
 {
   "context": "kind-astro-ats-032-lab-040-01-01",
+  "cluster": "astro-ats-032-lab-040-01-01",
+  "namespace": "starfleet-032-040-01-01",
   "resources": [
     {
       "kind": "poddisruptionbudget",
       "name": "probe",
-      "namespace": "starfleet",
+      "namespace": "starfleet-032-040-01-01",
       "expected": {
         "apiVersion": "policy/v1",
         "kind": "PodDisruptionBudget",
         "metadata": {
           "name": "probe",
-          "namespace": "starfleet"
+          "namespace": "starfleet-032-040-01-01"
         },
         "spec": {
           "minAvailable": 1,
@@ -20,35 +22,36 @@
             }
           }
         }
-      }
+      },
+      "outcome": "probe-budget"
     },
     {
       "kind": "configmap",
       "name": "maintenance-record",
-      "namespace": "starfleet",
+      "namespace": "starfleet-032-040-01-01",
       "expected": {
         "apiVersion": "v1",
         "kind": "ConfigMap",
         "metadata": {
           "name": "maintenance-record",
-          "namespace": "starfleet"
+          "namespace": "starfleet-032-040-01-01"
         },
         "data": {
-          "node": "astro-ats-032-lab-040-01-01-worker",
           "result": "returned-to-service"
         }
-      }
+      },
+      "outcome": "maintenance-record"
     },
     {
       "kind": "deployment",
       "name": "probe",
-      "namespace": "starfleet",
+      "namespace": "starfleet-032-040-01-01",
       "expected": {
         "apiVersion": "apps/v1",
         "kind": "Deployment",
         "metadata": {
           "name": "probe",
-          "namespace": "starfleet"
+          "namespace": "starfleet-032-040-01-01"
         },
         "spec": {
           "replicas": 2,
@@ -131,7 +134,7 @@
       "args": [
         "kubectl",
         "-n",
-        "starfleet",
+        "starfleet-032-040-01-01",
         "exec",
         "shuttle",
         "--",

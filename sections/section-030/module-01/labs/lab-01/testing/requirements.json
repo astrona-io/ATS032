@@ -1,5 +1,7 @@
 {
   "context": "kind-astro-ats-032-lab-030-01-01",
+  "cluster": "astro-ats-032-lab-030-01-01",
+  "namespace": "starfleet-032-030-01-01",
   "resources": [
     {
       "kind": "serviceaccount",
@@ -9,9 +11,10 @@
         "kind": "ServiceAccount",
         "metadata": {
           "name": "observer",
-          "namespace": "starfleet"
+          "namespace": "starfleet-032-030-01-01"
         }
-      }
+      },
+      "outcome": "observer-rbac"
     },
     {
       "kind": "role",
@@ -21,7 +24,7 @@
         "kind": "Role",
         "metadata": {
           "name": "observer-reader",
-          "namespace": "starfleet"
+          "namespace": "starfleet-032-030-01-01"
         },
         "rules": [
           {
@@ -37,7 +40,8 @@
             ]
           }
         ]
-      }
+      },
+      "outcome": "observer-rbac"
     },
     {
       "kind": "rolebinding",
@@ -47,7 +51,7 @@
         "kind": "RoleBinding",
         "metadata": {
           "name": "observer-read",
-          "namespace": "starfleet"
+          "namespace": "starfleet-032-030-01-01"
         },
         "roleRef": {
           "apiGroup": "rbac.authorization.k8s.io",
@@ -58,10 +62,11 @@
           {
             "kind": "ServiceAccount",
             "name": "observer",
-            "namespace": "starfleet"
+            "namespace": "starfleet-032-030-01-01"
           }
         ]
-      }
+      },
+      "outcome": "observer-rbac"
     },
     {
       "kind": "deployment",
@@ -71,7 +76,7 @@
         "kind": "Deployment",
         "metadata": {
           "name": "probe",
-          "namespace": "starfleet"
+          "namespace": "starfleet-032-030-01-01"
         },
         "spec": {
           "replicas": 2,
@@ -147,7 +152,8 @@
           }
         }
       },
-      "state": "deployment"
+      "state": "deployment",
+      "outcome": "probe-reads-pods"
     }
   ],
   "behavior": [
@@ -155,15 +161,16 @@
       "args": [
         "kubectl",
         "-n",
-        "starfleet",
+        "starfleet-032-030-01-01",
         "exec",
         "deployment/probe",
         "--",
         "python",
         "-c",
-        "from pathlib import Path; import ssl,urllib.request,json; root=Path('/var/run/secrets/kubernetes.io/serviceaccount'); request=urllib.request.Request('https://kubernetes.default.svc/api/v1/namespaces/starfleet/pods',headers={'Authorization':'Bearer '+(root/'token').read_text()}); context=ssl.create_default_context(cafile=str(root/'ca.crt')); result=json.load(urllib.request.urlopen(request,context=context,timeout=5)); print(result['kind'])"
+        "from pathlib import Path; import ssl,urllib.request,json; root=Path('/var/run/secrets/kubernetes.io/serviceaccount'); request=urllib.request.Request('https://kubernetes.default.svc/api/v1/namespaces/starfleet-032-030-01-01/pods',headers={'Authorization':'Bearer '+(root/'token').read_text()}); context=ssl.create_default_context(cafile=str(root/'ca.crt')); result=json.load(urllib.request.urlopen(request,context=context,timeout=5)); print(result['kind'])"
       ],
-      "equals": "PodList"
+      "equals": "PodList",
+      "outcome": "probe-reads-pods"
     },
     {
       "args": [
@@ -173,8 +180,8 @@
         "get",
         "secrets",
         "-n",
-        "starfleet",
-        "--as=system:serviceaccount:starfleet:observer"
+        "starfleet-032-030-01-01",
+        "--as=system:serviceaccount:starfleet-032-030-01-01:observer"
       ],
       "denied": true,
       "failure_markers": [
@@ -190,8 +197,8 @@
         "create",
         "pods",
         "-n",
-        "starfleet",
-        "--as=system:serviceaccount:starfleet:observer"
+        "starfleet-032-030-01-01",
+        "--as=system:serviceaccount:starfleet-032-030-01-01:observer"
       ],
       "denied": true,
       "failure_markers": [

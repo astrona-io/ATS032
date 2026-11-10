@@ -5,7 +5,9 @@ exam_objectives:
 ---
 # Remove Anonymous Access To The API
 
-The `ops` team in `outpost` has asked why a stranger could list Pods without logging in.
+Solve this question on: `terminal`
+
+The `ops` team in `outpost-032-030-02-01` has asked why a stranger could list Pods without logging in.
 
 ## Objective
 
@@ -13,7 +15,7 @@ Close the binding that lets unauthenticated callers read cluster data while keep
 
 ## Starting state
 
-The `outpost` operations team noticed that the API server answers a request without a credential. The ClusterRoleBinding `anonymous-viewer` gives the `view` ClusterRole to the group `system:unauthenticated`. The binding `ops-viewer` gives `view` to the group `ops` and is correct. The Deployment `probe` in `starfleet` can send requests to the API server. Do not change the Deployment.
+The `outpost-032-030-02-01` operations team noticed that the API server answers a request without a credential. The ClusterRoleBinding `anonymous-viewer` gives the `view` ClusterRole to the group `system:unauthenticated`. The binding `ops-viewer` gives `view` to the group `ops` and is correct. The Deployment `probe` in `starfleet-032-030-02-01` can send requests to the API server. Do not change the Deployment.
 
 Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
 
@@ -24,10 +26,18 @@ test "$(kubectl config current-context)" = "kind-astro-ats-032-lab-030-02-01" ||
 
 Keep this connection selected throughout the task. Every script supplied by the lab refuses a different context.
 
-## Required result
+Allow 3–5 minutes for task work. Cluster startup adds time.
 
-Remove the ClusterRoleBinding `anonymous-viewer`. After the change, an anonymous request from a `probe` Pod to `/api/v1/namespaces/starfleet/pods` must return `403`, and an anonymous request to `/version` must still return `200`. The ClusterRoleBinding `ops-viewer` must stay unchanged, and the group `ops` must still be able to list Pods in `starfleet`. Do not edit any built-in role.
+## Tasks
 
-## Verify The Result
+1. Find the binding that gives cluster data to unauthenticated callers, and remove the ClusterRoleBinding `anonymous-viewer`.
+2. Prove the result from a `probe` Pod: an anonymous request to `/api/v1/namespaces/starfleet-032-030-02-01/pods` returns `403`, and an anonymous request to `/version` still returns `200`.
 
-The grader checks the stated resource fields and live evidence. Wait for controller convergence before submitting. Inspect actual results rather than relying on a sample transcript.
+## Constraints
+
+- Keep the ClusterRoleBinding `ops-viewer` unchanged; the group `ops` must still list Pods in `starfleet-032-030-02-01`.
+- Do not edit any built-in role, and do not change the Deployment `probe`.
+
+## How the answer is checked
+
+The grader runs one check. It checks that `anonymous-viewer` is gone and that an anonymous Pod list from a `probe` Pod gets `403`. It also checks that `/version` still answers `200`, that `ops-viewer` is unchanged and that the group `ops` can list Pods.

@@ -1,16 +1,18 @@
 {
   "context": "kind-astro-ats-032-lab-040-03-01",
+  "cluster": "astro-ats-032-lab-040-03-01",
+  "namespace": "starfleet-032-040-03-01",
   "resources": [
     {
       "kind": "poddisruptionbudget",
       "name": "probe",
-      "namespace": "starfleet",
+      "namespace": "starfleet-032-040-03-01",
       "expected": {
         "apiVersion": "policy/v1",
         "kind": "PodDisruptionBudget",
         "metadata": {
           "name": "probe",
-          "namespace": "starfleet"
+          "namespace": "starfleet-032-040-03-01"
         },
         "spec": {
           "maxUnavailable": 1,
@@ -20,37 +22,39 @@
             }
           }
         }
-      }
+      },
+      "outcome": "budget-max-unavailable"
     },
     {
       "kind": "configmap",
       "name": "post-maintenance-record",
-      "namespace": "starfleet",
+      "namespace": "starfleet-032-040-03-01",
       "expected": {
         "apiVersion": "v1",
         "kind": "ConfigMap",
         "metadata": {
           "name": "post-maintenance-record",
-          "namespace": "starfleet"
+          "namespace": "starfleet-032-040-03-01"
         },
         "data": {
           "nodes-ready": "3",
           "probe-ready": "2",
           "result": "verified"
         }
-      }
+      },
+      "outcome": "post-maintenance-record"
     },
     {
       "kind": "deployment",
       "name": "probe",
-      "namespace": "starfleet",
+      "namespace": "starfleet-032-040-03-01",
       "state": "deployment",
       "expected": {
         "apiVersion": "apps/v1",
         "kind": "Deployment",
         "metadata": {
           "name": "probe",
-          "namespace": "starfleet"
+          "namespace": "starfleet-032-040-03-01"
         },
         "spec": {
           "replicas": 2,
@@ -61,7 +65,8 @@
             }
           }
         }
-      }
+      },
+      "outcome": "probe-spread"
     }
   ],
   "behavior": [
@@ -69,7 +74,7 @@
       "args": [
         "kubectl",
         "-n",
-        "starfleet",
+        "starfleet-032-040-03-01",
         "exec",
         "shuttle",
         "--",
