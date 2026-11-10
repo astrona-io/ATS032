@@ -10,9 +10,12 @@ def exists(*args):
     return subprocess.run(["kubectl","get",*args],capture_output=True,text=True,timeout=15).returncode==0
 
 def can(verb,resource,namespace,*identity):
-    # pods/log means the log subresource; as a plain argument kubectl reads it as a Pod named log
-    resource,_,subresource=resource.partition("/")
-    extra=["--subresource="+subresource] if subresource else []
+    # pods/log and pods/exec mean subresources; as a plain argument kubectl reads them as
+    # Pods named log and exec. configmaps/<name> stays a named object.
+    extra=[]
+    if resource in ("pods/log","pods/exec"):
+        resource,_,subresource=resource.partition("/")
+        extra=["--subresource="+subresource]
     result=subprocess.run(["kubectl","auth","can-i",verb,resource,*extra,"-n",namespace,*identity],capture_output=True,text=True,timeout=15)
     assert result.returncode in (0,1) and result.stdout.strip() in ("yes","no"), "Authorization check failed"
     return result.returncode==0 and result.stdout.strip()=="yes"
