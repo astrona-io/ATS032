@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
-if [[ "$(kubectl config current-context)" != "kind-astro-ats-032-lab-040-capstone-01" ]]; then
+context="${ASTRONA_KUBE_CONTEXT:-kind-astro-ats-032-lab-040-capstone-01}"
+if [[ "$(kubectl config current-context)" != "$context" ]]; then
   printf 'Refusing to operate on another Kubernetes context\n' >&2
   exit 1
 fi
+cluster="${ASTRONA_KIND_CLUSTER:-astro-ats-032-lab-040-capstone-01}"
 lab_directory="$(cd "$(dirname "$0")/.." && pwd)"
 solution_directory="$lab_directory/solution"
-worker_name="astro-ats-032-lab-040-capstone-01-worker"
+worker_name="$cluster-worker"
 
 read_node_field() {
   kubectl get node "$1" -o "jsonpath={.status.nodeInfo.$2}"
@@ -14,7 +16,7 @@ read_node_field() {
 
 kubectl apply -f "$solution_directory/poddisruptionbudget-probe.yaml"
 kubectl -n outpost delete pod drifter --timeout=60s
-kubectl apply -f "$solution_directory/pod-drifter.yaml"
+sed "s/astro-ats-032-lab-040-capstone-01-/$cluster-/g" "$solution_directory/pod-drifter.yaml" | kubectl apply -f -
 kubectl -n outpost wait --for=condition=Ready pod/drifter --timeout=120s
 kubectl drain "$worker_name" --ignore-daemonsets --timeout=180s
 kubectl label node "$worker_name" patch-status=done --overwrite
