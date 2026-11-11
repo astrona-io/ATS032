@@ -96,6 +96,12 @@ labs:
     - sections/section-040/module-03/course-01-patch-the-operating-system-and-container-runtime-on-nodes.md
     - sections/section-040/module-03/course-02-verify-the-cluster-after-an-upgrade.md
     - sections/section-040/module-03/course-03-rollback-limits-and-restore-drills.md
+  sections/section-020/module-01/labs/lab-02:
+    preparation:
+    - sections/section-020/module-01/course-03a-verify-token-audiences.md
+  sections/section-030/module-03/labs/lab-02:
+    preparation:
+    - sections/section-030/module-03/course-03a-test-webhook-outages.md
 additional_readings:
 - sections/section-010/module-01/course-02-clusterroles-reuse-and-escalation-prevention.md
 - sections/section-010/module-01/course-03-additive-grants-dangerous-verbs-and-auditing-access.md
