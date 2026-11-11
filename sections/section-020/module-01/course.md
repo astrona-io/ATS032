@@ -42,3 +42,7 @@ The playground is a `kind` cluster running Kubernetes 1.35 with one control-plan
 Launch your playground now, and keep it running next to you while you read the parts:
 
 <!-- astrona:playground -->
+
+## Independent live assessment
+
+Prepare with [Verify The Receiver Of A Projected Token](course-03a-verify-token-audiences.md). [Restrict A Projected Token Audience](labs/lab-02/question.md) uses its own kind environment. The Pod uses an explicit short-lived token for telemetry.training; Live TokenReview accepts the intended audience and the Kubernetes API rejects the token.

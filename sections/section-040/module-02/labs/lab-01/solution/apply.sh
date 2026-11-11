@@ -1,22 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
-if [[ "$(kubectl config current-context)" != "kind-astro-ats-032-lab-040-02-01" ]]; then
+context="${ASTRONA_KUBE_CONTEXT:-kind-astro-ats-032-lab-040-02-01}"
+if [[ "$(kubectl config current-context)" != "$context" ]]; then
   printf 'Refusing to operate on another Kubernetes context\n' >&2
   exit 1
 fi
+cluster="${ASTRONA_KIND_CLUSTER:-astro-ats-032-lab-040-02-01}"
 lab_directory="$(cd "$(dirname "$0")/.." && pwd)"
 solution_directory="$lab_directory/solution"
-control_plane_name="astro-ats-032-lab-040-02-01-control-plane"
-worker_name="astro-ats-032-lab-040-02-01-worker"
-worker2_name="astro-ats-032-lab-040-02-01-worker2"
+control_plane_name="$cluster-control-plane"
+worker_name="$cluster-worker"
+worker2_name="$cluster-worker2"
 
 read_node_field() {
   kubectl get node "$1" -o "jsonpath={.status.nodeInfo.$2}"
 }
 
 server_version="$(kubectl get --raw /version | python3 -c 'import json, sys; print(json.load(sys.stdin)["gitVersion"])')"
-probe_image="$(kubectl -n starfleet get deployment probe -o jsonpath='{.spec.template.spec.containers[0].image}')"
-client_image="$(kubectl -n outpost get pod drifter -o jsonpath='{.spec.containers[0].image}')"
+probe_image="$(kubectl -n starfleet-032-040-02-01 get deployment probe -o jsonpath='{.spec.template.spec.containers[0].image}')"
+client_image="$(kubectl -n outpost-032-040-02-01 get pod drifter -o jsonpath='{.spec.containers[0].image}')"
 rendered_file="$(mktemp)"
 trap 'command rm -f "$rendered_file"' EXIT
 sed \

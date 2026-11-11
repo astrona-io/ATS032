@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: version-inventory
-  namespace: starfleet
+  namespace: starfleet-032-040-02-01
 data:
   server-version: <SERVER_VERSION>
   kubelet-control-plane: <KUBELET_CONTROL_PLANE>

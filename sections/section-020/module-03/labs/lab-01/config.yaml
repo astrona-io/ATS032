@@ -24,11 +24,36 @@ teardown:
   keepCluster: false
 testing:
   init:
+  - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
   - name: reference-result
     type: file
     source: solution/apply.sh
-validation:
-  script:
-    name: verify-fields-and-live-evidence
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
     type: file
-    source: validate.sh
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: legacy-token-removed
+    description: Secret ledger-legacy-token is gone
+    type: file
+    source: validation/validate-legacy-token-removed.sh
+    points: 1
+  - name: broad-bindings-removed
+    description: ledger-edit and outpost-all-view are gone; ledger and archive lose the extra access
+    type: file
+    source: validation/validate-broad-bindings-removed.sh
+    points: 1
+  - name: config-reader
+    description: Role and RoleBinding config-reader let ledger read ConfigMaps
+    type: file
+    source: validation/validate-config-reader.sh
+    points: 1
+  - name: ledger-client-projected-token
+    description: Pod ledger-client uses a projected token that expires after 3600 seconds
+    type: file
+    source: validation/validate-ledger-client-projected-token.sh
+    points: 1

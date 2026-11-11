@@ -1,29 +1,32 @@
 {
   "context": "kind-astro-ats-032-lab-040-02-01",
+  "cluster": "astro-ats-032-lab-040-02-01",
+  "namespace": "starfleet-032-040-02-01",
   "resources": [
     {
       "kind": "configmap",
       "name": "version-inventory",
-      "namespace": "starfleet",
+      "namespace": "starfleet-032-040-02-01",
       "expected": {
         "apiVersion": "v1",
         "kind": "ConfigMap",
         "metadata": {
           "name": "version-inventory",
-          "namespace": "starfleet"
+          "namespace": "starfleet-032-040-02-01"
         }
-      }
+      },
+      "outcome": "version-inventory"
     },
     {
       "kind": "deployment",
       "name": "probe",
-      "namespace": "starfleet",
+      "namespace": "starfleet-032-040-02-01",
       "expected": {
         "apiVersion": "apps/v1",
         "kind": "Deployment",
         "metadata": {
           "name": "probe",
-          "namespace": "starfleet"
+          "namespace": "starfleet-032-040-02-01"
         },
         "spec": {
           "replicas": 2,
@@ -106,7 +109,7 @@
       "args": [
         "kubectl",
         "-n",
-        "starfleet",
+        "starfleet-032-040-02-01",
         "exec",
         "shuttle",
         "--",

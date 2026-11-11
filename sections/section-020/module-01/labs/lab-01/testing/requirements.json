@@ -1,30 +1,33 @@
 {
   "context": "kind-astro-ats-032-lab-020-01-01",
+  "cluster": "astro-ats-032-lab-020-01-01",
+  "namespace": "starfleet-032-020-01-01",
   "resources": [
     {
       "kind": "serviceaccount",
       "name": "no-api",
-      "namespace": "starfleet",
+      "namespace": "starfleet-032-020-01-01",
       "expected": {
         "apiVersion": "v1",
         "kind": "ServiceAccount",
         "metadata": {
           "name": "no-api",
-          "namespace": "starfleet"
+          "namespace": "starfleet-032-020-01-01"
         },
         "automountServiceAccountToken": false
-      }
+      },
+      "outcome": "no-api-serviceaccount"
     },
     {
       "kind": "pod",
       "name": "no-token-reader",
-      "namespace": "starfleet",
+      "namespace": "starfleet-032-020-01-01",
       "expected": {
         "apiVersion": "v1",
         "kind": "Pod",
         "metadata": {
           "name": "no-token-reader",
-          "namespace": "starfleet"
+          "namespace": "starfleet-032-020-01-01"
         },
         "spec": {
           "restartPolicy": "Never",
@@ -73,7 +76,8 @@
           "automountServiceAccountToken": false
         }
       },
-      "state": "pod"
+      "state": "pod",
+      "outcome": "no-token-reader-pod"
     }
   ],
   "behavior": [
@@ -81,7 +85,7 @@
       "args": [
         "kubectl",
         "-n",
-        "starfleet",
+        "starfleet-032-020-01-01",
         "exec",
         "no-token-reader",
         "--",
@@ -89,7 +93,8 @@
         "-c",
         "test ! -e /var/run/secrets/kubernetes.io/serviceaccount/token && printf absent"
       ],
-      "equals": "absent"
+      "equals": "absent",
+      "outcome": "no-token-reader-pod"
     },
     {
       "args": [
@@ -99,8 +104,8 @@
         "get",
         "pods",
         "-n",
-        "starfleet",
-        "--as=system:serviceaccount:starfleet:no-api"
+        "starfleet-032-020-01-01",
+        "--as=system:serviceaccount:starfleet-032-020-01-01:no-api"
       ],
       "denied": true,
       "failure_markers": [
@@ -116,8 +121,8 @@
         "get",
         "secrets",
         "-n",
-        "starfleet",
-        "--as=system:serviceaccount:starfleet:no-api"
+        "starfleet-032-020-01-01",
+        "--as=system:serviceaccount:starfleet-032-020-01-01:no-api"
       ],
       "denied": true,
       "failure_markers": [

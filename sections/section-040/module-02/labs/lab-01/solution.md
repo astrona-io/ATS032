@@ -19,8 +19,8 @@ The API server version comes from the `/version` endpoint. The node fields come 
 ```sh
 kubectl get --raw /version
 kubectl get nodes -o custom-columns=NAME:.metadata.name,KUBELET:.status.nodeInfo.kubeletVersion,RUNTIME:.status.nodeInfo.containerRuntimeVersion
-kubectl -n starfleet get deployment probe -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}'
-kubectl -n outpost get pod drifter -o jsonpath='{.spec.containers[0].image}{"\n"}'
+kubectl -n starfleet-032-040-02-01 get deployment probe -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}'
+kubectl -n outpost-032-040-02-01 get pod drifter -o jsonpath='{.spec.containers[0].image}{"\n"}'
 ```
 
 Write down the `gitVersion` value, the kubelet version of each node, the runtime of the control-plane node and the two image names.
@@ -34,7 +34,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: version-inventory
-  namespace: starfleet
+  namespace: starfleet-032-040-02-01
 data:
   server-version: <SERVER_VERSION>
   kubelet-control-plane: <KUBELET_CONTROL_PLANE>
@@ -66,7 +66,7 @@ kubectl label node astro-ats-032-lab-040-02-01-worker2 patch-wave=3
 Print the ConfigMap and the labels, and compare the values with the live cluster once more.
 
 ```sh
-kubectl -n starfleet get configmap version-inventory -o yaml
+kubectl -n starfleet-032-040-02-01 get configmap version-inventory -o yaml
 kubectl get nodes -L patch-wave
 ```
 

@@ -7,7 +7,13 @@ def get_object(*args):
     return json.loads(run(*args,"-o","json"))
 
 def can(verb,resource,namespace,*identity):
-    result=subprocess.run(["kubectl","auth","can-i",verb,resource,"-n",namespace,*identity],capture_output=True,text=True,timeout=15)
+    # pods/log and pods/exec mean subresources; as a plain argument kubectl reads them as
+    # Pods named log and exec. configmaps/<name> stays a named object.
+    extra=[]
+    if resource in ("pods/log","pods/exec"):
+        resource,_,subresource=resource.partition("/")
+        extra=["--subresource="+subresource]
+    result=subprocess.run(["kubectl","auth","can-i",verb,resource,*extra,"-n",namespace,*identity],capture_output=True,text=True,timeout=15)
     assert result.returncode in (0,1) and result.stdout.strip() in ("yes","no"), "Authorization check failed"
     return result.returncode==0 and result.stdout.strip()=="yes"
 

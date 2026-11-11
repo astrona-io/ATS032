@@ -1,4 +1,4 @@
-prefix = 'astro-ats-032-lab-040-capstone-01'
+prefix = os.environ.get('ASTRONA_KIND_CLUSTER') or 'astro-ats-032-lab-040-capstone-01'
 worker = get('node', prefix + '-worker', namespace='')
 assert not worker['spec'].get('unschedulable', False), 'Return the first worker to scheduling'
 assert not any(taint.get('key') == 'maintenance' for taint in worker['spec'].get('taints', [])), 'Remove the leftover maintenance taint'

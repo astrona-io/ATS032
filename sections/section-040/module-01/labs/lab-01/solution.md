@@ -23,7 +23,7 @@ The isolated environment has two healthy probe replicas, an internal Service and
 Inspect the current objects before changing them:
 
 ```sh
-kubectl -n starfleet get pods -o wide
+kubectl -n starfleet-032-040-01-01 get pods -o wide
 kubectl get nodes -o wide
 ```
 
@@ -36,7 +36,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: probe
-  namespace: starfleet
+  namespace: starfleet-032-040-01-01
 spec:
   minAvailable: 1
   selector:
@@ -47,7 +47,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: maintenance-record
-  namespace: starfleet
+  namespace: starfleet-032-040-01-01
 data:
   node: astro-ats-032-lab-040-01-01-worker
   result: returned-to-service
@@ -69,8 +69,8 @@ Observe the actual result. A denied request returns a nonzero status when the de
 
 ```sh
 kubectl wait --for=condition=Ready node/"$worker_name" --timeout=180s
-kubectl -n starfleet rollout status deployment/probe --timeout=180s
-kubectl -n starfleet exec shuttle -- wget -q -T 3 -O- http://probe/
+kubectl -n starfleet-032-040-01-01 rollout status deployment/probe --timeout=180s
+kubectl -n starfleet-032-040-01-01 exec shuttle -- wget -q -T 3 -O- http://probe/
 ```
 
 Respect disruption limits while draining and returning an isolated worker to service. The commands above deliberately target one environment. Keep its remaining components available so an unrelated failure cannot stand in for the required denial or correction. No example command output is presented as evidence of a completed run. A matching field alone does not establish that a process used it or that a controller reconciled it.

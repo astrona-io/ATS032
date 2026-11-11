@@ -5,7 +5,9 @@ exam_objectives:
 ---
 # Enforce Admission Rules In A Namespace
 
-The `outpost` team shares a cluster with other teams and wants guard rails on what it can create.
+Solve this question on: `terminal`
+
+The `outpost-032-030-03-01` team shares a cluster with other teams and wants guard rails on what it can create.
 
 ## Objective
 
@@ -13,7 +15,7 @@ Make the API server reject privileged Pods and NodePort Services in one namespac
 
 ## Starting state
 
-The `outpost` namespace must stop accepting Pods that ask for host-level power and Services that open a port on every node. The namespaces `outpost` and `starfleet` have no admission rule. The Pod `drifter` and the Deployment `probe` are healthy. Do not change any workload.
+The `outpost-032-030-03-01` namespace must stop accepting Pods that ask for host-level power and Services that open a port on every node. The namespaces `outpost-032-030-03-01` and `starfleet-032-030-03-01` have no admission rule. The Pod `drifter` and the Deployment `probe` are healthy. Do not change any workload.
 
 Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
 
@@ -24,10 +26,20 @@ test "$(kubectl config current-context)" = "kind-astro-ats-032-lab-030-03-01" ||
 
 Keep this connection selected throughout the task. Every script supplied by the lab refuses a different context.
 
-## Required result
+Allow 8–10 minutes for task work. Cluster startup adds time.
 
-Label the namespace `outpost` with `pod-security.kubernetes.io/enforce=baseline`. Create a ValidatingAdmissionPolicy named `no-nodeport` that matches `CREATE` and `UPDATE` of Services in the core API group and rejects a Service of type `NodePort`. Create a ValidatingAdmissionPolicyBinding named `no-nodeport-outpost` with the policy name `no-nodeport`, the validation action `Deny` and a namespace selector that selects only `outpost`. A privileged Pod and a NodePort Service in `outpost` must be rejected. A ClusterIP Service and a plain Pod in `outpost` must be admitted, and a NodePort Service in `starfleet` must still be admitted.
+## Tasks
 
-## Verify The Result
+1. Label the namespace `outpost-032-030-03-01` with `pod-security.kubernetes.io/enforce=baseline`.
+2. Create a ValidatingAdmissionPolicy named `no-nodeport` that matches `CREATE` and `UPDATE` of Services in the core API group and rejects a Service of type `NodePort`.
+3. Create a ValidatingAdmissionPolicyBinding named `no-nodeport-outpost` with the policy name `no-nodeport`, the validation action `Deny` and a namespace selector that selects only `outpost-032-030-03-01`.
 
-The grader checks the stated resource fields and live evidence. Wait for controller convergence before submitting. Inspect actual results rather than relying on a sample transcript.
+## Constraints
+
+- A ClusterIP Service and a plain Pod in `outpost-032-030-03-01` must still be admitted.
+- A NodePort Service in `starfleet-032-030-03-01` must still be admitted.
+- Do not change any workload.
+
+## How the answer is checked
+
+The grader runs two checks. The first checks the namespace label, then sends a privileged Pod and a plain Pod to `outpost-032-030-03-01` as server-side dry runs: the privileged Pod must be rejected and the plain Pod admitted. The second checks the policy and its binding, then sends dry-run Services: a NodePort Service in `outpost-032-030-03-01` must be rejected, and a ClusterIP Service there and a NodePort Service in `starfleet-032-030-03-01` admitted.

@@ -24,4 +24,4 @@ spec:
   matchResources:
     namespaceSelector:
       matchLabels:
-        kubernetes.io/metadata.name: outpost
+        kubernetes.io/metadata.name: outpost-032-030-03-01

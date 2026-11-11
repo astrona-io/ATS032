@@ -13,6 +13,8 @@ runtime:
     preloadImages:
     - docker.io/library/python:3.13-alpine
     - docker.io/library/busybox:1.37.0
+    nodes:
+      workers: 1
 bootstrap:
   init:
   - name: seed-rbac
@@ -22,11 +24,26 @@ teardown:
   keepCluster: false
 testing:
   init:
+  - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
   - name: reference-repair
     type: file
     source: solution/apply.sh
-validation:
-  script:
-    name: verify-rbac
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
     type: file
-    source: validate.sh
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: pod-reader-role
+    description: Role pod-reader grants only get, list and watch on core Pods
+    type: file
+    source: validation/validate-pod-reader-role.sh
+    points: 1
+  - name: shuttle-binding
+    description: RoleBinding shuttle-pod-reader gives the Role to shuttle only, and shuttle can read Pods
+    type: file
+    source: validation/validate-shuttle-binding.sh
+    points: 1

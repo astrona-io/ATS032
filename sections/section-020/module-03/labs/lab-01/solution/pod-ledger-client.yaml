@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: ledger-client
-  namespace: outpost
+  namespace: outpost-032-020-03-01
   labels:
     app: ledger-client
 spec:

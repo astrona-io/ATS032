@@ -13,6 +13,8 @@ runtime:
     preloadImages:
     - docker.io/library/python:3.13-alpine
     - docker.io/library/busybox:1.37.0
+    nodes:
+      workers: 1
 bootstrap:
   init:
   - name: seed-rbac
@@ -22,11 +24,26 @@ teardown:
   keepCluster: false
 testing:
   init:
+  - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
   - name: reference-repair
     type: file
     source: solution/apply.sh
-validation:
-  script:
-    name: verify-rbac
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
     type: file
-    source: validate.sh
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: least-privilege-rules
+    description: Role crew-operator has no wildcard and grants exactly the required verbs
+    type: file
+    source: validation/validate-least-privilege-rules.sh
+    points: 2
+  - name: excess-denied
+    description: outpost-crew is denied Secrets, Pod writes, logs, exec, RoleBindings, other namespaces and nodes
+    type: file
+    source: validation/validate-excess-denied.sh
+    points: 1
