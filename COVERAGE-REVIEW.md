@@ -4,13 +4,14 @@ The course has teaching material for its registered lab tasks, but its readings 
 
 `TEACHING-COVERAGE.yaml` names the preparation set for every lab. `LAB-COVERAGE.md` renders both directions: lab to preparation and reading to assessment. A preparation link means the reading teaches something used by that task, not that every operation in the reading is graded. The additional-reading list makes material without a module assessment visible. Capstones combine selected skills and do not silently count as coverage of every reading.
 
+## Live assessment additions
+
+New kind labs verify projected-token audiences through TokenReview and direct API authentication, and exercise an admission webhook with healthy, unavailable and out-of-scope requests.
+
 ## Remaining practical gaps and boundaries
 
-- The maintenance labs assess disruption budgets, scheduling, inventory and service recovery. They do not install a Kubernetes or operating-system upgrade or perform an etcd restore.
-- The token lab assesses projected-token configuration and effective RBAC. Audience rejection is taught as a separate experiment; it is not a scored outcome.
-- Admission webhook failure behavior and aggregated ClusterRole construction have playground examples but no dedicated module grader.
-
-These are explicit limits, not completed assessments. When closing one, add or extend a runnable environment, teach the actual commands and evidence, add a live grader with negative cases, and update the mapping. Do not mark a reference procedure as practiced just because it contains a command block.
+- Cluster upgrades and etcd restore remain ungraded procedures.
+- Aggregated ClusterRoles have no dedicated module assessment. The webhook exercise covers one validating webhook, not every admission extension.
 
 ## Runtime choice
 
