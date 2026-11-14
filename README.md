@@ -1,3 +1,9 @@
+<p align="center">
+  <a href="https://astrona.io/courses/certified-kubernetes-security-specialist">
+    <img src="https://astrona.io/courses/certified-kubernetes-security-specialist/domains/ATS032.svg" alt="ATS032: Cluster Hardening, part of the Certified Kubernetes Security Specialist course on Astrona" width="100%">
+  </a>
+</p>
+
 # Cluster Hardening (ATS032)
 
 Certified Kubernetes Security Specialist (CKS): Cluster Hardening, worth 15% of the official curriculum. This course belongs to ATP007.
