@@ -7,4 +7,4 @@ exam_objectives:
 
 Read the real versions of a cluster, record them in one ConfigMap and label each node with its patch wave.
 
-The task and solution use a separate pinned kind cluster. Run `testing/smoke.sh` with its private kubeconfig to verify initial rejection and reference success. The grader compares the recorded values with the live cluster. Static validation is not live evidence. Runtime verification remains pending.
+The task and solution use a separate pinned kind cluster. Run `astrona test` on this folder: `testing/verify-start.sh` checks that every outcome fails on the starting state, then the reference solution is applied and every outcome must pass.

@@ -1,0 +1,48 @@
+{
+  "apiVersion": "admissionregistration.k8s.io/v1",
+  "kind": "ValidatingWebhookConfiguration",
+  "metadata": {
+    "name": "training-guard"
+  },
+  "webhooks": [
+    {
+      "name": "guard.admission.training",
+      "admissionReviewVersions": [
+        "v1"
+      ],
+      "sideEffects": "None",
+      "failurePolicy": "Ignore",
+      "timeoutSeconds": 10,
+      "namespaceSelector": {
+        "matchLabels": {
+          "admission.training/protected": "missing"
+        }
+      },
+      "clientConfig": {
+        "service": {
+          "name": "guard",
+          "namespace": "webhook-system",
+          "path": "/",
+          "port": 443
+        }
+      },
+      "rules": [
+        {
+          "operations": [
+            "CREATE"
+          ],
+          "apiGroups": [
+            ""
+          ],
+          "apiVersions": [
+            "v1"
+          ],
+          "resources": [
+            "configmaps"
+          ],
+          "scope": "Namespaced"
+        }
+      ]
+    }
+  ]
+}

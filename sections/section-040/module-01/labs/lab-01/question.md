@@ -5,6 +5,8 @@ exam_objectives:
 ---
 # Drain And Return A Worker To Service
 
+Solve this question on: `terminal`
+
 Respect disruption limits while draining and returning an isolated worker to service.
 
 ## Starting state
@@ -22,10 +24,19 @@ worker_name="astro-ats-032-lab-040-01-01-worker"
 
 Keep this connection selected. Host-level commands name only this environment's node containers. They do not operate on the host operating system.
 
-## Required result
+Allow 8–10 minutes for task work. Cluster startup with two workers adds time.
 
-Create PodDisruptionBudget probe with minAvailable one. Cordon and drain the first worker with --ignore-daemonsets and a bounded timeout, then uncordon it. Record ConfigMap maintenance-record naming that worker and result returned-to-service. Keep both probe replicas available and the clients running on the second worker. The final grader checks availability, the budget and schedulability; it cannot prove every earlier eviction. This maintenance exercise does not perform a Kubernetes binary upgrade.
+## Tasks
 
-## Verify The Result
+1. Create the PodDisruptionBudget `probe` in `starfleet-032-040-01-01` with `minAvailable: 1`.
+2. Cordon and drain the first worker with `--ignore-daemonsets` and a bounded timeout, then uncordon it.
+3. Record the ConfigMap `maintenance-record` in `starfleet-032-040-01-01` that names that worker and has the result `returned-to-service`.
 
-The grader checks the required object fields and actual observations. Wait for controller convergence before submitting. Preserve the task's namespace, workload names and unrelated components.
+## Constraints
+
+- Keep both `probe` replicas available and the clients running on the second worker.
+- This maintenance exercise does not perform a Kubernetes binary upgrade.
+
+## How the answer is checked
+
+The grader runs two checks. The first checks the PodDisruptionBudget `probe`. The second checks the ConfigMap `maintenance-record` and that it names the first worker. Both checks also confirm that the first worker is schedulable and Ready, that the Deployment `probe` has two ready replicas and that `shuttle` still reaches `http://probe/`. The final grader cannot prove every earlier eviction.

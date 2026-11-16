@@ -1,0 +1,115 @@
+version: 1
+labs:
+  sections/section-010/module-01/labs/lab-01:
+    preparation:
+    - sections/section-010/module-01/course-01-roles-bindings-and-scope.md
+  sections/section-010/module-02/labs/lab-01:
+    preparation:
+    - sections/section-010/module-02/course-01-ask-the-authorizer-precisely.md
+    - sections/section-010/module-02/course-02-find-every-grant-for-an-identity.md
+    - sections/section-010/module-02/course-03-rewrite-a-broad-grant-as-least-privilege.md
+  sections/section-010/module-03/labs/lab-01:
+    preparation:
+    - sections/section-010/module-03/course-01-users-groups-and-serviceaccounts-as-subjects.md
+    - sections/section-010/module-03/course-03-remove-wildcards-and-narrow-rules.md
+  sections/section-010/capstone/labs/lab-01:
+    preparation:
+    - sections/section-010/module-01/course-01-roles-bindings-and-scope.md
+    - sections/section-010/module-01/course-02-clusterroles-reuse-and-escalation-prevention.md
+    - sections/section-010/module-01/course-03-additive-grants-dangerous-verbs-and-auditing-access.md
+    - sections/section-010/module-02/course-01-ask-the-authorizer-precisely.md
+    - sections/section-010/module-02/course-02-find-every-grant-for-an-identity.md
+    - sections/section-010/module-02/course-03-rewrite-a-broad-grant-as-least-privilege.md
+    - sections/section-010/module-03/course-01-users-groups-and-serviceaccounts-as-subjects.md
+    - sections/section-010/module-03/course-02-built-in-and-aggregated-clusterroles.md
+    - sections/section-010/module-03/course-03-remove-wildcards-and-narrow-rules.md
+  sections/section-020/module-01/labs/lab-01:
+    preparation:
+    - sections/section-020/module-01/course-01-serviceaccounts-and-the-default-token.md
+    - sections/section-020/module-01/course-02-disable-automounting-and-minimize-permissions.md
+  sections/section-020/module-02/labs/lab-01:
+    preparation:
+    - sections/section-020/module-02/course-01-one-serviceaccount-for-each-workload.md
+    - sections/section-020/module-02/course-02-grant-only-what-the-workload-uses.md
+    - sections/section-020/module-02/course-03-clean-up-the-default-serviceaccount.md
+  sections/section-020/module-03/labs/lab-01:
+    preparation:
+    - sections/section-020/module-03/course-01-find-which-pods-use-which-serviceaccount.md
+    - sections/section-020/module-03/course-02-audit-grants-that-reach-serviceaccounts.md
+    - sections/section-020/module-03/course-03-audit-tokens-secrets-lifetimes-and-audience.md
+  sections/section-020/capstone/labs/lab-01:
+    preparation:
+    - sections/section-020/module-01/course-01-serviceaccounts-and-the-default-token.md
+    - sections/section-020/module-01/course-02-disable-automounting-and-minimize-permissions.md
+    - sections/section-020/module-01/course-03-bound-tokens-audience-and-legacy-secrets.md
+    - sections/section-020/module-02/course-01-one-serviceaccount-for-each-workload.md
+    - sections/section-020/module-02/course-02-grant-only-what-the-workload-uses.md
+    - sections/section-020/module-02/course-03-clean-up-the-default-serviceaccount.md
+    - sections/section-020/module-03/course-01-find-which-pods-use-which-serviceaccount.md
+    - sections/section-020/module-03/course-02-audit-grants-that-reach-serviceaccounts.md
+    - sections/section-020/module-03/course-03-audit-tokens-secrets-lifetimes-and-audience.md
+  sections/section-030/module-01/labs/lab-01:
+    preparation:
+    - sections/section-030/module-01/course-01-how-an-api-request-is-checked.md
+    - sections/section-030/module-01/course-02-a-narrow-workload-identity.md
+  sections/section-030/module-02/labs/lab-01:
+    preparation:
+    - sections/section-030/module-02/course-01-authentication-methods-and-identities.md
+    - sections/section-030/module-02/course-02-anonymous-access-in-practice.md
+  sections/section-030/module-03/labs/lab-01:
+    preparation:
+    - sections/section-030/module-03/course-01-pod-security-admission.md
+    - sections/section-030/module-03/course-02-validatingadmissionpolicy-with-cel.md
+  sections/section-030/capstone/labs/lab-01:
+    preparation:
+    - sections/section-030/module-01/course-01-how-an-api-request-is-checked.md
+    - sections/section-030/module-01/course-02-a-narrow-workload-identity.md
+    - sections/section-030/module-01/course-03-hardening-the-endpoint-and-the-kubelet.md
+    - sections/section-030/module-02/course-01-authentication-methods-and-identities.md
+    - sections/section-030/module-02/course-02-anonymous-access-in-practice.md
+    - sections/section-030/module-02/course-03-authorization-modes-and-impersonation.md
+    - sections/section-030/module-03/course-01-pod-security-admission.md
+    - sections/section-030/module-03/course-02-validatingadmissionpolicy-with-cel.md
+    - sections/section-030/module-03/course-03-admission-webhooks-and-failure-policy.md
+  sections/section-040/module-01/labs/lab-01:
+    preparation:
+    - sections/section-040/module-01/course-01-versions-skew-and-support.md
+    - sections/section-040/module-01/course-02-cordon-drain-and-disruption-budgets.md
+  sections/section-040/module-02/labs/lab-01:
+    preparation:
+    - sections/section-040/module-02/course-01-where-vulnerabilities-are-published.md
+    - sections/section-040/module-02/course-02-inventory-what-the-cluster-runs.md
+    - sections/section-040/module-02/course-03-triage-a-vulnerability-and-plan-patch-waves.md
+  sections/section-040/module-03/labs/lab-01:
+    preparation:
+    - sections/section-040/module-03/course-01-patch-the-operating-system-and-container-runtime-on-nodes.md
+    - sections/section-040/module-03/course-02-verify-the-cluster-after-an-upgrade.md
+  sections/section-040/capstone/labs/lab-01:
+    preparation:
+    - sections/section-040/module-01/course-01-versions-skew-and-support.md
+    - sections/section-040/module-01/course-02-cordon-drain-and-disruption-budgets.md
+    - sections/section-040/module-01/course-03-the-kubeadm-upgrade-sequence.md
+    - sections/section-040/module-01/course-04-snapshot-and-verify.md
+    - sections/section-040/module-02/course-01-where-vulnerabilities-are-published.md
+    - sections/section-040/module-02/course-02-inventory-what-the-cluster-runs.md
+    - sections/section-040/module-02/course-03-triage-a-vulnerability-and-plan-patch-waves.md
+    - sections/section-040/module-03/course-01-patch-the-operating-system-and-container-runtime-on-nodes.md
+    - sections/section-040/module-03/course-02-verify-the-cluster-after-an-upgrade.md
+    - sections/section-040/module-03/course-03-rollback-limits-and-restore-drills.md
+  sections/section-020/module-01/labs/lab-02:
+    preparation:
+    - sections/section-020/module-01/course-03a-verify-token-audiences.md
+  sections/section-030/module-03/labs/lab-02:
+    preparation:
+    - sections/section-030/module-03/course-03a-test-webhook-outages.md
+additional_readings:
+- sections/section-010/module-01/course-02-clusterroles-reuse-and-escalation-prevention.md
+- sections/section-010/module-01/course-03-additive-grants-dangerous-verbs-and-auditing-access.md
+- sections/section-010/module-03/course-02-built-in-and-aggregated-clusterroles.md
+- sections/section-020/module-01/course-03-bound-tokens-audience-and-legacy-secrets.md
+- sections/section-030/module-01/course-03-hardening-the-endpoint-and-the-kubelet.md
+- sections/section-030/module-02/course-03-authorization-modes-and-impersonation.md
+- sections/section-030/module-03/course-03-admission-webhooks-and-failure-policy.md
+- sections/section-040/module-01/course-03-the-kubeadm-upgrade-sequence.md
+- sections/section-040/module-01/course-04-snapshot-and-verify.md
+- sections/section-040/module-03/course-03-rollback-limits-and-restore-drills.md

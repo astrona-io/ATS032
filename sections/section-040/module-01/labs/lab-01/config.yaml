@@ -24,11 +24,26 @@ teardown:
   keepCluster: false
 testing:
   init:
+  - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
   - name: reference-result
     type: file
     source: solution/apply.sh
-validation:
-  script:
-    name: verify-fields-and-live-evidence
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
     type: file
-    source: validate.sh
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: probe-budget
+    description: PodDisruptionBudget probe keeps one replica available
+    type: file
+    source: validation/validate-probe-budget.sh
+    points: 1
+  - name: maintenance-record
+    description: ConfigMap maintenance-record names the maintained worker
+    type: file
+    source: validation/validate-maintenance-record.sh
+    points: 1

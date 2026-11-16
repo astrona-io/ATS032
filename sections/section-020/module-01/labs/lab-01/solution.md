@@ -24,7 +24,7 @@ The isolated environment has two healthy probe replicas, an internal Service and
 Inspect the current objects before changing them:
 
 ```sh
-kubectl -n starfleet get pods -o wide
+kubectl -n starfleet-032-020-01-01 get pods -o wide
 kubectl get nodes -o wide
 ```
 
@@ -37,14 +37,14 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: no-api
-  namespace: starfleet
+  namespace: starfleet-032-020-01-01
 automountServiceAccountToken: false
 ---
 apiVersion: v1
 kind: Pod
 metadata:
   name: no-token-reader
-  namespace: starfleet
+  namespace: starfleet-032-020-01-01
 spec:
   restartPolicy: Never
   containers:
@@ -88,8 +88,8 @@ kubectl apply -f serviceaccount-no-api.yaml
 Observe the actual result. A denied request returns a nonzero status when the denial works, so run it separately from a shell sequence that stops on error. Status convergence and a successful request establish different parts of the result.
 
 ```sh
-kubectl -n starfleet wait --for=condition=Ready pod/no-token-reader --timeout=180s
-kubectl -n starfleet exec no-token-reader -- sh -c 'test ! -e /var/run/secrets/kubernetes.io/serviceaccount/token && printf absent'
+kubectl -n starfleet-032-020-01-01 wait --for=condition=Ready pod/no-token-reader --timeout=180s
+kubectl -n starfleet-032-020-01-01 exec no-token-reader -- sh -c 'test ! -e /var/run/secrets/kubernetes.io/serviceaccount/token && printf absent'
 ```
 
 Run a workload without mounting credentials it does not need. The commands above deliberately target one environment. Keep its remaining components available so an unrelated failure cannot stand in for the required denial or correction. No example command output is presented as evidence of a completed run. A matching field alone does not establish that a process used it or that a controller reconciled it.

@@ -1,24 +1,24 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: starfleet
+  name: starfleet-032-010-03-01
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: outpost
+  name: outpost-032-010-03-01
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: probe
-  namespace: starfleet
+  namespace: starfleet-032-010-03-01
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: crew-operator
-  namespace: outpost
+  namespace: outpost-032-010-03-01
 rules:
   - apiGroups: ["*"]
     resources: ["*"]
@@ -28,7 +28,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: outpost-crew-operator
-  namespace: outpost
+  namespace: outpost-032-010-03-01
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role

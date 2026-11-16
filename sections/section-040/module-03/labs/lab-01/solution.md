@@ -18,8 +18,8 @@ Check the nodes, the application Pods and the budget, in that order.
 
 ```sh
 kubectl get nodes
-kubectl -n starfleet get pods -l app=probe -o wide
-kubectl -n starfleet get pdb probe
+kubectl -n starfleet-032-040-03-01 get pods -l app=probe -o wide
+kubectl -n starfleet-032-040-03-01 get pdb probe
 kubectl describe node astro-ats-032-lab-040-03-01-worker2 | grep -i -A2 taints
 ```
 
@@ -30,7 +30,7 @@ The second worker shows `SchedulingDisabled`. One `probe` Pod is `Pending`, beca
 ```sh
 kubectl uncordon astro-ats-032-lab-040-03-01-worker2
 kubectl taint nodes astro-ats-032-lab-040-03-01-worker2 maintenance=patching:NoSchedule-
-kubectl -n starfleet rollout status deployment/probe --timeout=180s
+kubectl -n starfleet-032-040-03-01 rollout status deployment/probe --timeout=180s
 ```
 
 ## Repair the budget
@@ -42,7 +42,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: probe
-  namespace: starfleet
+  namespace: starfleet-032-040-03-01
 spec:
   maxUnavailable: 1
   selector:
@@ -54,10 +54,10 @@ Apply it and read the result:
 
 ```sh
 kubectl apply -f poddisruptionbudget-probe.yaml
-kubectl -n starfleet get pdb probe
+kubectl -n starfleet-032-040-03-01 get pdb probe
 ```
 
-If the apply is refused because both fields are set, delete the budget with `kubectl -n starfleet delete pdb probe` and apply the file again.
+If the apply is refused because both fields are set, delete the budget with `kubectl -n starfleet-032-040-03-01 delete pdb probe` and apply the file again.
 
 ## Record the verified state
 
@@ -68,7 +68,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: post-maintenance-record
-  namespace: starfleet
+  namespace: starfleet-032-040-03-01
 data:
   nodes-ready: "3"
   probe-ready: "2"
@@ -85,8 +85,8 @@ kubectl apply -f configmap-post-maintenance-record.yaml
 
 ```sh
 kubectl get nodes
-kubectl -n starfleet get pods -l app=probe -o wide
-kubectl -n starfleet exec shuttle -- wget -q -T 3 -O- http://probe/
+kubectl -n starfleet-032-040-03-01 get pods -l app=probe -o wide
+kubectl -n starfleet-032-040-03-01 exec shuttle -- wget -q -T 3 -O- http://probe/
 ```
 
 After recording your result, remove the independent lab with `astrona destroy ats-032-lab-040-03-01`.

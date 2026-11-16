@@ -14,6 +14,8 @@ A Secret of type `kubernetes.io/service-account-token` holds a JSON Web Token (J
 <!-- astrona:playground:renew -->
 
 ```sh
+export KUBECONFIG="$(astrona kubeconfig ats-032-playground-020-03)"
+test "$(kubectl config current-context)" = "kind-astro-ats-032-playground-020-03" || exit 1
 kubectl get secrets -A --field-selector type=kubernetes.io/service-account-token
 kubectl get secrets -A --field-selector type=kubernetes.io/service-account-token -o custom-columns=NAMESPACE:.metadata.namespace,NAME:.metadata.name,SERVICEACCOUNT:'.metadata.annotations.kubernetes\.io/service-account\.name'
 ```
@@ -26,32 +28,60 @@ kubectl -n outpost delete secret ledger-legacy-token
 
 ## Find projected tokens with long lifetimes
 
-A projected token has a lifetime that the pod author chooses in `expirationSeconds`. The default is 3607 seconds, a little over an hour. A pod can ask for much more, and the API server accepts it. The pod `ledger-client` asks for 86400 seconds. To find such pods across the cluster, print the lifetime of each projected token. A pod without an explicit volume prints the default.
+The Pod's `expirationSeconds` requests a token lifetime. The API default for an explicit projection is 3600 seconds; this cluster's automatically injected volume requests 3607. The server determines the issued expiration. The Pod `ledger-client` requests 86400 seconds. Print the requested values across the cluster; a Pod without a token projection has no value:
 
 ```sh
 kubectl get pods -A -o jsonpath='{range .items[*]}{.metadata.namespace}{"/"}{.metadata.name}{"\t"}{.spec.volumes[*].projected.sources[*].serviceAccountToken.expirationSeconds}{"\n"}{end}'
 ```
 
-Pods that use the default mount show 3607. The line for `outpost/ledger-client` shows 86400, which is more than a day. A long lifetime is a finding because a stolen token stays useful for that long, and the kubelet only refreshes the file at about 80 percent of the lifetime. Short lifetimes limit the damage, and the minimum the API accepts is 600 seconds.
+The `outpost/ledger-client` line shows a request for one day. Treat it as a review finding, then inspect the issued token's expiry to establish its actual lifetime. Kubelet refreshes projected tokens before expiry; rotation does not itself revoke an already copied token. The minimum requested duration is 600 seconds. See the [Kubernetes projected-token documentation](https://kubernetes.io/docs/concepts/storage/projected-volumes/#serviceaccounttoken-projected-volumes) for the API contract.
 
 ## Request a token and test it against the API server
 
-You can request a token yourself and use it. The command `kubectl create token` calls the TokenRequest API and prints the JWT. The option `--token` makes `kubectl` send a given token instead of your own credentials. Put the first command inside `$(...)` so the token goes straight into the second command and never appears on the screen. `kubectl auth whoami` prints the identity that the API server sees.
+A TokenRequest asks the API server for a token with an audience and a lifetime. To test that token, remove your administrator credentials from the client configuration. Adding `--token` to a kubeconfig that still contains a client certificate can authenticate through that certificate and invalidate the experiment.
+
+Using the selected playground context, save its server address and public certificate authority (CA). The CA verifies the API server; it does not authenticate you:
 
 ```sh
-kubectl --token="$(kubectl -n outpost create token archive)" auth whoami
-kubectl --token="$(kubectl -n outpost create token archive --audience=ledger)" auth whoami
+api_server=$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')
+ca_file=$(mktemp)
+kubectl config view --raw --minify -o jsonpath='{.clusters[0].cluster.certificate-authority-data}' | base64 -d > "$ca_file"
 ```
 
-The first command prints the user name `system:serviceaccount:outpost:archive` together with its groups. The second fails with an `Unauthorized` error. The token is valid, but its audience is `ledger`, and the API server accepts only tokens that name its own audience. This is the property you use when a workload needs a token for another service: the token is useless against the API server.
-
-The same call shows the effect of the lifetime. Ask for the shortest token and test it:
+Request a token for `archive`, then send it using an empty kubeconfig. Only the explicit token authenticates this request:
 
 ```sh
-kubectl --token="$(kubectl -n outpost create token archive --duration=10m)" auth can-i list pods -n outpost
+token=$(kubectl -n outpost create token archive --duration=10m)
+kubectl --kubeconfig=/dev/null --server="$api_server" --certificate-authority="$ca_file" --token="$token" auth whoami
 ```
 
-The answer is `yes`, because of the group binding found earlier. Ten minutes after the token was created, the same call is refused. Tokens from `kubectl create token` can also be tied to an object with `--bound-object-kind` and `--bound-object-name`, and then they stop working as soon as that pod or Secret is deleted.
+The response must identify `system:serviceaccount:outpost:archive`. A response naming your administrator means the test has not isolated the token. Now request the same identity with an audience that this API server does not accept:
+
+```sh
+token=$(kubectl -n outpost create token archive --audience=ledger --duration=10m)
+kubectl --kubeconfig=/dev/null --server="$api_server" --certificate-authority="$ca_file" --token="$token" auth whoami
+unset token
+rm "$ca_file"
+```
+
+The request should fail as unauthorized. The token is intended for `ledger`, not this API server. Treat the requested duration as a request: the server can choose a different expiration. Inspect the issued token's claims locally if you need its actual expiry, without recording the credential in a report.
+
+## Repair an explicit projection
+
+Disabling the default mount does not remove a token volume explicitly declared by the Pod. For a workload that needs one API token, use `automountServiceAccountToken: false` and an explicit projection. This fragment belongs inside a Pod's `spec`:
+
+```yaml
+automountServiceAccountToken: false
+volumes:
+- name: ledger-token
+  projected:
+    sources:
+    - serviceAccountToken:
+        path: token
+        expirationSeconds: 3600
+```
+
+Mount `ledger-token` read-only in the container that needs it. A volume entry alone does not expose the file to a container. Omitting `audience` requests the API server's default audience; use an explicit audience when the receiving service requires another one. Pod volume sources cannot normally be changed in place, so export the manifest, remove server-generated fields, recreate the Pod with the corrected projection and wait for readiness. Then inspect both the live volume and the mounted path. This checks the configuration applied to the workload, while the isolated request above checks token acceptance.
 
 ## What to record in a review
 

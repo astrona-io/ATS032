@@ -1,20 +1,23 @@
 {
   "context": "kind-astro-ats-032-lab-030-03-01",
+  "cluster": "astro-ats-032-lab-030-03-01",
+  "namespace": "starfleet-032-030-03-01",
   "resources": [
     {
       "kind": "namespace",
-      "name": "outpost",
+      "name": "outpost-032-030-03-01",
       "expected": {
         "apiVersion": "v1",
         "kind": "Namespace",
         "metadata": {
-          "name": "outpost",
+          "name": "outpost-032-030-03-01",
           "labels": {
             "pod-security.kubernetes.io/enforce": "baseline"
           }
         }
       },
-      "namespace": null
+      "namespace": null,
+      "outcome": "pod-security-baseline"
     },
     {
       "kind": "validatingadmissionpolicy",
@@ -26,7 +29,8 @@
           "name": "no-nodeport"
         }
       },
-      "namespace": null
+      "namespace": null,
+      "outcome": "no-nodeport-policy"
     },
     {
       "kind": "validatingadmissionpolicybinding",
@@ -44,7 +48,8 @@
           ]
         }
       },
-      "namespace": null
+      "namespace": null,
+      "outcome": "no-nodeport-policy"
     }
   ],
   "behavior": [
@@ -52,7 +57,7 @@
       "args": [
         "kubectl",
         "-n",
-        "outpost",
+        "outpost-032-030-03-01",
         "run",
         "priv",
         "--image=docker.io/library/busybox:1.37.0",
@@ -64,13 +69,14 @@
       "denied": true,
       "failure_markers": [
         "violates podsecurity"
-      ]
+      ],
+      "outcome": "pod-security-baseline"
     },
     {
       "args": [
         "kubectl",
         "-n",
-        "outpost",
+        "outpost-032-030-03-01",
         "create",
         "service",
         "nodeport",
@@ -83,13 +89,14 @@
       "denied": true,
       "failure_markers": [
         "denied request"
-      ]
+      ],
+      "outcome": "no-nodeport-policy"
     },
     {
       "args": [
         "kubectl",
         "-n",
-        "outpost",
+        "outpost-032-030-03-01",
         "create",
         "service",
         "clusterip",
@@ -101,13 +108,14 @@
       ],
       "contains": [
         "service/demo"
-      ]
+      ],
+      "outcome": "no-nodeport-policy"
     },
     {
       "args": [
         "kubectl",
         "-n",
-        "starfleet",
+        "starfleet-032-030-03-01",
         "create",
         "service",
         "nodeport",
@@ -119,13 +127,14 @@
       ],
       "contains": [
         "service/demo"
-      ]
+      ],
+      "outcome": "no-nodeport-policy"
     },
     {
       "args": [
         "kubectl",
         "-n",
-        "outpost",
+        "outpost-032-030-03-01",
         "run",
         "plain",
         "--image=docker.io/library/busybox:1.37.0",
@@ -135,7 +144,8 @@
       ],
       "contains": [
         "pod/plain"
-      ]
+      ],
+      "outcome": "pod-security-baseline"
     }
   ]
 }

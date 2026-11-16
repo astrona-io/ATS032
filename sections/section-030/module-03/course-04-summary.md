@@ -17,4 +17,10 @@ An admission webhook calls an HTTPS service and can change or validate the objec
 
 Clean up the playground when you finish.
 
+
+
+## Independent live assessment
+
+Prepare with [Test A Webhook During An Outage](course-03a-test-webhook-outages.md). [Bound A Webhook Outage](labs/lab-02/question.md) uses its own kind environment. The healthy webhook rejects restricted ConfigMaps only in the protected namespace; The protected namespace fails closed during a webhook outage while other namespaces remain usable.
+
 <!-- astrona:playground:destroy -->

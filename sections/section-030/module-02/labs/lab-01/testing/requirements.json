@@ -1,5 +1,7 @@
 {
   "context": "kind-astro-ats-032-lab-030-02-01",
+  "cluster": "astro-ats-032-lab-030-02-01",
+  "namespace": "starfleet-032-030-02-01",
   "resources": [
     {
       "kind": "clusterrolebinding",
@@ -26,33 +28,27 @@
       "namespace": null
     }
   ],
-  "absent": [
-    {
-      "kind": "clusterrolebinding",
-      "name": "anonymous-viewer",
-      "namespace": null
-    }
-  ],
   "behavior": [
     {
       "args": [
         "kubectl",
         "-n",
-        "starfleet",
+        "starfleet-032-030-02-01",
         "exec",
         "deployment/probe",
         "--",
         "python",
         "-c",
-        "import ssl,urllib.request as r,urllib.error as e\nroot='/var/run/secrets/kubernetes.io/serviceaccount'\nc=ssl.create_default_context(cafile=root+'/ca.crt')\nq=r.Request('https://kubernetes.default.svc/api/v1/namespaces/starfleet/pods')\ntry:\n    print(r.urlopen(q,context=c,timeout=5).status)\nexcept e.HTTPError as x:\n    print(x.code)\n"
+        "import ssl,urllib.request as r,urllib.error as e\nroot='/var/run/secrets/kubernetes.io/serviceaccount'\nc=ssl.create_default_context(cafile=root+'/ca.crt')\nq=r.Request('https://kubernetes.default.svc/api/v1/namespaces/starfleet-032-030-02-01/pods')\ntry:\n    print(r.urlopen(q,context=c,timeout=5).status)\nexcept e.HTTPError as x:\n    print(x.code)\n"
       ],
-      "equals": "403"
+      "equals": "403",
+      "outcome": "anonymous-access-removed"
     },
     {
       "args": [
         "kubectl",
         "-n",
-        "starfleet",
+        "starfleet-032-030-02-01",
         "exec",
         "deployment/probe",
         "--",
@@ -70,11 +66,24 @@
         "list",
         "pods",
         "-n",
-        "starfleet",
+        "starfleet-032-030-02-01",
         "--as=ops-user",
         "--as-group=ops"
       ],
       "equals": "yes"
+    },
+    {
+      "args": [
+        "kubectl",
+        "get",
+        "clusterrolebinding",
+        "anonymous-viewer"
+      ],
+      "denied": true,
+      "failure_markers": [
+        "not found"
+      ],
+      "outcome": "anonymous-access-removed"
     }
   ]
 }

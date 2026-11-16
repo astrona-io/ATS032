@@ -1,22 +1,22 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: starfleet
+  name: starfleet-032-020-03-01
   labels:
     project: ckad
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: outpost
+  name: outpost-032-020-03-01
   labels:
-    project: outpost
+    project: outpost-032-020-03-01
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: probe-code
-  namespace: starfleet
+  namespace: starfleet-032-020-03-01
 data:
   server.py: "from http.server import BaseHTTPRequestHandler, HTTPServer\nfrom pathlib\
     \ import Path\nimport os\nimport socket\n\nclass Handler(BaseHTTPRequestHandler):\n\
@@ -33,7 +33,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: probe
-  namespace: starfleet
+  namespace: starfleet-032-020-03-01
 spec:
   replicas: 2
   selector:
@@ -82,7 +82,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: probe
-  namespace: starfleet
+  namespace: starfleet-032-020-03-01
 spec:
   selector:
     app: probe
@@ -96,7 +96,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: shuttle
-  namespace: starfleet
+  namespace: starfleet-032-020-03-01
   labels:
     app: shuttle
 spec:
@@ -113,7 +113,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: drifter
-  namespace: outpost
+  namespace: outpost-032-020-03-01
   labels:
     app: drifter
 spec:
@@ -130,20 +130,20 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: ledger
-  namespace: outpost
+  namespace: outpost-032-020-03-01
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: archive
-  namespace: outpost
+  namespace: outpost-032-020-03-01
 automountServiceAccountToken: false
 ---
 apiVersion: v1
 kind: Pod
 metadata:
   name: ledger-client
-  namespace: outpost
+  namespace: outpost-032-020-03-01
   labels:
     app: ledger-client
 spec:
@@ -170,7 +170,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: archive-reader
-  namespace: outpost
+  namespace: outpost-032-020-03-01
   labels:
     app: archive-reader
 spec:
@@ -185,7 +185,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: ledger-legacy-token
-  namespace: outpost
+  namespace: outpost-032-020-03-01
   annotations:
     kubernetes.io/service-account.name: ledger
 type: kubernetes.io/service-account-token
@@ -201,13 +201,13 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: ledger
-  namespace: outpost
+  namespace: outpost-032-020-03-01
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: outpost-all-view
-  namespace: outpost
+  namespace: outpost-032-020-03-01
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -215,4 +215,4 @@ roleRef:
 subjects:
 - apiGroup: rbac.authorization.k8s.io
   kind: Group
-  name: system:serviceaccounts:outpost
+  name: system:serviceaccounts:outpost-032-020-03-01

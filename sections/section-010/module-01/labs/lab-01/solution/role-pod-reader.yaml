@@ -2,7 +2,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: pod-reader
-  namespace: starfleet
+  namespace: starfleet-032-010-01-01
 rules:
 - apiGroups:
   - ''
@@ -17,7 +17,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: shuttle-pod-reader
-  namespace: starfleet
+  namespace: starfleet-032-010-01-01
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -25,4 +25,4 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: shuttle
-  namespace: starfleet
+  namespace: starfleet-032-010-01-01

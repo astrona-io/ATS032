@@ -24,11 +24,36 @@ teardown:
   keepCluster: false
 testing:
   init:
+  - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
   - name: reference-result
     type: file
     source: solution/apply.sh
-validation:
-  script:
-    name: verify-fields-and-live-evidence
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
     type: file
-    source: validate.sh
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: probe-serviceaccount
+    description: Deployment probe runs as ServiceAccount probe with no token mounted
+    type: file
+    source: validation/validate-probe-serviceaccount.sh
+    points: 2
+  - name: pod-lister-rbac
+    description: pod-lister can get Pods in its namespace only and cannot delete them
+    type: file
+    source: validation/validate-pod-lister-rbac.sh
+    points: 1
+  - name: pod-lister-pod
+    description: Pod pod-lister runs as ServiceAccount pod-lister
+    type: file
+    source: validation/validate-pod-lister-pod.sh
+    points: 1
+  - name: default-account-locked
+    description: default-pod-access is gone and the default ServiceAccount mounts no token and cannot get Pods
+    type: file
+    source: validation/validate-default-account-locked.sh
+    points: 1

@@ -24,11 +24,36 @@ teardown:
   keepCluster: false
 testing:
   init:
+  - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
   - name: reference-result
     type: file
     source: solution/apply.sh
-validation:
-  script:
-    name: verify-fields-and-live-evidence
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
     type: file
-    source: validate.sh
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: worker2-schedulable
+    description: The second worker is schedulable and has no maintenance taint
+    type: file
+    source: validation/validate-worker2-schedulable.sh
+    points: 1
+  - name: probe-spread
+    description: Both probe replicas are ready on two different nodes
+    type: file
+    source: validation/validate-probe-spread.sh
+    points: 1
+  - name: budget-max-unavailable
+    description: PodDisruptionBudget probe uses maxUnavailable 1 only
+    type: file
+    source: validation/validate-budget-max-unavailable.sh
+    points: 1
+  - name: post-maintenance-record
+    description: ConfigMap post-maintenance-record has the verified data
+    type: file
+    source: validation/validate-post-maintenance-record.sh
+    points: 1

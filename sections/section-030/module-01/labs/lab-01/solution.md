@@ -21,8 +21,8 @@ The application and client fixtures are healthy. Complete the required change wi
 Inspect the relevant evidence:
 
 ```sh
-kubectl -n starfleet get pods
-kubectl -n starfleet get deployment probe -o yaml
+kubectl -n starfleet-032-030-01-01 get pods
+kubectl -n starfleet-032-030-01-01 get deployment probe -o yaml
 ```
 
 A ServiceAccount identifies the workload to the API server. The projected token authenticates the request, while RBAC controls the permitted action. Using the mounted certificate authority verifies the API server identity. A host-side authorization check alone does not prove that the workload can authenticate.
@@ -35,13 +35,13 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: observer
-  namespace: starfleet
+  namespace: starfleet-032-030-01-01
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: observer-reader
-  namespace: starfleet
+  namespace: starfleet-032-030-01-01
 rules:
 - apiGroups:
   - ''
@@ -55,7 +55,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: observer-read
-  namespace: starfleet
+  namespace: starfleet-032-030-01-01
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -63,13 +63,13 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: observer
-  namespace: starfleet
+  namespace: starfleet-032-030-01-01
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: probe
-  namespace: starfleet
+  namespace: starfleet-032-030-01-01
 spec:
   replicas: 2
   selector:
@@ -127,13 +127,13 @@ kubectl apply -f serviceaccount-observer.yaml
 Observe the actual result. A denied-request command returns a nonzero status when the denial works. Run denial checks separately from a shell sequence that stops on the first nonzero status.
 
 ```sh
-kubectl -n starfleet rollout status deployment/probe --timeout=180s
-kubectl -n starfleet exec deployment/probe -- python -c 'from pathlib import Path; import ssl,urllib.request,json; root=Path('"'"'/var/run/secrets/kubernetes.io/serviceaccount'"'"'); request=urllib.request.Request('"'"'https://kubernetes.default.svc/api/v1/namespaces/starfleet/pods'"'"',headers={'"'"'Authorization'"'"':'"'"'Bearer '"'"'+(root/'"'"'token'"'"').read_text()}); context=ssl.create_default_context(cafile=str(root/'"'"'ca.crt'"'"')); result=json.load(urllib.request.urlopen(request,context=context,timeout=5)); print(result['"'"'kind'"'"'])'
-kubectl auth can-i get secrets -n starfleet --as=system:serviceaccount:starfleet:observer
-kubectl auth can-i create pods -n starfleet --as=system:serviceaccount:starfleet:observer
+kubectl -n starfleet-032-030-01-01 rollout status deployment/probe --timeout=180s
+kubectl -n starfleet-032-030-01-01 exec deployment/probe -- python -c 'from pathlib import Path; import ssl,urllib.request,json; root=Path('"'"'/var/run/secrets/kubernetes.io/serviceaccount'"'"'); request=urllib.request.Request('"'"'https://kubernetes.default.svc/api/v1/namespaces/starfleet-032-030-01-01/pods'"'"',headers={'"'"'Authorization'"'"':'"'"'Bearer '"'"'+(root/'"'"'token'"'"').read_text()}); context=ssl.create_default_context(cafile=str(root/'"'"'ca.crt'"'"')); result=json.load(urllib.request.urlopen(request,context=context,timeout=5)); print(result['"'"'kind'"'"'])'
+kubectl auth can-i get secrets -n starfleet-032-030-01-01 --as=system:serviceaccount:starfleet-032-030-01-01:observer
+kubectl auth can-i create pods -n starfleet-032-030-01-01 --as=system:serviceaccount:starfleet-032-030-01-01:observer
 ```
 
-Create ServiceAccount `observer`, Role `observer-reader` granting exactly get and list on core Pods, and RoleBinding `observer-read` for that identity in `starfleet`. Run both probe replicas as that ServiceAccount. A request from the application container using its mounted token and certificate authority must read the namespace Pod list. Secret reads and Pod creation must remain denied.
+Create ServiceAccount `observer`, Role `observer-reader` granting exactly get and list on core Pods, and RoleBinding `observer-read` for that identity in `starfleet-032-030-01-01`. Run both probe replicas as that ServiceAccount. A request from the application container using its mounted token and certificate authority must read the namespace Pod list. Secret reads and Pod creation must remain denied.
 
 After recording the result, remove this independent lab with `astrona destroy ats-032-lab-030-01-01`.
 

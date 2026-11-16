@@ -1,16 +1,18 @@
 {
   "context": "kind-astro-ats-032-lab-020-03-01",
+  "cluster": "astro-ats-032-lab-020-03-01",
+  "namespace": "starfleet-032-020-03-01",
   "resources": [
     {
       "kind": "role",
       "name": "config-reader",
-      "namespace": "outpost",
+      "namespace": "outpost-032-020-03-01",
       "expected": {
         "apiVersion": "rbac.authorization.k8s.io/v1",
         "kind": "Role",
         "metadata": {
           "name": "config-reader",
-          "namespace": "outpost"
+          "namespace": "outpost-032-020-03-01"
         },
         "rules": [
           {
@@ -26,18 +28,19 @@
             ]
           }
         ]
-      }
+      },
+      "outcome": "config-reader"
     },
     {
       "kind": "rolebinding",
       "name": "config-reader",
-      "namespace": "outpost",
+      "namespace": "outpost-032-020-03-01",
       "expected": {
         "apiVersion": "rbac.authorization.k8s.io/v1",
         "kind": "RoleBinding",
         "metadata": {
           "name": "config-reader",
-          "namespace": "outpost"
+          "namespace": "outpost-032-020-03-01"
         },
         "roleRef": {
           "apiGroup": "rbac.authorization.k8s.io",
@@ -48,15 +51,16 @@
           {
             "kind": "ServiceAccount",
             "name": "ledger",
-            "namespace": "outpost"
+            "namespace": "outpost-032-020-03-01"
           }
         ]
-      }
+      },
+      "outcome": "config-reader"
     },
     {
       "kind": "pod",
       "name": "ledger-client",
-      "namespace": "outpost",
+      "namespace": "outpost-032-020-03-01",
       "expected": {
         "spec": {
           "serviceAccountName": "ledger",
@@ -78,12 +82,13 @@
           ]
         }
       },
-      "state": "pod"
+      "state": "pod",
+      "outcome": "ledger-client-projected-token"
     },
     {
       "kind": "pod",
       "name": "archive-reader",
-      "namespace": "outpost",
+      "namespace": "outpost-032-020-03-01",
       "expected": {
         "spec": {
           "serviceAccountName": "archive"
@@ -101,10 +106,11 @@
         "get",
         "configmaps",
         "-n",
-        "outpost",
-        "--as=system:serviceaccount:outpost:ledger"
+        "outpost-032-020-03-01",
+        "--as=system:serviceaccount:outpost-032-020-03-01:ledger"
       ],
-      "equals": "yes"
+      "equals": "yes",
+      "outcome": "config-reader"
     },
     {
       "args": [
@@ -114,14 +120,15 @@
         "delete",
         "configmaps",
         "-n",
-        "outpost",
-        "--as=system:serviceaccount:outpost:ledger"
+        "outpost-032-020-03-01",
+        "--as=system:serviceaccount:outpost-032-020-03-01:ledger"
       ],
       "denied": true,
       "failure_markers": [
         "no"
       ],
-      "equals": "no"
+      "equals": "no",
+      "outcome": "broad-bindings-removed"
     },
     {
       "args": [
@@ -131,14 +138,15 @@
         "get",
         "secrets",
         "-n",
-        "outpost",
-        "--as=system:serviceaccount:outpost:ledger"
+        "outpost-032-020-03-01",
+        "--as=system:serviceaccount:outpost-032-020-03-01:ledger"
       ],
       "denied": true,
       "failure_markers": [
         "no"
       ],
-      "equals": "no"
+      "equals": "no",
+      "outcome": "broad-bindings-removed"
     },
     {
       "args": [
@@ -148,20 +156,21 @@
         "list",
         "pods",
         "-n",
-        "outpost",
-        "--as=system:serviceaccount:outpost:archive"
+        "outpost-032-020-03-01",
+        "--as=system:serviceaccount:outpost-032-020-03-01:archive"
       ],
       "denied": true,
       "failure_markers": [
         "no"
       ],
-      "equals": "no"
+      "equals": "no",
+      "outcome": "broad-bindings-removed"
     },
     {
       "args": [
         "kubectl",
         "-n",
-        "outpost",
+        "outpost-032-020-03-01",
         "get",
         "secret",
         "ledger-legacy-token"
@@ -169,7 +178,8 @@
       "denied": true,
       "failure_markers": [
         "not found"
-      ]
+      ],
+      "outcome": "legacy-token-removed"
     },
     {
       "args": [
@@ -181,13 +191,14 @@
       "denied": true,
       "failure_markers": [
         "not found"
-      ]
+      ],
+      "outcome": "broad-bindings-removed"
     },
     {
       "args": [
         "kubectl",
         "-n",
-        "outpost",
+        "outpost-032-020-03-01",
         "get",
         "rolebinding",
         "outpost-all-view"
@@ -195,7 +206,8 @@
       "denied": true,
       "failure_markers": [
         "not found"
-      ]
+      ],
+      "outcome": "broad-bindings-removed"
     }
   ]
 }
