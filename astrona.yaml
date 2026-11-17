@@ -344,27 +344,48 @@ modules:
     title: A Narrow Workload Identity
     path: sections/section-030/module-01/course-02-a-narrow-workload-identity.md
   - type: reading
-    title: Use A Workload Identity For An API Request — Task
+    title: Give A Workload A Narrow ServiceAccount — Task
     path: sections/section-030/module-01/labs/lab-01/question.md
   - type: lab
-    title: Use A Workload Identity For An API Request
+    title: Give A Workload A Narrow ServiceAccount
     path: sections/section-030/module-01/labs/lab-01
+    examScope: namespace
     difficulty: intermediate
-    estimated_duration: 25m
+    estimated_duration: 10m
     topic: serviceaccount-api
     task_kind: build
     learning_goals:
-    - Run the application with a narrow identity and authenticate a real API request
-      from its container.
+    - Run a Deployment with its own ServiceAccount that may only read Pods in its
+      namespace, and prove the limit with API requests from the container.
     tags:
     - cks
     - serviceaccount-api
   - type: reading
-    title: Use A Workload Identity For An API Request — Solution
+    title: Give A Workload A Narrow ServiceAccount — Solution
     path: sections/section-030/module-01/labs/lab-01/solution.md
   - type: reading
     title: Hardening The Endpoint And The Kubelet
     path: sections/section-030/module-01/course-03-hardening-the-endpoint-and-the-kubelet.md
+  - type: reading
+    title: Harden The Kubelet On A Worker Node — Task
+    path: sections/section-030/module-01/labs/lab-02/question.md
+  - type: lab
+    title: Harden The Kubelet On A Worker Node
+    path: sections/section-030/module-01/labs/lab-02
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 10m
+    topic: kubelet-hardening
+    task_kind: build
+    learning_goals:
+    - Turn off anonymous kubelet access, use Webhook authorization and close the
+      read-only port on a worker node, and check the effective kubelet configuration.
+    tags:
+    - cks
+    - kubelet-hardening
+  - type: reading
+    title: Harden The Kubelet On A Worker Node — Solution
+    path: sections/section-030/module-01/labs/lab-02/solution.md
   - type: reading
     title: Summary
     path: sections/section-030/module-01/course-04-summary.md
@@ -380,30 +401,71 @@ modules:
     title: Authentication Methods And Identities
     path: sections/section-030/module-02/course-01-authentication-methods-and-identities.md
   - type: reading
+    title: Remove Static Token Authentication From The API Server — Task
+    path: sections/section-030/module-02/labs/lab-02/question.md
+  - type: lab
+    title: Remove Static Token Authentication From The API Server
+    path: sections/section-030/module-02/labs/lab-02
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 8m
+    topic: static-token-auth
+    task_kind: build
+    learning_goals:
+    - Remove the static token file from the kube-apiserver static Pod and prove that
+      the old token is rejected once the API server is ready again.
+    tags:
+    - cks
+    - static-token-auth
+  - type: reading
+    title: Remove Static Token Authentication From The API Server — Solution
+    path: sections/section-030/module-02/labs/lab-02/solution.md
+  - type: reading
     title: Anonymous Access In Practice
     path: sections/section-030/module-02/course-02-anonymous-access-in-practice.md
   - type: reading
-    title: Remove Anonymous Access To The API — Task
+    title: Remove RBAC Grants For Anonymous Requests — Task
     path: sections/section-030/module-02/labs/lab-01/question.md
   - type: lab
-    title: Remove Anonymous Access To The API
+    title: Remove RBAC Grants For Anonymous Requests
     path: sections/section-030/module-02/labs/lab-01
+    examScope: cluster
     difficulty: intermediate
-    estimated_duration: 25m
+    estimated_duration: 8m
     topic: anonymous-access
     task_kind: build
     learning_goals:
-    - Remove the binding that gives anonymous callers access to cluster data without
-      breaking health access or a named team binding.
+    - Find and remove the bindings that give anonymous requests access to cluster
+      data without breaking health access or a named team binding.
     tags:
     - cks
     - anonymous-access
   - type: reading
-    title: Remove Anonymous Access To The API — Solution
+    title: Remove RBAC Grants For Anonymous Requests — Solution
     path: sections/section-030/module-02/labs/lab-01/solution.md
   - type: reading
     title: Authorization Modes And Impersonation
     path: sections/section-030/module-02/course-03-authorization-modes-and-impersonation.md
+  - type: reading
+    title: Remove AlwaysAllow And Narrow Impersonation Rights — Task
+    path: sections/section-030/module-02/labs/lab-03/question.md
+  - type: lab
+    title: Remove AlwaysAllow And Narrow Impersonation Rights
+    path: sections/section-030/module-02/labs/lab-03
+    examScope: cluster
+    difficulty: advanced
+    estimated_duration: 12m
+    topic: authorization-modes
+    task_kind: build
+    learning_goals:
+    - Set the API server authorization modes to Node,RBAC and limit an impersonation
+      grant to one ServiceAccount in one namespace.
+    tags:
+    - cks
+    - authorization-modes
+  - type: reading
+    title: Remove AlwaysAllow And Narrow Impersonation Rights — Solution
+    path: sections/section-030/module-02/labs/lab-03/solution.md
   - type: reading
     title: Summary
     path: sections/section-030/module-02/course-04-summary.md
@@ -419,57 +481,79 @@ modules:
     title: Pod Security Admission
     path: sections/section-030/module-03/course-01-pod-security-admission.md
   - type: reading
-    title: ValidatingAdmissionPolicy With CEL
-    path: sections/section-030/module-03/course-02-validatingadmissionpolicy-with-cel.md
-  - type: reading
-    title: Enforce Admission Rules In A Namespace — Task
+    title: Enforce Pod Security Standards On A Namespace — Task
     path: sections/section-030/module-03/labs/lab-01/question.md
   - type: lab
-    title: Enforce Admission Rules In A Namespace
+    title: Enforce Pod Security Standards On A Namespace
     path: sections/section-030/module-03/labs/lab-01
+    examScope: namespace
     difficulty: intermediate
-    estimated_duration: 25m
+    estimated_duration: 10m
     topic: admission-rules
     task_kind: build
     learning_goals:
-    - Reject privileged Pods and NodePort Services in one namespace with Pod Security
-      labels and a ValidatingAdmissionPolicy.
+    - Enforce the baseline Pod Security Standard, warn about restricted, and fix a
+      privileged Deployment so that it runs under the new rule.
     tags:
     - cks
     - admission-rules
   - type: reading
-    title: Enforce Admission Rules In A Namespace — Solution
+    title: Enforce Pod Security Standards On A Namespace — Solution
     path: sections/section-030/module-03/labs/lab-01/solution.md
+  - type: reading
+    title: ValidatingAdmissionPolicy With CEL
+    path: sections/section-030/module-03/course-02-validatingadmissionpolicy-with-cel.md
+  - type: reading
+    title: Block NodePort Services With A ValidatingAdmissionPolicy — Task
+    path: sections/section-030/module-03/labs/lab-02/question.md
+  - type: lab
+    title: Block NodePort Services With A ValidatingAdmissionPolicy
+    path: sections/section-030/module-03/labs/lab-02
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 10m
+    topic: validating-admission-policy
+    task_kind: build
+    learning_goals:
+    - Extend a ValidatingAdmissionPolicy to UPDATE requests and bind it with the Deny
+      action to one namespace.
+    tags:
+    - cks
+    - validating-admission-policy
+  - type: reading
+    title: Block NodePort Services With A ValidatingAdmissionPolicy — Solution
+    path: sections/section-030/module-03/labs/lab-02/solution.md
   - type: reading
     title: Admission Webhooks And Failure Policy
     path: sections/section-030/module-03/course-03-admission-webhooks-and-failure-policy.md
   - type: reading
+    title: Make An Admission Webhook Fail Closed Safely — Task
+    path: sections/section-030/module-03/labs/lab-03/question.md
+  - type: lab
+    title: Make An Admission Webhook Fail Closed Safely
+    path: sections/section-030/module-03/labs/lab-03
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 8m
+    topic: admission-webhook-failure
+    task_kind: build
+    learning_goals:
+    - Make a validating webhook fail closed with a short timeout while keeping
+      kube-system out of its namespace selector.
+    tags:
+    - cks
+    - admission-webhook-failure
+  - type: reading
+    title: Make An Admission Webhook Fail Closed Safely — Solution
+    path: sections/section-030/module-03/labs/lab-03/solution.md
+  - type: reading
     title: Summary
     path: sections/section-030/module-03/course-04-summary.md
   - type: quiz
-    title: 'Knowledge Check: Restrict Access To The Kubernetes API'
+    title: 'Knowledge Check: Admission Control For API Writes'
     path: sections/section-030/module-03/quiz.yaml
     question_count: 10
     pass_score: 70
-  - type: reading
-    title: 'Knowledge Check: Admission Control For API Writes'
-    path: sections/section-030/capstone/labs/lab-01/question.md
-  - type: lab
-    title: Restrict API Access End To End
-    path: sections/section-030/capstone/labs/lab-01
-    difficulty: advanced
-    estimated_duration: 50m
-    topic: api-access-capstone
-    task_kind: build
-    learning_goals:
-    - Combine a narrow workload identity, removal of anonymous access and admission
-      rules in one namespace, and prove each with requests.
-    tags:
-    - cks
-    - api-access-capstone
-  - type: reading
-    title: Restrict API Access End To End — Solution
-    path: sections/section-030/capstone/labs/lab-01/solution.md
 - id: module-040
   title: Upgrade Kubernetes To Avoid Vulnerabilities
   description: Plan a supported upgrade, drain nodes safely, run the kubeadm sequence

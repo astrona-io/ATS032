@@ -24,7 +24,7 @@ On a kubeadm-based cluster such as the playground, the output contains the line 
 - **RBAC** allows a request when a Role or ClusterRole bound to the identity lists the verb, resource and name. It has only allow rules and never answers `deny`.
 - **Webhook** sends a `SubjectAccessReview` to an external service. That service can allow or deny. Use it when decisions come from a policy engine outside the cluster.
 - **ABAC** reads rules from a static file and needs an API server restart for each change. Do not use it.
-- **AlwaysAllow** authorizes every request. With it, the permission model is gone, and anonymous callers can do everything. It exists for tests.
+- **AlwaysAllow** authorizes every request that reaches it. With it, the permission model is gone, and every authenticated user and ServiceAccount can do everything. The API server turns anonymous authentication off when `AlwaysAllow` is in the list, so requests without credentials get `401`. It exists for tests.
 - **AlwaysDeny** refuses every request and also exists for tests.
 
 A hardened kubeadm cluster uses `Node,RBAC`. `Node` comes first so that a kubelet request is decided cheaply, and `RBAC` handles everyone else. If `AlwaysAllow` is in the list, RBAC never gets a chance to refuse anything, because the request is already authorized.
@@ -69,7 +69,7 @@ You now know which modes decide a request, why only `Node,RBAC` belongs in the l
 ## Common pitfalls
 
 > [!WARNING]
-> - **Leaving `AlwaysAllow` in `--authorization-mode`.** Every request is authorized, including anonymous ones. Check the live flag.
+> - **Leaving `AlwaysAllow` in `--authorization-mode`.** Every authenticated request is authorized, whatever the RBAC rules say. Check the live flag.
 > - **Putting `RBAC` without `Node`.** Kubelets then depend on RBAC rules that were not designed for them.
 > - **Granting `impersonate` broadly.** It lets the holder act as any identity that it names, including administrators.
 > - **Reading `can-i` without `--as`.** The answer is for your own credentials, which are `cluster-admin` in the playground.

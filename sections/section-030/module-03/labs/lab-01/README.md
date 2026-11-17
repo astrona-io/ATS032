@@ -2,8 +2,10 @@
 exam_objectives:
 - Restrict access to Kubernetes API
 ---
-# Enforce Admission Rules In A Namespace
+# Enforce Pod Security Standards On A Namespace
 
-Make the API server reject privileged Pods and NodePort Services in one namespace and still admit ordinary objects. The task and reference solution use a separate pinned kind cluster. The grader checks declared fields and bounded live evidence. Python 3 is required on the grading host.
+The bootstrap creates `outpost-032-030-03-01` without Pod Security labels and a privileged Deployment `web`.
 
-Run `testing/smoke.sh` with the lab's private kubeconfig to prove that the starting state fails and the reference repair passes. Each wait and request is bounded. Live verification is pending until actual container-engine execution is recorded. Static checks are not runtime evidence.
+The graders check the labels and send server-side dry-run Pods: a privileged Pod must be rejected, a plain Pod must be admitted with a `restricted` warning. `web` must roll out without privileged containers.
+
+The task and solution use a separate pinned kind cluster with one control plane node and one worker node (`examScope: namespace`). Run `astrona validate .` and `astrona test . --accept-terms --headless` on this folder: `testing/verify-start.sh` checks that every outcome fails on the starting state, then `solution/apply.sh` applies the reference solution and `testing/wait-solved.sh` waits until every outcome passes.

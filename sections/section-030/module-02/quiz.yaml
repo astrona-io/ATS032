@@ -10,7 +10,7 @@ provenance: "Original practice material written for this course; not official ex
 scope:
   type: section
   id: section-030
-  title: "Restrict Access To The Kubernetes API"
+  title: "Authentication, Anonymous Access And Authorization Modes"
 placement:
   position: after
   reading: sections/section-030/module-02/course-04-summary.md

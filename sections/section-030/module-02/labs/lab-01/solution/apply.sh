@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
+# Reference solution: delete the two bindings that name anonymous subjects.
 set -euo pipefail
-if [[ "$(kubectl config current-context)" != "kind-astro-ats-032-lab-030-02-01" ]]; then
+context="${ASTRONA_KUBE_CONTEXT:-kind-astro-ats-032-lab-030-02-01}"
+if [[ "$(kubectl config current-context)" != "$context" ]]; then
   printf 'Refusing to operate on another Kubernetes context\n' >&2
   exit 1
 fi
-lab_directory="$(cd "$(dirname "$0")/.." && pwd)"
-solution_directory="$lab_directory/solution"
-kubectl delete clusterrolebinding anonymous-viewer --ignore-not-found
+kubectl delete clusterrolebinding metrics-reader
+kubectl -n starfleet-032-030-02-01 delete rolebinding support-read
