@@ -2,16 +2,13 @@ apiVersion: astrona.io/v1
 metadata:
   name: ats-032-lab-020-03-01
   docs:
-    prerequisites: docs/prerequisites.md
     examQuestion: question.md
-    caseStudy: docs/case-study.md
     guide: solution.md
 runtime:
   type: kind
   kind:
     image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
     preloadImages:
-    - docker.io/library/python:3.13-alpine
     - docker.io/library/busybox:1.37.0
     nodes:
       workers: 1
@@ -37,23 +34,18 @@ testing:
     source: testing/wait-solved.sh
 validation:
   scripts:
-  - name: legacy-token-removed
-    description: Secret ledger-legacy-token is gone
+  - name: ledger-config-reader
+    description: The ServiceAccount ledger can only get and list ConfigMaps in its namespace and has no access elsewhere
     type: file
-    source: validation/validate-legacy-token-removed.sh
+    source: validation/validate-ledger-config-reader.sh
+    points: 2
+  - name: archive-no-access
+    description: The ServiceAccount archive has no permissions of its own
+    type: file
+    source: validation/validate-archive-no-access.sh
     points: 1
-  - name: broad-bindings-removed
-    description: ledger-edit and outpost-all-view are gone; ledger and archive lose the extra access
+  - name: group-bindings-removed
+    description: No binding gives permissions to the group of all ServiceAccounts in the namespace
     type: file
-    source: validation/validate-broad-bindings-removed.sh
-    points: 1
-  - name: config-reader
-    description: Role and RoleBinding config-reader let ledger read ConfigMaps
-    type: file
-    source: validation/validate-config-reader.sh
-    points: 1
-  - name: ledger-client-projected-token
-    description: Pod ledger-client uses a projected token that expires after 3600 seconds
-    type: file
-    source: validation/validate-ledger-client-projected-token.sh
+    source: validation/validate-group-bindings-removed.sh
     points: 1

@@ -1,46 +1,84 @@
----
-draft: true
-exam_objectives:
-- Exercise caution in using service accounts e.g. disable defaults, minimize permissions on newly created ones
----
-# Remove ServiceAccount Findings From A Namespace Solution
+# Remove Over-Broad ServiceAccount Bindings: Solution
 
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+A ServiceAccount gets permissions from every binding that names it, and also from every binding that names one of its groups. Kubernetes puts each ServiceAccount in the group `system:serviceaccounts` (all ServiceAccounts of the cluster) and in `system:serviceaccounts:<namespace>` (all ServiceAccounts of its namespace). A binding to a group does not contain the account name, so a search for the name alone misses it.
+
+## Step 1: Find the bindings
+
+First connect to the lab cluster:
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-032-lab-020-03-01)"
 test "$(kubectl config current-context)" = "kind-astro-ats-032-lab-020-03-01" || exit 1
 ```
 
-Keep this connection selected. Every script supplied by the lab refuses a different context.
-
-## Inspect
-
-Start with the audit commands. They list the pods with their ServiceAccounts, the token Secrets and the bindings that name a ServiceAccount or a ServiceAccount group:
+List the RoleBindings of the namespace, then the ClusterRoleBindings whose subjects are ServiceAccounts or ServiceAccount groups:
 
 ```sh
-kubectl get pods -n outpost-032-020-03-01 -o custom-columns=NAME:.metadata.name,SERVICEACCOUNT:.spec.serviceAccountName,AUTOMOUNT:.spec.automountServiceAccountToken
-kubectl get secrets -A --field-selector type=kubernetes.io/service-account-token
 kubectl -n outpost-032-020-03-01 get rolebindings -o wide
-kubectl get clusterrolebinding ledger-edit -o wide
-kubectl -n outpost-032-020-03-01 get pod ledger-client -o jsonpath='{.spec.volumes[0].projected.sources[0].serviceAccountToken.expirationSeconds}{"\n"}'
+kubectl get clusterrolebindings -o custom-columns=NAME:.metadata.name,ROLE:.roleRef.name,KIND:.subjects[*].kind,SUBJECT:.subjects[*].name | grep -E 'ServiceAccount|system:serviceaccounts'
 ```
 
-The pod list shows that `archive-reader` leaves the pod field unset, the Secret list includes `ledger-legacy-token`, the two bindings name `ledger` and the group, and the last command prints `86400`.
+```text
+NAME               ROLE               AGE   USERS   GROUPS                                         SERVICEACCOUNTS
+outpost-all-view   ClusterRole/view   5s            system:serviceaccounts:outpost-032-020-03-01   
+kindnet                                                         kindnet                                                                ServiceAccount   kindnet
+kubeadm:node-proxier                                            system:node-proxier                                                    ServiceAccount   kube-proxy
+ledger-edit                                                     edit                                                                   ServiceAccount   ledger
+local-path-provisioner-bind                                     local-path-provisioner-role                                            ServiceAccount   local-path-provisioner-service-account
+outpost-view-all                                                view                                                                   Group            system:serviceaccounts:outpost-032-020-03-01
+system:controller:attachdetach-controller                       system:controller:attachdetach-controller                              ServiceAccount   attachdetach-controller
+...
+system:service-account-issuer-discovery                         system:service-account-issuer-discovery                                Group            system:serviceaccounts
+```
 
-## Remove the findings
+The output is shortened: about 40 rows of `system:` bindings are left out. Kubernetes creates those for its own controllers and for CoreDNS. Three bindings belong to the lab:
 
-Delete the token Secret and the two bindings:
+- The RoleBinding `outpost-all-view` gives `view` to every ServiceAccount of the namespace.
+- The ClusterRoleBinding `ledger-edit` gives `edit` to `ledger` in every namespace of the cluster.
+- The ClusterRoleBinding `outpost-view-all` gives `view` to every ServiceAccount of the namespace, in every namespace.
+
+The last row, `system:service-account-issuer-discovery`, is a default binding. It only lets ServiceAccounts read the public keys that verify tokens, so leave it.
+
+## Step 2: Confirm the effect with the API server
+
+Ask the API server what the two ServiceAccounts may do, in their own namespace and in `default`:
 
 ```sh
-kubectl -n outpost-032-020-03-01 delete secret ledger-legacy-token
-kubectl delete clusterrolebinding ledger-edit
+kubectl auth can-i get secrets -n outpost-032-020-03-01 --as=system:serviceaccount:outpost-032-020-03-01:ledger
+kubectl auth can-i get secrets -n default --as=system:serviceaccount:outpost-032-020-03-01:ledger
+kubectl auth can-i list pods -n outpost-032-020-03-01 --as=system:serviceaccount:outpost-032-020-03-01:archive
+kubectl auth can-i list pods -n default --as=system:serviceaccount:outpost-032-020-03-01:archive
+```
+
+```text
+yes
+yes
+yes
+yes
+```
+
+`ledger` can read Secrets in any namespace, which includes the credentials of other workloads. `archive` has no binding with its own name, yet it can list Pods everywhere through the group bindings.
+
+## Step 3: Delete the over-broad bindings
+
+`kubectl delete` accepts several names of the same kind in one command:
+
+```sh
+kubectl delete clusterrolebinding ledger-edit outpost-view-all
 kubectl -n outpost-032-020-03-01 delete rolebinding outpost-all-view
 ```
 
-## Keep the one permission the workload needs
+```text
+clusterrolebinding.rbac.authorization.k8s.io "ledger-edit" deleted
+clusterrolebinding.rbac.authorization.k8s.io "outpost-view-all" deleted
+rolebinding.rbac.authorization.k8s.io "outpost-all-view" deleted from outpost-032-020-03-01 namespace
+```
 
-Save this as `rbac-config-reader.yaml`:
+Do not delete the ClusterRoles `edit` and `view`. They are built-in roles that other bindings use.
+
+## Step 4: Give ledger only what it needs
+
+Save this as `role-config-reader.yaml`:
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -52,7 +90,11 @@ rules:
 - apiGroups: [""]
   resources: ["configmaps"]
   verbs: ["get", "list"]
----
+```
+
+Save this as `rolebinding-config-reader.yaml`:
+
+```yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -68,76 +110,36 @@ subjects:
   namespace: outpost-032-020-03-01
 ```
 
-Apply it:
+Apply them:
 
 ```sh
-kubectl apply -f rbac-config-reader.yaml
+kubectl apply -f role-config-reader.yaml
+kubectl apply -f rolebinding-config-reader.yaml
 ```
 
-## Recreate the pod with a short token
+```text
+role.rbac.authorization.k8s.io/config-reader created
+rolebinding.rbac.authorization.k8s.io/config-reader created
+```
 
-A pod cannot change its volumes after it is created, so delete it first:
+## Step 5: Check the result
+
+Ask the same kind of questions again:
 
 ```sh
-kubectl -n outpost-032-020-03-01 delete pod ledger-client
-```
-
-Save this as `pod-ledger-client.yaml`:
-
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: ledger-client
-  namespace: outpost-032-020-03-01
-  labels:
-    app: ledger-client
-spec:
-  serviceAccountName: ledger
-  automountServiceAccountToken: false
-  restartPolicy: Never
-  containers:
-  - name: client
-    image: docker.io/library/busybox:1.37.0
-    command: ["sh", "-c", "sleep 3600"]
-    volumeMounts:
-    - name: ledger-token
-      mountPath: /var/run/tokens
-      readOnly: true
-  volumes:
-  - name: ledger-token
-    projected:
-      sources:
-      - serviceAccountToken:
-          path: token
-          expirationSeconds: 3600
-```
-
-Apply it:
-
-```sh
-kubectl apply -f pod-ledger-client.yaml
-```
-
-## Verify The Result
-
-Check the three removed objects, then ask the API server what the two accounts may do. Commands that print `no` or report `NotFound` exit with status 1 on purpose.
-
-```sh
-kubectl -n outpost-032-020-03-01 wait --for=condition=Ready pod/ledger-client --timeout=180s
-kubectl -n outpost-032-020-03-01 get secret ledger-legacy-token
-kubectl auth can-i get configmaps -n outpost-032-020-03-01 --as=system:serviceaccount:outpost-032-020-03-01:ledger
+kubectl auth can-i list configmaps -n outpost-032-020-03-01 --as=system:serviceaccount:outpost-032-020-03-01:ledger
 kubectl auth can-i get secrets -n outpost-032-020-03-01 --as=system:serviceaccount:outpost-032-020-03-01:ledger
+kubectl auth can-i list configmaps -n default --as=system:serviceaccount:outpost-032-020-03-01:ledger
 kubectl auth can-i list pods -n outpost-032-020-03-01 --as=system:serviceaccount:outpost-032-020-03-01:archive
+kubectl auth can-i list pods -n default --as=system:serviceaccount:outpost-032-020-03-01:archive
 ```
 
-The Secret lookup reports that the Secret is not found. The first `can-i` prints `yes` and the last two print `no`.
+```text
+yes
+no
+no
+no
+no
+```
 
-After recording your result, remove the independent lab with `astrona destroy ats-032-lab-020-03-01`.
-
-## Common pitfalls
-
-> [!WARNING]
-> - Deleting only the ClusterRoleBinding is not enough. The group binding in `outpost-032-020-03-01` also reaches every ServiceAccount of the namespace, including `archive`.
-> - A token lifetime below 600 seconds is rejected. Use 3600.
-> - Do not delete the ServiceAccount `ledger`. The pod needs it and the new Role binds to it.
+`ledger` can read ConfigMaps in its own namespace only, and `archive` can no longer read anything. For a full list of rules, run `kubectl auth can-i --list -n outpost-032-020-03-01 --as=system:serviceaccount:outpost-032-020-03-01:ledger`. Its output also shows the small default rules that every authenticated user has, such as `create` on `selfsubjectreviews`.

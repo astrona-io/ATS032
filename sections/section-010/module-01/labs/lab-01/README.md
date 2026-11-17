@@ -1,12 +1,10 @@
----
-draft: true
-exam_objectives:
-- Use Role Based Access Controls to minimize exposure
----
-# Grant Namespace Pod Read Access
+# Grant Namespace Pod Read Access (author notes)
 
-Grant a ServiceAccount only Pod read access in the required namespace and verify denied operations. This independent graded environment is separate from the module playground.
+Graded lab `ats-032-lab-010-01-01`. The learner task is `question.md` and the walkthrough is `solution.md`.
 
-Author checks: run `astrona validate -c ATS032/sections/section-010/module-01/labs/lab-01` from the workspace. Run `astrona test` on this folder: `testing/verify-start.sh` checks that every outcome fails on the starting state, then the reference solution is applied and every outcome must pass. The grader requires Python 3 on the host.
-
-Runtime verification is pending. Static checks and offline grader tests do not prove cluster execution.
+- Start: namespaces `starfleet-032-010-01-01` and `outpost-032-010-01-01`, ServiceAccount `shuttle` with no grant.
+- Outcomes (`validation/validate-<outcome>.sh`, one point each):
+  - `pod-reader-role`: the Role's rules, expanded to (API group, resource, name, verb) tuples, equal Pod `get`, `list`, `watch`. Any split of the rules passes.
+  - `shuttle-binding`: the RoleBinding references `pod-reader` and names only `shuttle` (ServiceAccount or `system:serviceaccount:` User form). A SelfSubjectRulesReview as `shuttle`, minus a baseline ServiceAccount, equals Pod reads in starfleet and is empty in outpost. Node list is denied. No other binding in the cluster names `shuttle`.
+- `testing/check.py`, `testing/verify-start.sh`, `testing/wait-solved.sh` and the `validation/` wrappers are copies of `scripts/ci/lab-files/`; do not edit them here.
+- Check with `astrona validate` and `astrona test --accept-terms --headless` on this folder.

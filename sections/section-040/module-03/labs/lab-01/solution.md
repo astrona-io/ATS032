@@ -1,41 +1,93 @@
 ---
-draft: true
 exam_objectives:
 - Upgrade Kubernetes to avoid vulnerabilities
 ---
-# Verify And Repair A Cluster After Maintenance Solution
+# Verify And Repair A Cluster After Maintenance: Solution
 
-Use a host shell with the private kubeconfig for this independent kind environment.
+Connect to the lab first, so that `kubectl` talks to this lab's cluster:
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-032-lab-040-03-01)"
-test "$(kubectl config current-context)" = "kind-astro-ats-032-lab-040-03-01" || exit 1
+worker_name="astro-ats-032-lab-040-03-01-worker"
 ```
 
-## Find what is wrong
+The output below comes from one run of this lab. Pod names, IP addresses and ages differ in your run.
 
-Check the nodes, the application Pods and the budget, in that order.
+## Check the nodes
+
+Start at the bottom layer. A node that is cordoned shows `SchedulingDisabled`, and its taints show in `kubectl describe node`:
 
 ```sh
 kubectl get nodes
-kubectl -n starfleet-032-040-03-01 get pods -l app=probe -o wide
-kubectl -n starfleet-032-040-03-01 get pdb probe
-kubectl describe node astro-ats-032-lab-040-03-01-worker2 | grep -i -A2 taints
+kubectl describe node "$worker_name" | grep -A3 Taints
 ```
 
-The second worker shows `SchedulingDisabled`. One `probe` Pod is `Pending`, because the Deployment forbids two replicas on one node and the second worker cannot take new Pods. The budget shows `ALLOWED DISRUPTIONS` of `0`. The node description lists the taint `maintenance=patching:NoSchedule`. Uncordoning removes only the unschedulable flag; the taint stays until you remove it.
+```text
+NAME                                        STATUS                     ROLES           AGE   VERSION
+astro-ats-032-lab-040-03-01-control-plane   Ready                      control-plane   59s   v1.35.0
+astro-ats-032-lab-040-03-01-worker          Ready,SchedulingDisabled   <none>          49s   v1.35.0
+Taints:             maintenance=patching:NoSchedule
+                    node.kubernetes.io/unschedulable:NoSchedule
+Unschedulable:      true
+Lease:
+```
 
-## Repair the node
+The worker has two problems. It is still cordoned, and it still has the taint `maintenance=patching:NoSchedule` from the maintenance window. The scheduler places no new Pod on it while either one is there.
+
+## Check the workload
 
 ```sh
-kubectl uncordon astro-ats-032-lab-040-03-01-worker2
-kubectl taint nodes astro-ats-032-lab-040-03-01-worker2 maintenance=patching:NoSchedule-
-kubectl -n starfleet-032-040-03-01 rollout status deployment/probe --timeout=180s
+kubectl -n starfleet-032-040-03-01 get pods -o wide
+kubectl -n starfleet-032-040-03-01 get pdb probe
 ```
 
-## Repair the budget
+```text
+NAME                    READY   STATUS    RESTARTS   AGE   IP           NODE                                        NOMINATED NODE   READINESS GATES
+probe-c69d5fd85-nb5xh   0/1     Pending   0          33s   <none>       <none>                                      <none>           <none>
+probe-c69d5fd85-qd96v   1/1     Running   0          34s   10.244.0.5   astro-ats-032-lab-040-03-01-control-plane   <none>           <none>
+NAME    MIN AVAILABLE   MAX UNAVAILABLE   ALLOWED DISRUPTIONS   AGE
+probe   2               N/A               0                     33s
+```
 
-Save this as `poddisruptionbudget-probe.yaml`. It replaces `minAvailable` with `maxUnavailable`:
+One `probe` Pod is Pending. The Deployment has a required anti-affinity rule on the node name, so the second Pod cannot join the first on the control plane node. The only other node is the worker, and the worker refuses new Pods. Run `kubectl -n starfleet-032-040-03-01 describe pod <pending pod>` to read the scheduler's reason in the events.
+
+## Return the worker to service
+
+Remove the taint (the `-` at the end of the command removes it), then uncordon the node:
+
+```sh
+kubectl taint nodes "$worker_name" maintenance=patching:NoSchedule-
+kubectl uncordon "$worker_name"
+kubectl -n starfleet-032-040-03-01 rollout status deployment/probe --timeout=180s
+kubectl -n starfleet-032-040-03-01 get pods -o wide
+```
+
+```text
+node/astro-ats-032-lab-040-03-01-worker untainted
+node/astro-ats-032-lab-040-03-01-worker uncordoned
+Waiting for deployment "probe" rollout to finish: 1 of 2 updated replicas are available...
+deployment "probe" successfully rolled out
+NAME                    READY   STATUS    RESTARTS   AGE   IP           NODE                                        NOMINATED NODE   READINESS GATES
+probe-c69d5fd85-nb5xh   1/1     Running   0          34s   10.244.1.3   astro-ats-032-lab-040-03-01-worker          <none>           <none>
+probe-c69d5fd85-qd96v   1/1     Running   0          35s   10.244.0.5   astro-ats-032-lab-040-03-01-control-plane   <none>           <none>
+```
+
+The scheduler placed the Pending Pod on the worker as soon as the node accepted Pods again. Both Pods now run on different nodes.
+
+## Fix the disruption budget
+
+The workload is healthy, but the PodDisruptionBudget still blocks the next drain:
+
+```sh
+kubectl -n starfleet-032-040-03-01 get pdb probe
+```
+
+```text
+NAME    MIN AVAILABLE   MAX UNAVAILABLE   ALLOWED DISRUPTIONS   AGE
+probe   2               N/A               0                     34s
+```
+
+`minAvailable: 2` with two replicas means that no Pod may ever be evicted, so `kubectl drain` would wait forever. Allow one Pod to be unavailable instead. Save this as `poddisruptionbudget-probe.yaml`:
 
 ```yaml
 apiVersion: policy/v1
@@ -50,51 +102,26 @@ spec:
       app: probe
 ```
 
-Apply it and read the result:
-
-```sh
-kubectl apply -f poddisruptionbudget-probe.yaml
-kubectl -n starfleet-032-040-03-01 get pdb probe
-```
-
-If the apply is refused because both fields are set, delete the budget with `kubectl -n starfleet-032-040-03-01 delete pdb probe` and apply the file again.
-
-## Record the verified state
-
-Save this as `configmap-post-maintenance-record.yaml`:
-
-```yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: post-maintenance-record
-  namespace: starfleet-032-040-03-01
-data:
-  nodes-ready: "3"
-  probe-ready: "2"
-  result: verified
-```
-
 Apply it:
 
 ```sh
-kubectl apply -f configmap-post-maintenance-record.yaml
+kubectl apply -f poddisruptionbudget-probe.yaml
 ```
 
-## Verify the result
+Then check the result:
 
 ```sh
+kubectl -n starfleet-032-040-03-01 get pdb probe
 kubectl get nodes
-kubectl -n starfleet-032-040-03-01 get pods -l app=probe -o wide
-kubectl -n starfleet-032-040-03-01 exec shuttle -- wget -q -T 3 -O- http://probe/
 ```
 
-After recording your result, remove the independent lab with `astrona destroy ats-032-lab-040-03-01`.
+```text
+poddisruptionbudget.policy/probe configured
+NAME    MIN AVAILABLE   MAX UNAVAILABLE   ALLOWED DISRUPTIONS   AGE
+probe   N/A             1                 1                     34s
+NAME                                        STATUS   ROLES           AGE   VERSION
+astro-ats-032-lab-040-03-01-control-plane   Ready    control-plane   61s   v1.35.0
+astro-ats-032-lab-040-03-01-worker          Ready    <none>          51s   v1.35.0
+```
 
-## Common pitfalls
-
-> [!WARNING]
-> - **Running only `kubectl uncordon`.** A taint added during the window stays on the node and still blocks new Pods.
-> - **Deleting the Pending Pod.** The Deployment creates a new one that stays Pending for the same reason.
-> - **Recording the result before the rollout finishes.** The record would be false.
-> - **Keeping `minAvailable: 2` on two replicas.** It allows no voluntary eviction, so the next drain waits until its timeout.
+`minAvailable: 1` works as well: with two Ready Pods it also allows one disruption. The grader accepts any budget that selects `app=probe` and reports at least one allowed disruption.

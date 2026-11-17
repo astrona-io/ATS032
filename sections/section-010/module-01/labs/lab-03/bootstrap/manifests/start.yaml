@@ -1,0 +1,95 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: starfleet-032-010-01-03
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: outpost-032-010-01-03
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: shuttle
+  namespace: starfleet-032-010-01-03
+---
+# The grant that must stay: ConfigMap reads for shuttle.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: configmap-reader
+  namespace: outpost-032-010-01-03
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: shuttle-configmap-reader
+  namespace: outpost-032-010-01-03
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: configmap-reader
+subjects:
+  - kind: ServiceAccount
+    name: shuttle
+    namespace: starfleet-032-010-01-03
+---
+# Pod reads, grant 1: the ClusterRole view, ServiceAccount subject.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: shuttle-view
+  namespace: outpost-032-010-01-03
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: view
+subjects:
+  - kind: ServiceAccount
+    name: shuttle
+    namespace: starfleet-032-010-01-03
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pod-lister
+  namespace: outpost-032-010-01-03
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+---
+# Pod reads, grant 2: the same ServiceAccount written as a User subject.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: shuttle-pod-lister
+  namespace: outpost-032-010-01-03
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: pod-lister
+subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: User
+    name: system:serviceaccount:starfleet-032-010-01-03:shuttle
+---
+# Pod reads, grant 3: the group of every ServiceAccount in starfleet.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: starfleet-workloads
+  namespace: outpost-032-010-01-03
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: pod-lister
+subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: Group
+    name: system:serviceaccounts:starfleet-032-010-01-03

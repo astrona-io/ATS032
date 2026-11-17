@@ -205,11 +205,11 @@ example, is `authoring/exam-ready-labs.md` in `astrona-io/astrona-content`.
 ATS020 (CNPE: Observability and Operations) is the model training format:
 where this repo and ATS020 differ on grader layout, check style or the time
 line, follow ATS020. The context guard is the exception: ATS020 has none,
-the CKS labs keep theirs. ATS031 applied it first and is the worked example; copy from it. In short:
+the CKS labs keep theirs. ATS031 applies it to the CKS labs; copy from it. In short:
 
 - **Own namespaces.** Name each namespace `<role>-<training>-<section>-<module>-<lab>`
-  from the lab's `metadata.name`: `starfleet-032-010-01-01`,
-  `outpost-032-010-01-01`. Never a bare `starfleet`, `outpost` or `dock`.
+  from the lab's `metadata.name`: `starfleet-031-020-05-02`,
+  `outpost-031-020-05-02`. Never a bare `starfleet`, `outpost` or `dock`.
 - **Keep the context guard; no hardcoded cluster.** Every script and helper
   refuses to run unless `kubectl config current-context` is the lab's own
   context, read from `${ASTRONA_KUBE_CONTEXT:-kind-astro-<lab>}` so the guard
@@ -230,12 +230,9 @@ the CKS labs keep theirs. ATS031 applied it first and is the worked example; cop
   and passes for the reference solution.
 - **`testing.init`.** `testing/verify-start.sh` (every outcome fails at the
   start), then `solution/apply.sh`, then `testing/wait-solved.sh`.
-- **Question shape.** `question.md` follows ATS020: `Solve this question on:`,
-  the scenario and starting state, the time line `Allow N–M minutes for task
-  work.` (the upper bound is the exam time for a prepared student; over 20
-  minutes cannot join an exam), `## Tasks` with 2–4 numbered steps,
-  `## Constraints`, and `## How the answer is checked` with one sentence per
-  grader in `validation.scripts`.
+- **Time line.** `question.md` has `Allow about N minutes for the tasks.`
+  under its title, as in ATS020: the exam time for a prepared student. Over
+  20 minutes cannot join an exam.
 - **`examScope`.** Set `namespace` or `cluster` on the lab's `astrona.yaml`
   entry only when its `runtime.kind` fits the exam profile in
   `exams/kubestronaut/cks.yaml` (one control plane, one worker, kindnet).
@@ -244,11 +241,6 @@ the CKS labs keep theirs. ATS031 applied it first and is the worked example; cop
 - **Verify end to end.** `astrona validate <lab-dir>` and
   `astrona test <lab-dir> --accept-terms --headless` must both pass.
 - **Hands off** `task_kind`, `tags` and `topic`: other tooling owns them.
-- **CI.** `.github/workflows/labs.yml` (from ATS020) checks the course
-  structure with `scripts/ci/check-course-structure.py`, then runs
-  `astrona test` for every changed lab and `scripts/ci/test-playground.sh`
-  for every changed playground, each on its own runner. A change merges only
-  when "all environments pass" is green.
 
 ## About this repo (ATS032 only)
 
@@ -290,16 +282,10 @@ secure or official exam questions.
 ### Review and authoring checks
 
 Preserve the shared CLAUDE.md prefix copied from ATS015. Keep course IDs, official
-domain weights and ATP links unchanged. Technical pages have `draft: true` in
-Markdown front matter until review; a module-level flag alone is insufficient.
-The ATP registration remains draft until publication is approved.
+domain weights and ATP links unchanged. Technical pages carry no `draft: true`
+front matter. The ATP registration remains draft until publication is approved.
 
 Primary author sources are recorded in `SOURCES.md`. The objective list was
 verified on 2026-10-11. Detailed reading expansions were written on 2026-10-11.
 Validate manifest paths, summary ordering, curriculum coverage and question
 contracts. Do not claim live verification until the actual runtime result has been recorded.
-
-### Focused lab maintenance
-
-Follow `AUTHORING.md` for lesson/lab boundaries, lifecycle checks and PR review.
-Use `LAB-COVERAGE.md` to trace preparation lessons to assessed outcomes.

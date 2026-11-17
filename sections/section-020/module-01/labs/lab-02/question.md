@@ -1,23 +1,29 @@
 ---
-draft: true
+exam_objectives:
+- Exercise caution in using service accounts e.g. disable defaults, minimize permissions
+  on newly created ones
 ---
-# Restrict A Projected Token Audience
+# Replace a Legacy Token Secret With a Projected Token
 
-Solve this question on: `terminal`
+Allow about 8 minutes for the tasks.
 
-Pod `reporter` in namespace `audience-training` has an explicit token mounted at `/identity/token`. It currently targets the Kubernetes API instead of the receiving service `telemetry.training`.
+The `ledger-client` Pod in the `outpost` namespace reads a ServiceAccount token from a Secret. That token never expires and works for any audience. Replace it with a short-lived token that only the `ledger` service accepts.
 
-Allow 10–15 minutes for task work. Cluster startup adds time.
+## Connect to the lab
+
+Use a shell on your own machine. The kubeconfig file holds the address and the credentials of this lab's cluster, and `kubectl` uses it.
+
+```sh
+export KUBECONFIG="$(astrona kubeconfig ats-032-lab-020-01-02)"
+test "$(kubectl config current-context)" = "kind-astro-ats-032-lab-020-01-02" || exit 1
+```
 
 ## Tasks
 
-1. Recreate `reporter` with the same ServiceAccount and container, automatic token mounting disabled, and a single projected token for audience `telemetry.training`, expiration 600 seconds, mounted at `/identity/token`.
-2. Use TokenReview to verify the intended audience accepts the token and a different audience rejects it. Test that the token cannot authenticate a Kubernetes API request. Do not print the credential.
+Work in the namespace `outpost-032-020-01-02`.
 
-## Constraints
-
-Preserve the ServiceAccount, namespace, API configuration and running client. Do not create legacy token Secrets or change the API server's accepted audiences.
-
-## How the answer is checked
-
-The grader reads the current mounted token, verifies its identity and lifetime, submits live TokenReview requests and calls the Kubernetes API using an isolated credential configuration. A token decoded without signature verification is not sufficient evidence.
+1. Recreate the Pod `ledger-client`. Keep the name, the ServiceAccount `reporter` and the image `docker.io/library/busybox:1.37.0`.
+2. Give the new Pod a projected ServiceAccount token with the audience `ledger` and `expirationSeconds` of 600 or less. The container must read it at `/var/run/tokens/ledger-token`.
+3. The new Pod must not mount any Secret volume, and it must set `automountServiceAccountToken: false`, so it has no token at `/var/run/secrets/kubernetes.io/serviceaccount`.
+4. Delete the long-lived token Secret `reporter-legacy-token`. No Secret of type `kubernetes.io/service-account-token` for `reporter` may be left in the namespace.
+5. The new Pod must be running and ready, and the API server must accept its token for the audience `ledger` as the ServiceAccount `reporter`.

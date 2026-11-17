@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: starfleet-032-030-01-02
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: probe
+  namespace: starfleet-032-030-01-02
+  labels:
+    app: probe
+spec:
+  containers:
+  - name: probe
+    image: docker.io/library/busybox:1.37.0
+    command:
+    - sh
+    - -c
+    - echo probe started; sleep 86400
+    resources:
+      requests:
+        cpu: 10m
+        memory: 16Mi
+      limits:
+        memory: 32Mi

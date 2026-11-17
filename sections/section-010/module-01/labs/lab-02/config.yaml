@@ -1,0 +1,44 @@
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-032-lab-010-01-02
+  docs:
+    examQuestion: question.md
+    guide: solution.md
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
+    nodes:
+      workers: 1
+bootstrap:
+  init:
+  - name: seed-rbac
+    type: file
+    source: bootstrap/setup.sh
+teardown:
+  keepCluster: false
+testing:
+  init:
+  - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
+  - name: reference-result
+    type: file
+    source: solution/apply.sh
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
+    type: file
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: view-in-outpost
+    description: shuttle-view gives the ClusterRole view to shuttle in outpost-032-010-01-02 only
+    type: file
+    source: validation/validate-view-in-outpost.sh
+    points: 1
+  - name: role-manager
+    description: role-manager lets shuttle create, get and list Roles and RoleBindings in outpost-032-010-01-02 without escalate or bind
+    type: file
+    source: validation/validate-role-manager.sh
+    points: 1

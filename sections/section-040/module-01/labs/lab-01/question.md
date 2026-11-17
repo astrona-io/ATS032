@@ -1,19 +1,16 @@
 ---
-draft: true
 exam_objectives:
 - Upgrade Kubernetes to avoid vulnerabilities
 ---
-# Drain And Return A Worker To Service
+# Drain A Worker Node With A PodDisruptionBudget
 
-Solve this question on: `terminal`
+Allow about 10 minutes for the tasks.
 
-Respect disruption limits while draining and returning an isolated worker to service.
+The worker node of the `starfleet` cluster gets a new kubelet tonight. Before the upgrade, the node must be empty. The `probe` application must stay available during the move, and the `drifter` Pod in `outpost` must keep running.
 
-## Starting state
+## Connect to the lab
 
-The isolated environment has two healthy probe replicas, an internal Service and two client Pods. The required result has not been configured.
-
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+Use a shell on your own machine. The kubeconfig file holds the address and the credentials of this lab's cluster, and `kubectl` uses it.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-032-lab-040-01-01)"
@@ -22,21 +19,12 @@ node_name="astro-ats-032-lab-040-01-01-control-plane"
 worker_name="astro-ats-032-lab-040-01-01-worker"
 ```
 
-Keep this connection selected. Host-level commands name only this environment's node containers. They do not operate on the host operating system.
-
-Allow 8–10 minutes for task work. Cluster startup with two workers adds time.
-
 ## Tasks
 
-1. Create the PodDisruptionBudget `probe` in `starfleet-032-040-01-01` with `minAvailable: 1`.
-2. Cordon and drain the first worker with `--ignore-daemonsets` and a bounded timeout, then uncordon it.
-3. Record the ConfigMap `maintenance-record` in `starfleet-032-040-01-01` that names that worker and has the result `returned-to-service`.
+The cluster has one control plane node and one worker node. The Deployment `probe` in the namespace `starfleet-032-040-01-01` runs two Pods with the label `app=probe`, both on the worker. Its Pods tolerate the control plane taint `node-role.kubernetes.io/control-plane:NoSchedule`. The PodDisruptionBudget `probe` protects them. The bare Pod `drifter` in the namespace `outpost-032-040-01-01` also runs on the worker. A bare Pod has no controller, so nothing recreates it after an eviction.
 
-## Constraints
+1. Change the disruption budget so that a drain can evict the `probe` Pods. Keep a PodDisruptionBudget that selects `app: probe` in `matchLabels`, and every such budget must allow at least one disruption.
+2. Move `drifter` to the control plane node `astro-ats-032-lab-040-01-01-control-plane`. Keep its name, namespace, label `app=drifter`, image `docker.io/library/busybox:1.37.0` and `sleep` command, and keep it a bare Pod. It must be Running and Ready.
+3. Drain the worker `astro-ats-032-lab-040-01-01-worker`. Only DaemonSet Pods may stay on it, and two `probe` Pods must be available. Leave the worker cordoned for the upgrade.
 
-- Keep both `probe` replicas available and the clients running on the second worker.
-- This maintenance exercise does not perform a Kubernetes binary upgrade.
-
-## How the answer is checked
-
-The grader runs two checks. The first checks the PodDisruptionBudget `probe`. The second checks the ConfigMap `maintenance-record` and that it names the first worker. Both checks also confirm that the first worker is schedulable and Ready, that the Deployment `probe` has two ready replicas and that `shuttle` still reaches `http://probe/`. The final grader cannot prove every earlier eviction.
+Do not delete the Deployment `probe`.

@@ -1,0 +1,51 @@
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-032-lab-020-02-03
+  docs:
+    examQuestion: question.md
+    guide: solution.md
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
+    preloadImages:
+    - docker.io/library/busybox:1.37.0
+    nodes:
+      workers: 1
+bootstrap:
+  init:
+  - name: seed-private-environment
+    type: file
+    source: bootstrap/setup.sh
+teardown:
+  keepCluster: false
+testing:
+  init:
+  - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
+  - name: reference-result
+    type: file
+    source: solution/apply.sh
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
+    type: file
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: default-grants-removed
+    description: The default ServiceAccounts of both namespaces have no permissions of their own, and the Role pod-access is kept
+    type: file
+    source: validation/validate-default-grants-removed.sh
+    points: 2
+  - name: default-automount-off
+    description: The default ServiceAccounts of both namespaces turn token mounting off
+    type: file
+    source: validation/validate-default-automount-off.sh
+    points: 1
+  - name: pods-without-token
+    description: The Pods shuttle and drifter run without a ServiceAccount token
+    type: file
+    source: validation/validate-pods-without-token.sh
+    points: 1

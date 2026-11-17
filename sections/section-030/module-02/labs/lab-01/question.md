@@ -1,43 +1,30 @@
 ---
-draft: true
 exam_objectives:
 - Restrict access to Kubernetes API
 ---
-# Remove Anonymous Access To The API
+# Remove RBAC Grants For Anonymous Requests
 
-Solve this question on: `terminal`
+Allow about 8 minutes for the tasks.
 
-The `ops` team in `outpost-032-030-02-01` has asked why a stranger could list Pods without logging in.
+An audit shows that a caller with no credentials can read data in this cluster. The API server gives such a request the user `system:anonymous` and the group `system:unauthenticated`. Somebody bound roles to these subjects. Find the bindings and remove them, but keep the access that the cluster and the `ops` team need.
 
-## Objective
+## Connect to the lab
 
-Close the binding that lets unauthenticated callers read cluster data while keeping health and version access and the binding of a named team.
-
-## Starting state
-
-The `outpost-032-030-02-01` operations team noticed that the API server answers a request without a credential. The ClusterRoleBinding `anonymous-viewer` gives the `view` ClusterRole to the group `system:unauthenticated`. The binding `ops-viewer` gives `view` to the group `ops` and is correct. The Deployment `probe` in `starfleet-032-030-02-01` can send requests to the API server. Do not change the Deployment.
-
-Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
+Use a shell on your own machine. The kubeconfig file holds the address and the credentials of this lab's cluster, and `kubectl` uses it.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-032-lab-030-02-01)"
 test "$(kubectl config current-context)" = "kind-astro-ats-032-lab-030-02-01" || exit 1
+control_plane="astro-ats-032-lab-030-02-01-control-plane"
 ```
 
-Keep this connection selected throughout the task. Every script supplied by the lab refuses a different context.
-
-Allow 3–5 minutes for task work. Cluster startup adds time.
+To send a request with no credentials, run `curl` on the control plane node, for example `podman exec $control_plane curl -sk https://127.0.0.1:6443/version`. If your machine uses Docker, write `docker exec` instead.
 
 ## Tasks
 
-1. Find the binding that gives cluster data to unauthenticated callers, and remove the ClusterRoleBinding `anonymous-viewer`.
-2. Prove the result from a `probe` Pod: an anonymous request to `/api/v1/namespaces/starfleet-032-030-02-01/pods` returns `403`, and an anonymous request to `/version` still returns `200`.
+1. Remove every ClusterRoleBinding that grants a role to `system:anonymous` or `system:unauthenticated`, except the built-in bindings that the API server creates itself.
+2. Remove every RoleBinding in `starfleet-032-030-02-01` and `outpost-032-030-02-01` that grants a role to `system:anonymous` or `system:unauthenticated`.
 
-## Constraints
+After the change, an anonymous request must get `403 Forbidden` for the Pods of `outpost-032-030-02-01` and for the Secrets of `starfleet-032-030-02-01`. An anonymous request to `/version` must still return `200`.
 
-- Keep the ClusterRoleBinding `ops-viewer` unchanged; the group `ops` must still list Pods in `starfleet-032-030-02-01`.
-- Do not edit any built-in role, and do not change the Deployment `probe`.
-
-## How the answer is checked
-
-The grader runs one check. It checks that `anonymous-viewer` is gone and that an anonymous Pod list from a `probe` Pod gets `403`. It also checks that `/version` still answers `200`, that `ops-viewer` is unchanged and that the group `ops` can list Pods.
+Do not change the ClusterRoleBinding `ops-viewer`: the group `ops` must still be able to list Pods in `starfleet-032-030-02-01`. Do not change the built-in ClusterRole or ClusterRoleBinding `system:public-info-viewer`, and do not switch anonymous authentication off.

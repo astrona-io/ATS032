@@ -1,5 +1,4 @@
 ---
-draft: true
 exam_objectives:
 - Exercise caution in using service accounts e.g. disable defaults, minimize permissions on newly created ones
 ---
@@ -19,11 +18,5 @@ Key facts to remember:
 - The default projected token lives about one hour and is renewed by the kubelet.
 - A token for another audience is not accepted by the API server.
 - Long-lived token Secrets are a finding; short-lived bound tokens are the replacement.
-
-
-
-## Independent live assessment
-
-Prepare with [Verify The Receiver Of A Projected Token](course-03a-verify-token-audiences.md). [Restrict A Projected Token Audience](labs/lab-02/question.md) uses its own kind environment. The Pod uses an explicit short-lived token for telemetry.training; Live TokenReview accepts the intended audience and the Kubernetes API rejects the token.
 
 <!-- astrona:playground:destroy -->

@@ -1,33 +1,80 @@
 ---
-draft: true
 exam_objectives:
 - Upgrade Kubernetes to avoid vulnerabilities
 ---
-# Record The Version Inventory And Patch Waves Solution
+# Record A Cluster Version Inventory With Image Digests: Solution
 
-Use a host shell with the private kubeconfig for this independent kind environment.
+Connect to the lab first, so that `kubectl` talks to this lab's cluster:
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-032-lab-040-02-01)"
-test "$(kubectl config current-context)" = "kind-astro-ats-032-lab-040-02-01" || exit 1
 ```
 
-## Read the versions
+The output below comes from one run of this lab. Your `probe` image and digest can differ, because the lab picks the `busybox` tag when it starts.
 
-The API server version comes from the `/version` endpoint. The node fields come from `status.nodeInfo` of each node. The images come from the workload specifications.
+## Read the API server and the nodes
+
+`kubectl version` asks the API server for its version. The client line shows your own `kubectl`, so only the server line counts:
 
 ```sh
-kubectl get --raw /version
-kubectl get nodes -o custom-columns=NAME:.metadata.name,KUBELET:.status.nodeInfo.kubeletVersion,RUNTIME:.status.nodeInfo.containerRuntimeVersion
-kubectl -n starfleet-032-040-02-01 get deployment probe -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}'
-kubectl -n outpost-032-040-02-01 get pod drifter -o jsonpath='{.spec.containers[0].image}{"\n"}'
+kubectl version
 ```
 
-Write down the `gitVersion` value, the kubelet version of each node, the runtime of the control-plane node and the two image names.
+```text
+Server Version: v1.35.0
+```
 
-## Record them
+That output is shortened to the server line. The full `gitVersion` field is also in `kubectl get --raw /version`.
 
-Replace each placeholder in the file below with the value you read. Save this as `configmap-version-inventory.yaml`:
+The kubelet and the container runtime report their versions in the node status. The kubelet writes them into `.status.nodeInfo` when it registers the node:
+
+```sh
+kubectl get nodes -o custom-columns=NAME:.metadata.name,KUBELET:.status.nodeInfo.kubeletVersion,RUNTIME:.status.nodeInfo.containerRuntimeVersion
+```
+
+```text
+NAME                                        KUBELET   RUNTIME
+astro-ats-032-lab-040-02-01-control-plane   v1.35.0   containerd://2.2.0
+astro-ats-032-lab-040-02-01-worker          v1.35.0   containerd://2.2.0
+```
+
+Record the runtime exactly as shown, with `containerd://`.
+
+## Read the control plane components
+
+etcd and CoreDNS are separate projects with their own version numbers. Their versions are in the image tags of their Pods:
+
+```sh
+kubectl -n kube-system get pods -o custom-columns=NAME:.metadata.name,IMAGE:.spec.containers[*].image
+```
+
+The output is shortened to the two lines that matter here:
+
+```text
+coredns-7d764666f9-9kn2d                         registry.k8s.io/coredns/coredns:v1.13.1
+etcd-astro-ats-032-lab-040-02-01-control-plane   registry.k8s.io/etcd:3.6.6-0
+```
+
+## Read the workload image and its digest
+
+The Deployment holds the image as you wrote it. The Pod status holds what the container runtime really started:
+
+```sh
+kubectl -n starfleet-032-040-02-01 get deployment probe -o jsonpath='{.spec.template.spec.containers[0].image}'; echo
+kubectl -n starfleet-032-040-02-01 get pods -l app=probe -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.status.containerStatuses[0].imageID}{"\n"}{end}'
+```
+
+```text
+docker.io/library/busybox:1.36.1
+probe-9b48f9976-hb8qj	sha256:b7c873bd97bdc9046fc894e0b216c8aef31e0db4c5b761fb53022e40577ab6c0
+probe-9b48f9976-nd5th	sha256:b7c873bd97bdc9046fc894e0b216c8aef31e0db4c5b761fb53022e40577ab6c0
+```
+
+The lab loaded the image into the node without a pull, so `imageID` shows only `sha256:` and the digest. On a node that pulls from a registry, the field reads `docker.io/library/busybox@sha256:...`. Record only the `sha256:` part. Both Pods show the same digest, so they run the same image content.
+
+## Write the inventory
+
+Save this as `configmap-version-inventory.yaml`, with your own values:
 
 ```yaml
 apiVersion: v1
@@ -36,13 +83,14 @@ metadata:
   name: version-inventory
   namespace: starfleet-032-040-02-01
 data:
-  server-version: <SERVER_VERSION>
-  kubelet-control-plane: <KUBELET_CONTROL_PLANE>
-  kubelet-worker: <KUBELET_WORKER>
-  kubelet-worker2: <KUBELET_WORKER2>
-  container-runtime: <CONTAINER_RUNTIME>
-  probe-image: <PROBE_IMAGE>
-  client-image: <CLIENT_IMAGE>
+  server-version: v1.35.0
+  kubelet-control-plane: v1.35.0
+  kubelet-worker: v1.35.0
+  container-runtime: containerd://2.2.0
+  etcd-image: registry.k8s.io/etcd:3.6.6-0
+  coredns-image: registry.k8s.io/coredns/coredns:v1.13.1
+  probe-image: docker.io/library/busybox:1.36.1
+  probe-digest: sha256:b7c873bd97bdc9046fc894e0b216c8aef31e0db4c5b761fb53022e40577ab6c0
 ```
 
 Apply it:
@@ -51,31 +99,10 @@ Apply it:
 kubectl apply -f configmap-version-inventory.yaml
 ```
 
-## Label the patch waves
-
-The control plane goes first, the first worker next, and the second worker last.
-
-```sh
-kubectl label node astro-ats-032-lab-040-02-01-control-plane patch-wave=1
-kubectl label node astro-ats-032-lab-040-02-01-worker patch-wave=2
-kubectl label node astro-ats-032-lab-040-02-01-worker2 patch-wave=3
-```
-
-## Verify the result
-
-Print the ConfigMap and the labels, and compare the values with the live cluster once more.
+Then check the result:
 
 ```sh
 kubectl -n starfleet-032-040-02-01 get configmap version-inventory -o yaml
-kubectl get nodes -L patch-wave
 ```
 
-After recording your result, remove the independent lab with `astrona destroy ats-032-lab-040-02-01`.
-
-## Common pitfalls
-
-> [!WARNING]
-> - **Typing a version from memory.** Read it from the cluster; the grader compares with the live values.
-> - **Using the image tag of `etcd` or `coredns` as the Kubernetes version.** The API server version comes from `/version`.
-> - **Putting the second worker in an early wave.** It runs bare client Pods that a drain cannot move.
-> - **Leaving a placeholder such as `<SERVER_VERSION>` in the file.** Replace every one before you apply.
+The grader reads the same fields from the cluster on every run and compares them with your ConfigMap. The digest passes when it matches the `imageID` of a running `probe` Pod.

@@ -8,13 +8,3 @@ spec:
   selector:
     matchLabels:
       app: probe
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: post-maintenance-record
-  namespace: starfleet-032-040-03-01
-data:
-  nodes-ready: "3"
-  probe-ready: "2"
-  result: verified

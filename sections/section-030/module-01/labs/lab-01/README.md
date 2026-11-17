@@ -1,10 +1,11 @@
 ---
-draft: true
 exam_objectives:
 - Restrict access to Kubernetes API
 ---
-# Use A Workload Identity For An API Request
+# Give A Workload A Narrow ServiceAccount
 
-Run the application with a narrow identity and authenticate a real API request from its container. The task and reference solution use a separate pinned kind cluster. The grader checks declared fields and bounded live evidence. Python 3 is required on the grading host.
+Give the Deployment `probe` its own ServiceAccount `observer`, bound to a Role that may only get and list Pods in `starfleet-032-030-01-01`.
 
-Run `astrona test` on this folder: `testing/verify-start.sh` checks that every outcome fails on the starting state, then the reference solution is applied and every outcome must pass.
+The graders compare the Role verbs as a set, look for extra grants, and send real API requests from inside a `probe` Pod with its mounted token: Pods return 200, Secrets and the `outpost-032-030-01-01` Services return 403.
+
+The task and solution use a separate pinned kind cluster with one control plane node and one worker node (`examScope: namespace`). Run `astrona validate .` and `astrona test . --accept-terms --headless` on this folder: `testing/verify-start.sh` checks that every outcome fails on the starting state, then `solution/apply.sh` applies the reference solution and `testing/wait-solved.sh` waits until every outcome passes.

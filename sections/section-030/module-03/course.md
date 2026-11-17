@@ -1,5 +1,4 @@
 ---
-draft: true
 exam_objectives:
 - Restrict access to Kubernetes API
 ---
@@ -42,7 +41,3 @@ The playground is a `kind` cluster running Kubernetes 1.35 with one control-plan
 Launch your playground now, and keep it running next to you while you read the parts:
 
 <!-- astrona:playground -->
-
-## Independent live assessment
-
-Prepare with [Test A Webhook During An Outage](course-03a-test-webhook-outages.md). [Bound A Webhook Outage](labs/lab-02/question.md) uses its own kind environment. The healthy webhook rejects restricted ConfigMaps only in the protected namespace; The protected namespace fails closed during a webhook outage while other namespaces remain usable.

@@ -1,5 +1,4 @@
 ---
-draft: true
 exam_objectives:
 - Restrict access to Kubernetes API
 ---
@@ -12,7 +11,6 @@ Every request to the API server is authenticated, authorized and admitted. A wea
 1. Restrict Access To The Kubernetes API: the three checks, a narrow workload identity, and the API server and kubelet hardening settings.
 2. Authentication, Anonymous Access And Authorization Modes: authentication methods, anonymous callers and the bindings that open them, authorization modes and impersonation.
 3. Admission Control For API Writes: Pod Security admission, ValidatingAdmissionPolicy and admission webhooks with their failure policy.
-4. Capstone: restrict API access end to end with a narrow identity, no anonymous access and admission rules.
 
 Each module has a landing page, deep-dive parts, a summary and a ten-question knowledge check. Use the playground next to the text. Each lab follows the part it practises.
 

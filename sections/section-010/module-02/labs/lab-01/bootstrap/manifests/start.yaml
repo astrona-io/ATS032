@@ -28,6 +28,7 @@ metadata:
 data:
   status: pending
 ---
+# The broad grant: edit in every namespace for scout.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
@@ -41,6 +42,22 @@ subjects:
     name: scout
     namespace: starfleet-032-010-02-01
 ---
+# A second, easy to miss grant: scout written as a User subject.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: release-bot
+  namespace: starfleet-032-010-02-01
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: edit
+subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: User
+    name: system:serviceaccount:starfleet-032-010-02-01:scout
+---
+# Grants of other identities that must keep working.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:

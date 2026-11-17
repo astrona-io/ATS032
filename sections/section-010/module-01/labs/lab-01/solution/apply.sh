@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Reference solution: the Role pod-reader and its RoleBinding for shuttle.
 set -euo pipefail
 context="${ASTRONA_KUBE_CONTEXT:-kind-astro-ats-032-lab-010-01-01}"
 if [[ "$(kubectl config current-context)" != "$context" ]]; then

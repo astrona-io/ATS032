@@ -1,5 +1,3 @@
 .DS_Store
 .astrona/
-
 __pycache__/
-*.py[cod]

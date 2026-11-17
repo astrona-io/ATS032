@@ -8,12 +8,3 @@ spec:
   selector:
     matchLabels:
       app: probe
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: maintenance-record
-  namespace: starfleet-032-040-01-01
-data:
-  node: astro-ats-032-lab-040-01-01-worker
-  result: returned-to-service

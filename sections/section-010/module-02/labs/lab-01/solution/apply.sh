@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Reference solution: add the narrow grant first, then remove both broad
+# grants of scout.
 set -euo pipefail
 context="${ASTRONA_KUBE_CONTEXT:-kind-astro-ats-032-lab-010-02-01}"
 if [[ "$(kubectl config current-context)" != "$context" ]]; then
@@ -6,5 +8,6 @@ if [[ "$(kubectl config current-context)" != "$context" ]]; then
   exit 1
 fi
 solution_directory="$(cd "$(dirname "$0")" && pwd)"
-kubectl apply -f "$solution_directory/scout-operator.yaml"
+kubectl apply -f "$solution_directory/role-scout-operator.yaml"
 kubectl delete clusterrolebinding scout-edit-everywhere --ignore-not-found
+kubectl delete rolebinding release-bot -n starfleet-032-010-02-01 --ignore-not-found

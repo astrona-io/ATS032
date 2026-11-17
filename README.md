@@ -8,7 +8,7 @@
 
 Certified Kubernetes Security Specialist (CKS): Cluster Hardening, worth 15% of the official curriculum. This course belongs to ATP007.
 
-Developed reading explains mechanisms, responsible components, examples and limits. Every section has an introduction and every module closes with a summary. Reusable YAML checks contain 5–15 questions per bank. Technical content remains draft. Private playgrounds and draft graded labs are included.
+Developed reading explains mechanisms, responsible components, examples and limits. Every section has an introduction and every module closes with a summary. Reusable YAML checks contain 5–15 questions per bank. Private playgrounds and graded labs are included.
 
 ## Course Outline
 
@@ -21,22 +21,23 @@ Developed reading explains mechanisms, responsible components, examples and limi
 
 ## Author Review
 
-See [curriculum coverage](CURRICULUM.md), [primary sources](SOURCES.md), [question-bank documentation](ASSESSMENTS.md) and [contribution instructions](CONTRIBUTING.md). Runtime results are recorded in the PR and GitHub Actions.
+See [curriculum coverage](CURRICULUM.md), [primary sources](SOURCES.md), [question-bank documentation](ASSESSMENTS.md) and [contribution instructions](CONTRIBUTING.md).
 
 ## Hands-On Coverage
 
-This course has 4 ungraded module playgrounds and 4 draft independent labs. Tasks and solutions are registered around each lab immediately after its teaching reading. Static configuration, shell/Python/YAML, parser, lifecycle and offline grader checks pass. Live execution remains pending because the session cannot access Podman; installed CLI configuration validation is separately blocked by its maintenance lock.
+This course has 12 ungraded module playgrounds and 31 graded labs: 30 on a kind cluster with one control plane and one worker, and one on a QEMU virtual machine with a kubeadm cluster. Each lab's task and solution are registered right after the reading it practises; [LAB-COVERAGE.md](LAB-COVERAGE.md) maps every lab to its readings and outcomes. On 2026-11-17 every lab passed `astrona validate` and `astrona test --accept-terms --headless` (astrona 0.5.16, kind 0.33.0, Kubernetes v1.35.0 on Podman; the VM lab on arm64). Every outcome fails on the unsolved lab and passes after the reference solution.
 
 | Module | Labs in teaching order |
 | --- | --- |
-| 010/01 | Grant Namespace Pod Read Access |
-| 020/01 | Disable Unneeded ServiceAccount Tokens |
-| 030/01 | Use A Workload Identity For An API Request |
-| 040/01 | Drain And Return A Worker To Service |
-
-## Authoring and verification
-
-See [AUTHORING.md](AUTHORING.md) for the lab lifecycle and review workflow, and
-[LAB-COVERAGE.md](LAB-COVERAGE.md) for preparation lessons and graded outcomes.
-
-See [lesson and lab links](LAB-COVERAGE.md) and [remaining practical gaps](COVERAGE-REVIEW.md) for the current assessment scope.
+| 010/01 | Grant Namespace Pod Read Access; Reuse A ClusterRole In One Namespace And Delegate Role Management; Revoke An Action That Several Bindings Grant |
+| 010/02 | Remove Bindings To Broad Groups; Rewrite A Broad Grant As Least Privilege |
+| 010/03 | Fix The Subjects Of A RoleBinding; Build An Aggregated ClusterRole; Remove Wildcards From A Group Role |
+| 020/01 | Disable Unneeded ServiceAccount Tokens; Replace a Legacy Token Secret With a Projected Token |
+| 020/02 | Give a Deployment Its Own ServiceAccount; Grant a ServiceAccount Least-Privilege Access; Lock Down the Default ServiceAccount |
+| 020/03 | Remove Over-Broad ServiceAccount Bindings; Remove Long-Lived ServiceAccount Tokens |
+| 030/01 | Give A Workload A Narrow ServiceAccount; Harden The Kubelet On A Worker Node |
+| 030/02 | Remove Static Token Authentication From The API Server; Remove RBAC Grants For Anonymous Requests; Remove AlwaysAllow And Narrow Impersonation Rights |
+| 030/03 | Enforce Pod Security Standards On A Namespace; Block NodePort Services With A ValidatingAdmissionPolicy; Make An Admission Webhook Fail Closed Safely |
+| 040/01 | Drain A Worker Node With A PodDisruptionBudget; Upgrade A kubeadm Control Plane From v1.34 To v1.35 (QEMU VM); Save An etcd Snapshot Before An Upgrade |
+| 040/02 | Record A Cluster Version Inventory With Image Digests; Triage Vulnerability Records And Label Patch Waves |
+| 040/03 | Restart The Container Runtime On A Drained Worker; Verify And Repair A Cluster After Maintenance; Run An etcd Restore Drill From A Snapshot |

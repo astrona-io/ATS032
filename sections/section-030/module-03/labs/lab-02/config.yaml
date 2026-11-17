@@ -2,47 +2,48 @@ apiVersion: astrona.io/v1
 metadata:
   name: ats-032-lab-030-03-02
   docs:
-    prerequisites: docs/prerequisites.md
     examQuestion: question.md
-    caseStudy: docs/case-study.md
     guide: solution.md
 runtime:
   type: kind
   kind:
     image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
-    preloadImages:
-    - docker.io/library/python:3.13-alpine
-    - docker.io/library/busybox:1.37.0
     nodes:
       workers: 1
 bootstrap:
   init:
-  - name: prepare-environment
+  - name: seed-lab
     type: file
     source: bootstrap/setup.sh
+teardown:
+  keepCluster: false
 testing:
   init:
   - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
     type: file
     source: testing/verify-start.sh
-  - name: reference-solution
+  - name: reference-result
     type: file
     source: solution/apply.sh
-  - name: negative-cases
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
     type: file
-    source: testing/regression.sh
+    source: testing/wait-solved.sh
 validation:
   scripts:
-  - name: healthy-policy
-    description: The healthy webhook rejects restricted ConfigMaps only in the protected namespace
+  - name: create-denied
+    description: Creating a NodePort Service in the outpost namespace is denied by deny-nodeport and a ClusterIP Service is admitted
     type: file
-    source: validation/validate-healthy-policy.sh
+    source: validation/validate-create-denied.sh
     points: 1
-  - name: unavailable-policy
-    description: The protected namespace fails closed during a webhook outage while other namespaces remain
-      usable
+  - name: update-denied
+    description: Changing an existing Service in the outpost namespace to NodePort is denied
     type: file
-    source: validation/validate-unavailable-policy.sh
+    source: validation/validate-update-denied.sh
     points: 1
-teardown:
-  keepCluster: false
+  - name: binding-scoped
+    description: The binding deny-nodeport-outpost applies the policy to the outpost namespace only
+    type: file
+    source: validation/validate-binding-scoped.sh
+    points: 1

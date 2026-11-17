@@ -1,5 +1,4 @@
 ---
-draft: true
 exam_objectives:
 - Restrict access to Kubernetes API
 ---
@@ -16,11 +15,5 @@ A ValidatingAdmissionPolicy keeps a rule in the API server as a CEL expression. 
 An admission webhook calls an HTTPS service and can change or validate the object. Its `failurePolicy` decides what a failed call means: `Fail` rejects the request, and `Ignore` lets it through, which makes a security rule a bypass whenever the service is down. Selectors keep the webhook away from the namespaces it needs to run, and mutating webhooks run before validators.
 
 Clean up the playground when you finish.
-
-
-
-## Independent live assessment
-
-Prepare with [Test A Webhook During An Outage](course-03a-test-webhook-outages.md). [Bound A Webhook Outage](labs/lab-02/question.md) uses its own kind environment. The healthy webhook rejects restricted ConfigMaps only in the protected namespace; The protected namespace fails closed during a webhook outage while other namespaces remain usable.
 
 <!-- astrona:playground:destroy -->

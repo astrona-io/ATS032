@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ledger-client
+  namespace: outpost-032-020-01-02
+  labels:
+    app: ledger-client
+spec:
+  serviceAccountName: reporter
+  automountServiceAccountToken: false
+  restartPolicy: Never
+  containers:
+  - name: client
+    image: docker.io/library/busybox:1.37.0
+    command: ["sh", "-c", "sleep 86400"]
+    volumeMounts:
+    - name: ledger-token
+      mountPath: /var/run/tokens
+      readOnly: true
+  volumes:
+  - name: ledger-token
+    projected:
+      sources:
+      - serviceAccountToken:
+          audience: ledger
+          expirationSeconds: 600
+          path: ledger-token

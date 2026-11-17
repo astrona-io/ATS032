@@ -4,14 +4,9 @@ metadata:
   name: pod-reader
   namespace: starfleet-032-010-01-01
 rules:
-- apiGroups:
-  - ''
-  resources:
-  - pods
-  verbs:
-  - get
-  - list
-  - watch
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -23,6 +18,6 @@ roleRef:
   kind: Role
   name: pod-reader
 subjects:
-- kind: ServiceAccount
-  name: shuttle
-  namespace: starfleet-032-010-01-01
+  - kind: ServiceAccount
+    name: shuttle
+    namespace: starfleet-032-010-01-01

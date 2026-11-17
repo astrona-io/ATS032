@@ -1,6 +1,6 @@
 # Primary Authoring Sources
 
-[Official CKS objectives](https://training.linuxfoundation.org/certification/certified-kubernetes-security-specialist/) checked on 2026-10-11. The examination is performance-based. These primary references support author review; learner pages are self-contained. Adaptation paths are recorded per reading in AUTHORING.yaml. No runtime or command-output validation is claimed.
+[Official CKS objectives](https://training.linuxfoundation.org/certification/certified-kubernetes-security-specialist/) checked on 2026-10-11. The examination is performance-based. These primary references support author review; learner pages are self-contained. Adaptation paths are recorded per reading in AUTHORING.yaml. Lab command output is recorded from live runs; readings outside the labs are not runtime-verified.
 
 - [Kubernetes security concepts](https://kubernetes.io/docs/concepts/security/)
 - [CIS Kubernetes benchmark](https://www.cisecurity.org/benchmark/kubernetes)
@@ -28,10 +28,3 @@ Applied the local astrona-course-expand-material skill with CLAUDE.md plain-Engl
 - https://kubernetes.io/docs/tutorials/security/seccomp/
 - https://kubernetes.io/docs/tutorials/security/apparmor/
 - https://falco.org/docs/concepts/
-
-## Live assessment review — 2026-11-11
-
-Kubernetes 1.35 provides TokenReview and admission webhook behavior. QEMU fixtures pin the Ubuntu image and verify architecture-specific downloads where supplied. Package repositories and vulnerability data remain time-dependent.
-
-- [ServiceAccount authentication](https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/)
-- [Admission webhooks](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/)

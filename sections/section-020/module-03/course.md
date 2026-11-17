@@ -1,5 +1,4 @@
 ---
-draft: true
 exam_objectives:
 - Exercise caution in using service accounts e.g. disable defaults, minimize permissions on newly created ones
 ---
@@ -19,7 +18,7 @@ After this module you can:
 - Find RoleBindings and ClusterRoleBindings that reach a ServiceAccount directly or through a ServiceAccount group.
 - Check the effective permissions of a ServiceAccount with `kubectl auth can-i --list`.
 - List long-lived token Secrets and the ServiceAccount that each belongs to.
-- Read the lifetime and audience of a projected token and test a token with `kubectl --token`.
+- Read the lifetime and audience of a projected token and test a token through a separate kubeconfig user.
 
 ## Before you start
 
