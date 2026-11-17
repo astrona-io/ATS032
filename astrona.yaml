@@ -280,8 +280,9 @@ modules:
   - type: lab
     title: Disable Unneeded ServiceAccount Tokens
     path: sections/section-020/module-01/labs/lab-01
+    examScope: namespace
     difficulty: intermediate
-    estimated_duration: 25m
+    estimated_duration: 6m
     topic: token-minimization
     task_kind: build
     learning_goals:
@@ -295,6 +296,25 @@ modules:
   - type: reading
     title: Bound Tokens, Audience And Legacy Secrets
     path: sections/section-020/module-01/course-03-bound-tokens-audience-and-legacy-secrets.md
+  - type: reading
+    title: Replace a Legacy Token Secret With a Projected Token — Task
+    path: sections/section-020/module-01/labs/lab-02/question.md
+  - type: lab
+    title: Replace a Legacy Token Secret With a Projected Token
+    path: sections/section-020/module-01/labs/lab-02
+    examScope: namespace
+    difficulty: intermediate
+    estimated_duration: 8m
+    topic: projected-token-audience
+    task_kind: build
+    learning_goals:
+    - Replace a long-lived token Secret with a projected token that has its own audience and a short lifetime.
+    tags:
+    - cks
+    - projected-token-audience
+  - type: reading
+    title: Replace a Legacy Token Secret With a Projected Token — Solution
+    path: sections/section-020/module-01/labs/lab-02/solution.md
   - type: reading
     title: Summary
     path: sections/section-020/module-01/course-04-summary.md
@@ -310,30 +330,68 @@ modules:
     title: One ServiceAccount For Each Workload
     path: sections/section-020/module-02/course-01-one-serviceaccount-for-each-workload.md
   - type: reading
-    title: Grant Only What The Workload Uses
-    path: sections/section-020/module-02/course-02-grant-only-what-the-workload-uses.md
-  - type: reading
-    title: Clean Up The Default ServiceAccount
-    path: sections/section-020/module-02/course-03-clean-up-the-default-serviceaccount.md
-  - type: reading
-    title: Give Each Workload Its Own Least-Privilege ServiceAccount — Task
+    title: Give a Deployment Its Own ServiceAccount — Task
     path: sections/section-020/module-02/labs/lab-01/question.md
   - type: lab
-    title: Give Each Workload Its Own Least-Privilege ServiceAccount
+    title: Give a Deployment Its Own ServiceAccount
     path: sections/section-020/module-02/labs/lab-01
+    examScope: namespace
     difficulty: intermediate
-    estimated_duration: 25m
+    estimated_duration: 6m
     topic: serviceaccount-least-privilege
     task_kind: build
     learning_goals:
-    - Move a workload to a dedicated ServiceAccount, create one narrow grant and remove
-      the grant from the default account.
+    - Move a Deployment to a dedicated ServiceAccount whose Pods mount no API token.
     tags:
     - cks
     - serviceaccount-least-privilege
   - type: reading
-    title: Give Each Workload Its Own Least-Privilege ServiceAccount — Solution
+    title: Give a Deployment Its Own ServiceAccount — Solution
     path: sections/section-020/module-02/labs/lab-01/solution.md
+  - type: reading
+    title: Grant Only What The Workload Uses
+    path: sections/section-020/module-02/course-02-grant-only-what-the-workload-uses.md
+  - type: reading
+    title: Grant a ServiceAccount Least-Privilege Access — Task
+    path: sections/section-020/module-02/labs/lab-02/question.md
+  - type: lab
+    title: Grant a ServiceAccount Least-Privilege Access
+    path: sections/section-020/module-02/labs/lab-02
+    examScope: namespace
+    difficulty: intermediate
+    estimated_duration: 10m
+    topic: serviceaccount-role-binding
+    task_kind: build
+    learning_goals:
+    - Give a new ServiceAccount one narrow Role in its namespace and a short-lived projected token.
+    tags:
+    - cks
+    - serviceaccount-role-binding
+  - type: reading
+    title: Grant a ServiceAccount Least-Privilege Access — Solution
+    path: sections/section-020/module-02/labs/lab-02/solution.md
+  - type: reading
+    title: Clean Up The Default ServiceAccount
+    path: sections/section-020/module-02/course-03-clean-up-the-default-serviceaccount.md
+  - type: reading
+    title: Lock Down the Default ServiceAccount — Task
+    path: sections/section-020/module-02/labs/lab-03/question.md
+  - type: lab
+    title: Lock Down the Default ServiceAccount
+    path: sections/section-020/module-02/labs/lab-03
+    examScope: namespace
+    difficulty: intermediate
+    estimated_duration: 8m
+    topic: default-serviceaccount-cleanup
+    task_kind: build
+    learning_goals:
+    - Remove the grants of the default ServiceAccount and turn off its token automount in two namespaces.
+    tags:
+    - cks
+    - default-serviceaccount-cleanup
+  - type: reading
+    title: Lock Down the Default ServiceAccount — Solution
+    path: sections/section-020/module-02/labs/lab-03/solution.md
   - type: reading
     title: Summary
     path: sections/section-020/module-02/course-04-summary.md
@@ -352,27 +410,46 @@ modules:
     title: Audit Grants That Reach ServiceAccounts
     path: sections/section-020/module-03/course-02-audit-grants-that-reach-serviceaccounts.md
   - type: reading
-    title: 'Audit Tokens: Secrets, Lifetimes And Audience'
-    path: sections/section-020/module-03/course-03-audit-tokens-secrets-lifetimes-and-audience.md
-  - type: reading
-    title: Remove ServiceAccount Findings From A Namespace — Task
+    title: Remove Over-Broad ServiceAccount Bindings — Task
     path: sections/section-020/module-03/labs/lab-01/question.md
   - type: lab
-    title: Remove ServiceAccount Findings From A Namespace
+    title: Remove Over-Broad ServiceAccount Bindings
     path: sections/section-020/module-03/labs/lab-01
+    examScope: cluster
     difficulty: intermediate
-    estimated_duration: 25m
+    estimated_duration: 10m
     topic: serviceaccount-audit
     task_kind: build
     learning_goals:
-    - Remove over-broad grants, a long-lived token Secret and a long projected token,
-      and keep the one permission the workload needs.
+    - Remove over-broad and group bindings that reach ServiceAccounts and keep the one permission the workload needs.
     tags:
     - cks
     - serviceaccount-audit
   - type: reading
-    title: Remove ServiceAccount Findings From A Namespace — Solution
+    title: Remove Over-Broad ServiceAccount Bindings — Solution
     path: sections/section-020/module-03/labs/lab-01/solution.md
+  - type: reading
+    title: 'Audit Tokens: Secrets, Lifetimes And Audience'
+    path: sections/section-020/module-03/course-03-audit-tokens-secrets-lifetimes-and-audience.md
+  - type: reading
+    title: Remove Long-Lived ServiceAccount Tokens — Task
+    path: sections/section-020/module-03/labs/lab-02/question.md
+  - type: lab
+    title: Remove Long-Lived ServiceAccount Tokens
+    path: sections/section-020/module-03/labs/lab-02
+    examScope: namespace
+    difficulty: intermediate
+    estimated_duration: 8m
+    topic: long-lived-token-removal
+    task_kind: build
+    learning_goals:
+    - Delete long-lived ServiceAccount token Secrets and shorten the lifetime of a projected token.
+    tags:
+    - cks
+    - long-lived-token-removal
+  - type: reading
+    title: Remove Long-Lived ServiceAccount Tokens — Solution
+    path: sections/section-020/module-03/labs/lab-02/solution.md
   - type: reading
     title: Summary
     path: sections/section-020/module-03/course-04-summary.md
@@ -381,25 +458,6 @@ modules:
     path: sections/section-020/module-03/quiz.yaml
     question_count: 10
     pass_score: 70
-  - type: reading
-    title: Harden ServiceAccounts Across Two Namespaces — Task
-    path: sections/section-020/capstone/labs/lab-01/question.md
-  - type: lab
-    title: Harden ServiceAccounts Across Two Namespaces
-    path: sections/section-020/capstone/labs/lab-01
-    difficulty: advanced
-    estimated_duration: 50m
-    topic: serviceaccount-capstone
-    task_kind: build
-    learning_goals:
-    - Combine a dedicated account, a narrow grant, a cleaned default account, and
-      the removal of a legacy token and a group binding.
-    tags:
-    - cks
-    - serviceaccount-capstone
-  - type: reading
-    title: Harden ServiceAccounts Across Two Namespaces — Solution
-    path: sections/section-020/capstone/labs/lab-01/solution.md
 - id: module-030
   title: Restrict Access To The Kubernetes API
   description: Follow a request through authentication, authorization and admission,

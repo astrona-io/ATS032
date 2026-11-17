@@ -181,7 +181,7 @@ questions:
     learning_objective: "Test a token with another audience."
     source_readings:
       - sections/section-020/module-03/course-03-audit-tokens-secrets-lifetimes-and-audience.md
-    prompt: "A token created with `--audience=ledger` is sent to the API server with `kubectl --token`. What happens?"
+    prompt: "A token created with `--audience=ledger` is sent to the API server as the only credential of a kubeconfig user. What happens?"
     options:
       - id: a
         text: "The request is refused as `Unauthorized`"

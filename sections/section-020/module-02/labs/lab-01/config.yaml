@@ -2,16 +2,13 @@ apiVersion: astrona.io/v1
 metadata:
   name: ats-032-lab-020-02-01
   docs:
-    prerequisites: docs/prerequisites.md
     examQuestion: question.md
-    caseStudy: docs/case-study.md
     guide: solution.md
 runtime:
   type: kind
   kind:
     image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
     preloadImages:
-    - docker.io/library/python:3.13-alpine
     - docker.io/library/busybox:1.37.0
     nodes:
       workers: 1
@@ -24,11 +21,26 @@ teardown:
   keepCluster: false
 testing:
   init:
+  - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
   - name: reference-result
     type: file
     source: solution/apply.sh
-validation:
-  script:
-    name: verify-fields-and-live-evidence
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
     type: file
-    source: validate.sh
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: probe-serviceaccount
+    description: The ServiceAccount probe turns token mounting off and has no permissions of its own
+    type: file
+    source: validation/validate-probe-serviceaccount.sh
+    points: 1
+  - name: probe-pods-without-token
+    description: Every Pod of the Deployment probe runs as probe and has no ServiceAccount token
+    type: file
+    source: validation/validate-probe-pods-without-token.sh
+    points: 2
