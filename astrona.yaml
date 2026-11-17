@@ -2,8 +2,8 @@
 training:
   id: ATS032
   title: 'CKS: Cluster Hardening'
-  description: 'Detailed reading material, hands-on labs and reusable YAML knowledge
-    checks for CKS: Cluster Hardening. Technical content remains draft.'
+  description: 'Detailed reading material, labs and reusable YAML knowledge checks
+    for CKS: Cluster Hardening.'
   certification:
     name: Certified Kubernetes Security Specialist
     code: CKS
@@ -621,4 +621,5 @@ modules:
   - type: quiz
     title: Final Domain Quiz
     path: sections/final-domain-quiz.yaml
+    question_count: 12
     pass_score: 70

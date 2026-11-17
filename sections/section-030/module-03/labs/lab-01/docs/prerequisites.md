@@ -1,5 +1,4 @@
 ---
-draft: true
 exam_objectives:
 - Restrict access to Kubernetes API
 ---

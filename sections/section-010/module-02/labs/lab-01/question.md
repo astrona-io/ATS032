@@ -1,5 +1,4 @@
 ---
-draft: true
 exam_objectives:
 - Use Role Based Access Controls to minimize exposure
 ---

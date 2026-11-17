@@ -1,5 +1,4 @@
 ---
-draft: true
 exam_objectives:
 - Upgrade Kubernetes to avoid vulnerabilities
 ---

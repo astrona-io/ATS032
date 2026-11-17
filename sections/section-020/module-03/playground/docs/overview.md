@@ -1,5 +1,4 @@
 ---
-draft: true
 exam_objectives:
 - Exercise caution in using service accounts e.g. disable defaults, minimize permissions on newly created ones
 ---
