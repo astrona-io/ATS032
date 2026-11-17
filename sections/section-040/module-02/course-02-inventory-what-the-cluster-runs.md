@@ -54,7 +54,7 @@ The container runtime records the digest of the image that each running containe
 kubectl -n starfleet get pods -l app=probe -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.status.containerStatuses[0].imageID}{"\n"}{end}'
 ```
 
-The `imageID` field shows the image name and the digest. Two replicas that show different digests run different code. To pin a workload to exact content, write the image as `name@sha256:<digest>` in the Deployment. A pinned digest is reproducible, but it also stops automatic pickup of fixes, so the team must update the digest on purpose.
+The `imageID` field shows the digest. When the node pulled the image from a registry, the field shows the image name and the registry digest (`name@sha256:...`). When the image was loaded into the node without a pull, the field shows only `sha256:` and the ID of the image. Two replicas that show different digests run different code. To pin a workload to exact content, write the image as `name@sha256:<digest>` in the Deployment. A pinned digest is reproducible, but it also stops automatic pickup of fixes, so the team must update the digest on purpose.
 
 ## Scan the images
 

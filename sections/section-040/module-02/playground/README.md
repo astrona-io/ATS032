@@ -1,3 +1,11 @@
 # Version Inventory Playground
 
-This ungraded environment has a private context and pinned node image. The guide contains a complete exercise. Author verification is under testing; runtime verification is pending. The configuration has no submission or grading fields.
+Author notes for the ungraded playground `ats-032-playground-040-02`. It starts a
+private `kind` cluster from the pinned node image, with one control plane node
+and two workers, and runs `bootstrap/setup.sh` to seed the example workloads.
+The learner guide is `docs/overview.md`.
+
+The playground has no grader, no reference solution and no submission fields.
+The graded tasks for this module are separate labs under `../labs/`.
+Start it with `astrona run .` in this folder and remove it with
+`astrona destroy ats-032-playground-040-02`.

@@ -1,0 +1,51 @@
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-032-lab-040-03-02
+  docs:
+    examQuestion: question.md
+    guide: solution.md
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
+    preloadImages:
+    - docker.io/library/busybox:1.37.0
+    nodes:
+      workers: 1
+bootstrap:
+  init:
+  - name: seed-private-environment
+    type: file
+    source: bootstrap/setup.sh
+teardown:
+  keepCluster: false
+testing:
+  init:
+  - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
+  - name: reference-result
+    type: file
+    source: solution/apply.sh
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
+    type: file
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: runtime-restarted
+    description: containerd on the worker is active and started again after the lab began
+    type: file
+    source: validation/validate-runtime-restarted.sh
+    points: 1
+  - name: probe-pods-replaced
+    description: None of the probe Pods that ran on the worker at the start remains, and two probe Pods are available
+    type: file
+    source: validation/validate-probe-pods-replaced.sh
+    points: 1
+  - name: worker-in-service
+    description: The worker is Ready and schedulable again
+    type: file
+    source: validation/validate-worker-in-service.sh
+    points: 1

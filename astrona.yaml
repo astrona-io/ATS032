@@ -622,23 +622,23 @@ modules:
     title: Cordon, Drain And Disruption Budgets
     path: sections/section-040/module-01/course-02-cordon-drain-and-disruption-budgets.md
   - type: reading
-    title: Drain And Return A Worker To Service — Task
+    title: Drain A Worker Node With A PodDisruptionBudget — Task
     path: sections/section-040/module-01/labs/lab-01/question.md
   - type: lab
-    title: Drain And Return A Worker To Service
+    title: Drain A Worker Node With A PodDisruptionBudget
     path: sections/section-040/module-01/labs/lab-01
+    examScope: cluster
     difficulty: intermediate
-    estimated_duration: 25m
+    estimated_duration: 10m
     topic: node-maintenance
     task_kind: build
     learning_goals:
-    - Respect disruption limits while draining and returning an isolated worker to
-      service.
+    - Fix a PodDisruptionBudget that blocks a drain, move a bare Pod and drain a worker.
     tags:
     - cks
     - node-maintenance
   - type: reading
-    title: Drain And Return A Worker To Service — Solution
+    title: Drain A Worker Node With A PodDisruptionBudget — Solution
     path: sections/section-040/module-01/labs/lab-01/solution.md
   - type: reading
     title: The kubeadm Upgrade Sequence
@@ -646,6 +646,25 @@ modules:
   - type: reading
     title: Snapshot And Verify
     path: sections/section-040/module-01/course-04-snapshot-and-verify.md
+  - type: reading
+    title: Save An etcd Snapshot Before An Upgrade — Task
+    path: sections/section-040/module-01/labs/lab-03/question.md
+  - type: lab
+    title: Save An etcd Snapshot Before An Upgrade
+    path: sections/section-040/module-01/labs/lab-03
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 8m
+    topic: etcd-snapshot
+    task_kind: build
+    learning_goals:
+    - Save an etcd snapshot with etcdctl and read its revision with etcdutl.
+    tags:
+    - cks
+    - etcd-snapshot
+  - type: reading
+    title: Save An etcd Snapshot Before An Upgrade — Solution
+    path: sections/section-040/module-01/labs/lab-03/solution.md
   - type: reading
     title: Summary
     path: sections/section-040/module-01/course-05-summary.md
@@ -664,27 +683,46 @@ modules:
     title: Inventory What The Cluster Runs
     path: sections/section-040/module-02/course-02-inventory-what-the-cluster-runs.md
   - type: reading
-    title: Triage A Vulnerability And Plan Patch Waves
-    path: sections/section-040/module-02/course-03-triage-a-vulnerability-and-plan-patch-waves.md
-  - type: reading
-    title: Record The Version Inventory And Patch Waves — Task
+    title: Record A Cluster Version Inventory With Image Digests — Task
     path: sections/section-040/module-02/labs/lab-01/question.md
   - type: lab
-    title: Record The Version Inventory And Patch Waves
+    title: Record A Cluster Version Inventory With Image Digests
     path: sections/section-040/module-02/labs/lab-01
+    examScope: namespace
     difficulty: intermediate
-    estimated_duration: 25m
+    estimated_duration: 8m
     topic: version-inventory
     task_kind: build
     learning_goals:
-    - Record the real versions of a cluster in one ConfigMap and label each node with
-      its patch wave.
+    - Record node, component and workload versions with an image digest in one ConfigMap.
     tags:
     - cks
     - version-inventory
   - type: reading
-    title: Record The Version Inventory And Patch Waves — Solution
+    title: Record A Cluster Version Inventory With Image Digests — Solution
     path: sections/section-040/module-02/labs/lab-01/solution.md
+  - type: reading
+    title: Triage A Vulnerability And Plan Patch Waves
+    path: sections/section-040/module-02/course-03-triage-a-vulnerability-and-plan-patch-waves.md
+  - type: reading
+    title: Triage Vulnerability Records And Label Patch Waves — Task
+    path: sections/section-040/module-02/labs/lab-02/question.md
+  - type: lab
+    title: Triage Vulnerability Records And Label Patch Waves
+    path: sections/section-040/module-02/labs/lab-02
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 10m
+    topic: vulnerability-triage
+    task_kind: build
+    learning_goals:
+    - Decide which advisories apply to the running versions and label nodes in upgrade order.
+    tags:
+    - cks
+    - vulnerability-triage
+  - type: reading
+    title: Triage Vulnerability Records And Label Patch Waves — Solution
+    path: sections/section-040/module-02/labs/lab-02/solution.md
   - type: reading
     title: Summary
     path: sections/section-040/module-02/course-04-summary.md
@@ -700,6 +738,25 @@ modules:
     title: Patch The Operating System And Container Runtime On Nodes
     path: sections/section-040/module-03/course-01-patch-the-operating-system-and-container-runtime-on-nodes.md
   - type: reading
+    title: Restart The Container Runtime On A Drained Worker — Task
+    path: sections/section-040/module-03/labs/lab-02/question.md
+  - type: lab
+    title: Restart The Container Runtime On A Drained Worker
+    path: sections/section-040/module-03/labs/lab-02
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 10m
+    topic: runtime-patching
+    task_kind: build
+    learning_goals:
+    - Drain a worker, restart containerd on it and return it to service.
+    tags:
+    - cks
+    - runtime-patching
+  - type: reading
+    title: Restart The Container Runtime On A Drained Worker — Solution
+    path: sections/section-040/module-03/labs/lab-02/solution.md
+  - type: reading
     title: Verify The Cluster After An Upgrade
     path: sections/section-040/module-03/course-02-verify-the-cluster-after-an-upgrade.md
   - type: reading
@@ -708,13 +765,13 @@ modules:
   - type: lab
     title: Verify And Repair A Cluster After Maintenance
     path: sections/section-040/module-03/labs/lab-01
+    examScope: cluster
     difficulty: intermediate
-    estimated_duration: 25m
+    estimated_duration: 10m
     topic: post-maintenance-verification
     task_kind: build
     learning_goals:
-    - Find and repair a cordoned node, a leftover taint, a Pending Pod and a blocking
-      disruption budget.
+    - Find and repair a cordoned node, a leftover taint, a Pending Pod and a blocking disruption budget.
     tags:
     - cks
     - post-maintenance-verification
@@ -725,6 +782,25 @@ modules:
     title: Rollback Limits And Restore Drills
     path: sections/section-040/module-03/course-03-rollback-limits-and-restore-drills.md
   - type: reading
+    title: Run An etcd Restore Drill From A Snapshot — Task
+    path: sections/section-040/module-03/labs/lab-03/question.md
+  - type: lab
+    title: Run An etcd Restore Drill From A Snapshot
+    path: sections/section-040/module-03/labs/lab-03
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 8m
+    topic: etcd-restore-drill
+    task_kind: build
+    learning_goals:
+    - Restore an etcd snapshot into a separate data directory without touching the live etcd.
+    tags:
+    - cks
+    - etcd-restore-drill
+  - type: reading
+    title: Run An etcd Restore Drill From A Snapshot — Solution
+    path: sections/section-040/module-03/labs/lab-03/solution.md
+  - type: reading
     title: Summary
     path: sections/section-040/module-03/course-04-summary.md
   - type: quiz
@@ -732,25 +808,6 @@ modules:
     path: sections/section-040/module-03/quiz.yaml
     question_count: 10
     pass_score: 70
-  - type: reading
-    title: Run A Node Patch Window End To End — Task
-    path: sections/section-040/capstone/labs/lab-01/question.md
-  - type: lab
-    title: Run A Node Patch Window End To End
-    path: sections/section-040/capstone/labs/lab-01
-    difficulty: advanced
-    estimated_duration: 50m
-    topic: node-patch-window
-    task_kind: build
-    learning_goals:
-    - Drain a worker under a disruption budget, return it to service, move a bare
-      Pod and record the inventory.
-    tags:
-    - cks
-    - node-patch-window
-  - type: reading
-    title: Run A Node Patch Window End To End — Solution
-    path: sections/section-040/capstone/labs/lab-01/solution.md
   - type: quiz
     title: Final Domain Quiz
     path: sections/final-domain-quiz.yaml

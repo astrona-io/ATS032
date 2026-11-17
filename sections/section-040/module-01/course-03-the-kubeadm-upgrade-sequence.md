@@ -4,7 +4,7 @@ exam_objectives:
 ---
 # The kubeadm Upgrade Sequence
 
-This part is the procedure for a cluster created with `kubeadm` on Debian or Ubuntu hosts with packages from the Kubernetes package repository. The commands change real hosts, so they are shown to read and not to run in the playground. The playground nodes are containers, and they have no `apt` and no `kubeadm` command. The commands for other distributions differ in the package step only.
+This part is the procedure for a cluster created with `kubeadm` on Debian or Ubuntu hosts with packages from the Kubernetes package repository. The commands change real hosts, so they are shown to read and not to run in the playground. The playground nodes are containers. They have `apt` and a `kubeadm` binary, but no Kubernetes package repository is set up, so they cannot install a newer version. The commands for other distributions differ in the package step only.
 
 ## The order
 

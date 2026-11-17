@@ -2,32 +2,29 @@
 exam_objectives:
 - Upgrade Kubernetes to avoid vulnerabilities
 ---
-# Record The Version Inventory And Patch Waves
+# Record A Cluster Version Inventory With Image Digests
 
-A security announcement lists the fixed versions of a Kubernetes release. Before anyone plans the upgrade, the team needs one record of what the cluster runs now and the order in which the nodes will be patched.
+Allow about 8 minutes for the tasks.
 
-## Starting state
+A security announcement lists fixed versions for several components. Before the team can say whether the `starfleet` cluster is affected, it needs one record of what the cluster runs now.
 
-The isolated environment has one control-plane node and two workers. The namespace `starfleet` runs the Deployment `probe` and the Pod `shuttle`. The namespace `outpost` runs the Pod `drifter`. No inventory exists.
+## Connect to the lab
 
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+Use a shell on your own machine. The kubeconfig file holds the address and the credentials of this lab's cluster, and `kubectl` uses it.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-032-lab-040-02-01)"
 test "$(kubectl config current-context)" = "kind-astro-ats-032-lab-040-02-01" || exit 1
 ```
 
-Keep this connection selected. Every script supplied by the lab refuses a different context.
+## Tasks
 
-## Required result
+The cluster has the control plane node `astro-ats-032-lab-040-02-01-control-plane` and the worker node `astro-ats-032-lab-040-02-01-worker`. The Deployment `probe` in the namespace `starfleet-032-040-02-01` runs two Pods. Read every value from the live cluster; the values in this lab differ from run to run.
 
-Read the values from the live cluster. Do not type them from memory.
+Create the ConfigMap `version-inventory` in the namespace `starfleet-032-040-02-01` with these keys:
 
-1. Create the ConfigMap `version-inventory` in the namespace `starfleet` with exactly these keys: `server-version` (the `gitVersion` of the API server), `kubelet-control-plane`, `kubelet-worker` and `kubelet-worker2` (the kubelet version of each node), `container-runtime` (the container runtime version of the control-plane node), `probe-image` (the image of the container in the Deployment `probe`) and `client-image` (the image of the container in the Pod `drifter`).
-2. Label the three nodes with the key `patch-wave`: the control-plane node gets `1`, the first worker gets `2` and the second worker gets `3`. The second worker goes last because it runs the client Pods, which have no controller and cannot be moved by a drain.
+1. `server-version`: the `gitVersion` of the API server, for example `v1.35.0`. `kubelet-control-plane` and `kubelet-worker`: the kubelet version of each node. `container-runtime`: the container runtime version of the worker, exactly as the node reports it.
+2. `etcd-image` and `coredns-image`: the full image of the `etcd` Pod and of a CoreDNS Pod in `kube-system`, with registry and tag.
+3. `probe-image`: the image of the container in the Deployment `probe`, exactly as the Deployment writes it. `probe-digest`: the image digest that the running `probe` Pods report, written `sha256:` followed by 64 hexadecimal characters.
 
-Do not change any workload. This exercise records versions; it does not upgrade anything.
-
-## Verify The Result
-
-The grader reads the same fields from the cluster and compares them with your ConfigMap, then checks the three labels. Check your own values against the live cluster before you submit.
+Do not change any workload.
