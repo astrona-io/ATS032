@@ -3,6 +3,7 @@
 from pathlib import Path
 import json
 import re
+import subprocess
 import sys
 import yaml
 
@@ -49,6 +50,8 @@ def check_lab(root, lab, entry):
     scripts = cfg.get('validation', {}).get('scripts', [])
     if not scripts or cfg['validation'].get('script'):
         raise ValueError(f'{lab}: validation needs one scripts entry per outcome')
+    if runtime == 'qemu':
+        return check_vm_lab(directory, lab, name, scripts, entry)
     wrapper = (SHARED / 'validate-outcome.sh').read_bytes()
     for grader in scripts:
         if not grader.get('description') or not isinstance(grader.get('points'), int):
@@ -88,6 +91,38 @@ def check_lab(root, lab, entry):
     if not minutes or int(minutes.group(1)) > MAX_MINUTES:
         raise ValueError(f'{lab}: question.md needs "Allow about N minutes for the tasks." with N <= {MAX_MINUTES}')
     if entry.get('examScope') and runtime != 'kind':
+        raise ValueError(f'{lab}: only kind labs fit the exam profile')
+    return name
+
+
+def check_vm_lab(directory, lab, name, scripts, entry):
+    # astrona pipes each script of a QEMU lab into bash on the VM with no other
+    # lab file next to it, so testing/render-graders.sh copies the checks of
+    # validate.sh into every grader instead of the shared kind wrapper.
+    for grader in scripts:
+        if not grader.get('description') or not isinstance(grader.get('points'), int):
+            raise ValueError(f'{lab}: grader {grader.get("name")} needs a description and points')
+        if grader['source'] != f'validation/validate-{grader["name"]}.sh':
+            raise ValueError(f'{lab}: grader {grader["name"]} must use validation/validate-{grader["name"]}.sh')
+    listed = {grader['source'] for grader in scripts}
+    present = {str(path.relative_to(directory)) for path in directory.glob('validation/*')}
+    if listed != present:
+        raise ValueError(f'{lab}: validation/ files and config.yaml differ: {sorted(listed ^ present)}')
+    validate = (directory / 'validate.sh').read_text()
+    declared = re.search(r'^OUTCOMES="(.*)"$', validate, re.M)
+    if not declared or set(declared.group(1).split()) != {grader['name'] for grader in scripts}:
+        raise ValueError(f'{lab}: OUTCOMES in validate.sh and config.yaml differ')
+    render = subprocess.run(['bash', str(directory / 'testing/render-graders.sh'), '--check'], capture_output=True, text=True)
+    if render.returncode:
+        raise ValueError(f'{lab}: generated graders are stale; run bash testing/render-graders.sh')
+    for script in ['validate.sh', 'solution/apply.sh']:
+        if 'current-context' not in (directory / script).read_text():
+            raise ValueError(f'{lab}: {script} needs the context guard')
+    question = (directory / 'question.md').read_text()
+    minutes = re.search(r'^Allow about (\d+) minutes for the tasks\.$', question, re.M)
+    if not minutes or int(minutes.group(1)) > MAX_MINUTES:
+        raise ValueError(f'{lab}: question.md needs "Allow about N minutes for the tasks." with N <= {MAX_MINUTES}')
+    if entry.get('examScope'):
         raise ValueError(f'{lab}: only kind labs fit the exam profile')
     return name
 

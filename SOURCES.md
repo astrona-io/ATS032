@@ -1,6 +1,6 @@
 # Primary Authoring Sources
 
-[Official CKS objectives](https://training.linuxfoundation.org/certification/certified-kubernetes-security-specialist/) checked on 2026-10-11. The examination is performance-based. These primary references support author review; learner pages are self-contained. Adaptation paths are recorded per reading in AUTHORING.yaml. No runtime or command-output validation is claimed.
+[Official CKS objectives](https://training.linuxfoundation.org/certification/certified-kubernetes-security-specialist/) checked on 2026-10-11. The examination is performance-based. These primary references support author review; learner pages are self-contained. Adaptation paths are recorded per reading in AUTHORING.yaml. Lab command output is recorded from live runs; readings outside the labs are not runtime-verified.
 
 - [Kubernetes security concepts](https://kubernetes.io/docs/concepts/security/)
 - [CIS Kubernetes benchmark](https://www.cisecurity.org/benchmark/kubernetes)
