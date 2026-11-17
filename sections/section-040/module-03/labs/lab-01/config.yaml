@@ -2,19 +2,16 @@ apiVersion: astrona.io/v1
 metadata:
   name: ats-032-lab-040-03-01
   docs:
-    prerequisites: docs/prerequisites.md
     examQuestion: question.md
-    caseStudy: docs/case-study.md
     guide: solution.md
 runtime:
   type: kind
   kind:
     image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
     preloadImages:
-    - docker.io/library/python:3.13-alpine
     - docker.io/library/busybox:1.37.0
     nodes:
-      workers: 2
+      workers: 1
 bootstrap:
   init:
   - name: seed-private-environment
@@ -24,11 +21,31 @@ teardown:
   keepCluster: false
 testing:
   init:
+  - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
   - name: reference-result
     type: file
     source: solution/apply.sh
-validation:
-  script:
-    name: verify-fields-and-live-evidence
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
     type: file
-    source: validate.sh
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: worker-in-service
+    description: Both nodes are Ready, and the worker is schedulable without the maintenance taint
+    type: file
+    source: validation/validate-worker-in-service.sh
+    points: 1
+  - name: probe-spread
+    description: Two probe Pods are Running and Ready on two different nodes
+    type: file
+    source: validation/validate-probe-spread.sh
+    points: 1
+  - name: budget-allows-drain
+    description: Every PodDisruptionBudget that selects the probe Pods allows at least one disruption
+    type: file
+    source: validation/validate-budget-allows-drain.sh
+    points: 1
