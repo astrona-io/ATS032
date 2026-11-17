@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: starfleet-032-010-03-03
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dock-032-010-03-03
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: probe
+  namespace: starfleet-032-010-03-03
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: probe-status
+  namespace: dock-032-010-03-03
+spec:
+  selector:
+    app: probe
+  ports:
+    - port: 80
+      targetPort: 8080

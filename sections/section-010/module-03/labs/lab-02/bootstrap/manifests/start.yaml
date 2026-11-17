@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: starfleet-032-010-03-02
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: outpost-032-010-03-02
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: probe
+  namespace: starfleet-032-010-03-02
+---
+# Every subject below is wrong in some way: a capital letter, an extra user,
+# a missing "s" and the wrong namespace.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: observers
+  namespace: outpost-032-010-03-02
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: view
+subjects:
+  - kind: User
+    name: Jane
+    apiGroup: rbac.authorization.k8s.io
+  - kind: User
+    name: ghost
+    apiGroup: rbac.authorization.k8s.io
+  - kind: Group
+    name: outpost-observer
+    apiGroup: rbac.authorization.k8s.io
+  - kind: ServiceAccount
+    name: probe
+    namespace: outpost-032-010-03-02

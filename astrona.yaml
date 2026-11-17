@@ -54,13 +54,13 @@ modules:
   - type: lab
     title: Grant Namespace Pod Read Access
     path: sections/section-010/module-01/labs/lab-01
+    examScope: namespace
     difficulty: intermediate
-    estimated_duration: 20m
+    estimated_duration: 6m
     topic: rbac
     task_kind: build
     learning_goals:
-    - Grant a ServiceAccount only Pod read access in the required namespace and verify
-      denied operations.
+    - Grant a ServiceAccount only Pod read access in the required namespace and verify denied operations.
     tags:
     - cks
     - rbac
@@ -71,8 +71,46 @@ modules:
     title: ClusterRoles, Reuse And Escalation Prevention
     path: sections/section-010/module-01/course-02-clusterroles-reuse-and-escalation-prevention.md
   - type: reading
+    title: Reuse A ClusterRole In One Namespace And Delegate Role Management — Task
+    path: sections/section-010/module-01/labs/lab-02/question.md
+  - type: lab
+    title: Reuse A ClusterRole In One Namespace And Delegate Role Management
+    path: sections/section-010/module-01/labs/lab-02
+    examScope: namespace
+    difficulty: intermediate
+    estimated_duration: 8m
+    topic: rbac-clusterrole-reuse
+    task_kind: build
+    learning_goals:
+    - Bind a built-in ClusterRole in one namespace and grant Role management that RBAC escalation prevention still limits.
+    tags:
+    - cks
+    - rbac-clusterrole-reuse
+  - type: reading
+    title: Reuse A ClusterRole In One Namespace And Delegate Role Management — Solution
+    path: sections/section-010/module-01/labs/lab-02/solution.md
+  - type: reading
     title: Additive Grants, Dangerous Verbs And Auditing Access
     path: sections/section-010/module-01/course-03-additive-grants-dangerous-verbs-and-auditing-access.md
+  - type: reading
+    title: Revoke An Action That Several Bindings Grant — Task
+    path: sections/section-010/module-01/labs/lab-03/question.md
+  - type: lab
+    title: Revoke An Action That Several Bindings Grant
+    path: sections/section-010/module-01/labs/lab-03
+    examScope: namespace
+    difficulty: intermediate
+    estimated_duration: 8m
+    topic: rbac-additive-revoke
+    task_kind: build
+    learning_goals:
+    - Find every binding that grants one action to a ServiceAccount and revoke it without removing unrelated access.
+    tags:
+    - cks
+    - rbac-additive-revoke
+  - type: reading
+    title: Revoke An Action That Several Bindings Grant — Solution
+    path: sections/section-010/module-01/labs/lab-03/solution.md
   - type: reading
     title: Summary
     path: sections/section-010/module-01/course-04-summary.md
@@ -91,6 +129,25 @@ modules:
     title: Find Every Grant That Reaches An Identity
     path: sections/section-010/module-02/course-02-find-every-grant-for-an-identity.md
   - type: reading
+    title: Remove Bindings To Broad Groups — Task
+    path: sections/section-010/module-02/labs/lab-02/question.md
+  - type: lab
+    title: Remove Bindings To Broad Groups
+    path: sections/section-010/module-02/labs/lab-02
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 10m
+    topic: rbac-broad-groups
+    task_kind: build
+    learning_goals:
+    - Find and remove bindings to system:authenticated and ServiceAccount groups while keeping the built-in system bindings.
+    tags:
+    - cks
+    - rbac-broad-groups
+  - type: reading
+    title: Remove Bindings To Broad Groups — Solution
+    path: sections/section-010/module-02/labs/lab-02/solution.md
+  - type: reading
     title: Rewrite A Broad Grant As Least Privilege
     path: sections/section-010/module-02/course-03-rewrite-a-broad-grant-as-least-privilege.md
   - type: reading
@@ -99,13 +156,13 @@ modules:
   - type: lab
     title: Rewrite A Broad Grant As Least Privilege
     path: sections/section-010/module-02/labs/lab-01
+    examScope: cluster
     difficulty: intermediate
-    estimated_duration: 25m
+    estimated_duration: 12m
     topic: rbac-audit
     task_kind: build
     learning_goals:
-    - Replace a cluster-wide ClusterRoleBinding with a namespaced Role and RoleBinding
-      and verify allowed and denied actions.
+    - Replace a cluster-wide ClusterRoleBinding with a namespaced Role and RoleBinding and verify allowed and denied actions.
     tags:
     - cks
     - rbac
@@ -128,8 +185,46 @@ modules:
     title: Users, Groups And ServiceAccounts As Subjects
     path: sections/section-010/module-03/course-01-users-groups-and-serviceaccounts-as-subjects.md
   - type: reading
+    title: Fix The Subjects Of A RoleBinding — Task
+    path: sections/section-010/module-03/labs/lab-02/question.md
+  - type: lab
+    title: Fix The Subjects Of A RoleBinding
+    path: sections/section-010/module-03/labs/lab-02
+    examScope: namespace
+    difficulty: beginner
+    estimated_duration: 6m
+    topic: rbac-subjects
+    task_kind: build
+    learning_goals:
+    - Correct the User, Group and ServiceAccount subjects of a RoleBinding and test each subject with kubectl auth can-i.
+    tags:
+    - cks
+    - rbac-subjects
+  - type: reading
+    title: Fix The Subjects Of A RoleBinding — Solution
+    path: sections/section-010/module-03/labs/lab-02/solution.md
+  - type: reading
     title: Built-In And Aggregated ClusterRoles
     path: sections/section-010/module-03/course-02-built-in-and-aggregated-clusterroles.md
+  - type: reading
+    title: Build An Aggregated ClusterRole — Task
+    path: sections/section-010/module-03/labs/lab-03/question.md
+  - type: lab
+    title: Build An Aggregated ClusterRole
+    path: sections/section-010/module-03/labs/lab-03
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 10m
+    topic: rbac-aggregation
+    task_kind: build
+    learning_goals:
+    - Build an aggregated ClusterRole from labelled ClusterRoles and bind it in one namespace.
+    tags:
+    - cks
+    - rbac-aggregation
+  - type: reading
+    title: Build An Aggregated ClusterRole — Solution
+    path: sections/section-010/module-03/labs/lab-03/solution.md
   - type: reading
     title: Remove Wildcards And Narrow Rules
     path: sections/section-010/module-03/course-03-remove-wildcards-and-narrow-rules.md
@@ -139,13 +234,13 @@ modules:
   - type: lab
     title: Remove Wildcards From A Group Role
     path: sections/section-010/module-03/labs/lab-01
+    examScope: namespace
     difficulty: intermediate
-    estimated_duration: 25m
+    estimated_duration: 10m
     topic: rbac-wildcards
     task_kind: build
     learning_goals:
-    - Replace a wildcard rule in a group Role with explicit resources and verbs and
-      verify allowed and denied actions.
+    - Replace a wildcard rule in a group Role with explicit resources and verbs and verify allowed and denied actions.
     tags:
     - cks
     - rbac
@@ -161,26 +256,6 @@ modules:
     path: sections/section-010/module-03/quiz.yaml
     question_count: 10
     pass_score: 70
-  - type: reading
-    title: Remediate An RBAC Review Across Three Namespaces — Task
-    path: sections/section-010/capstone/labs/lab-01/question.md
-  - type: lab
-    title: Remediate An RBAC Review Across Three Namespaces
-    path: sections/section-010/capstone/labs/lab-01
-    difficulty: advanced
-    estimated_duration: 50m
-    topic: rbac-capstone
-    task_kind: build
-    learning_goals:
-    - Narrow a cluster-wide grant, remove a binding to every authenticated identity,
-      remove wildcards and build an aggregated ClusterRole in one review.
-    tags:
-    - cks
-    - rbac
-    - capstone
-  - type: reading
-    title: Remediate An RBAC Review Across Three Namespaces — Solution
-    path: sections/section-010/capstone/labs/lab-01/solution.md
 - id: module-020
   title: Restrict ServiceAccount Credentials
   description: Control how ServiceAccount credentials reach pods, turn off unneeded

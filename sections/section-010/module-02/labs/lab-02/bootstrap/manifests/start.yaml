@@ -1,0 +1,122 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: starfleet-032-010-02-02
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: outpost-032-010-02-02
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: shuttle
+  namespace: starfleet-032-010-02-02
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: scout
+  namespace: starfleet-032-010-02-02
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scout-report
+  namespace: outpost-032-010-02-02
+data:
+  status: pending
+---
+# Grants that must keep working.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: configmap-reader
+  namespace: outpost-032-010-02-02
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: shuttle-configmap-reader
+  namespace: outpost-032-010-02-02
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: configmap-reader
+subjects:
+  - kind: ServiceAccount
+    name: shuttle
+    namespace: starfleet-032-010-02-02
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: crew-view
+  namespace: outpost-032-010-02-02
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: view
+subjects:
+  - kind: Group
+    name: starfleet-crew
+    apiGroup: rbac.authorization.k8s.io
+---
+# Broad grant 1: view in outpost for every authenticated identity.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: everyone-view
+  namespace: outpost-032-010-02-02
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: view
+subjects:
+  - kind: Group
+    name: system:authenticated
+    apiGroup: rbac.authorization.k8s.io
+---
+# Broad grant 2: Secret reads in outpost for every ServiceAccount of the cluster.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: secret-reader
+  namespace: outpost-032-010-02-02
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: fleet-config
+  namespace: outpost-032-010-02-02
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: secret-reader
+subjects:
+  - kind: Group
+    name: system:serviceaccounts
+    apiGroup: rbac.authorization.k8s.io
+---
+# Broad grant 3: edit in every namespace for every ServiceAccount of starfleet.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: starfleet-automation
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: edit
+subjects:
+  - kind: Group
+    name: system:serviceaccounts:starfleet-032-010-02-02
+    apiGroup: rbac.authorization.k8s.io

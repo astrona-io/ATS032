@@ -4,29 +4,17 @@ exam_objectives:
 ---
 # Grant Namespace Pod Read Access
 
-The `starfleet` application needs this task completed in its isolated lab environment.
+Allow about 6 minutes for the tasks.
 
-## Objective
-
-Grant a ServiceAccount only Pod read access in the required namespace and verify denied operations.
-
-## Starting state
-
-The `starfleet` and `outpost` namespaces and `starfleet/shuttle` ServiceAccount exist. A ServiceAccount identifies a workload when it calls the Kubernetes application programming interface (API). It has no application-specific Pod read grant.
-
-Use this lab's private kubeconfig. A kubeconfig contains the cluster address and credentials used by kubectl, the Kubernetes command-line tool. The lab has a separate kind cluster from the module playground.
+This lab runs in its own kind cluster. Connect to it first:
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-032-lab-010-01-01)"
 test "$(kubectl config current-context)" = "kind-astro-ats-032-lab-010-01-01" || exit 1
 ```
 
-Keep this connection selected for every command below.
+The `shuttle` workload in `starfleet-032-010-01-01` must read the Pods in its own namespace and do nothing else. A ServiceAccount is the identity a Pod uses when it calls the Kubernetes API (Application Programming Interface). The ServiceAccount `shuttle` exists and has no grant yet. The namespace `outpost-032-010-01-01` also exists.
 
-## Required result
-
-Create Role `pod-reader` and RoleBinding `shuttle-pod-reader` in `starfleet`. Grant ServiceAccount `shuttle` in `starfleet` exactly `get`, `list` and `watch` on core Pods. The binding must reference that Role and only that ServiceAccount. Do not add a ClusterRoleBinding or any other grant. Pod creation and deletion, Secret reads, Pod reads in `outpost` and node reads must remain denied.
-
-## Verify the result
-
-Inspect the required fields and observe the actual result. The grader checks both the resource contract and effective allowed and denied permissions. Wait for controller convergence before submitting.
+1. In `starfleet-032-010-01-01`, create a Role named `pod-reader` that allows exactly `get`, `list` and `watch` on Pods (the core API group) and nothing else.
+2. In the same namespace, create a RoleBinding named `shuttle-pod-reader` that references the Role `pod-reader` and names only the ServiceAccount `shuttle` of `starfleet-032-010-01-01`.
+3. Give `shuttle` no other grant. No other RoleBinding or ClusterRoleBinding may name `shuttle`, so it can still not create or delete Pods, read Secrets, read Pods in `outpost-032-010-01-01` or list nodes.

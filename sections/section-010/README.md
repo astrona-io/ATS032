@@ -11,7 +11,6 @@ Role Based Access Control (RBAC) decides what each identity may do in the cluste
 1. Minimize Exposure With Role Based Access Control: Roles and bindings, how a binding decides the reach of a ClusterRole, escalation prevention, dangerous verbs and a first look at auditing.
 2. Audit And Narrow Effective Access: exact `kubectl auth can-i` questions, a search of every binding that reaches an identity, and the safe order for replacing a broad grant with a narrow one.
 3. Subjects, Built-In Roles And Wildcards: users, groups and ServiceAccounts as subjects, the default and aggregated ClusterRoles, and the removal of wildcards from rules.
-4. Capstone: remediate an RBAC review across three namespaces.
 
 Each module ends with a summary and a ten-question knowledge check. The parts carry the hands-on steps. Each lab follows the part that practises its skill. The playground is a private `kind` cluster with Kubernetes v1.35; launch it from the landing page and keep it running while you read.
 

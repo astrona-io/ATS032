@@ -1,0 +1,49 @@
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-032-lab-010-03-03
+  docs:
+    examQuestion: question.md
+    guide: solution.md
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
+    nodes:
+      workers: 1
+bootstrap:
+  init:
+  - name: seed-rbac
+    type: file
+    source: bootstrap/setup.sh
+teardown:
+  keepCluster: false
+testing:
+  init:
+  - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
+  - name: reference-result
+    type: file
+    source: solution/apply.sh
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
+    type: file
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: component-roles
+    description: The labelled ClusterRoles fleet-reader-pods and fleet-reader-services read Pods and Services
+    type: file
+    source: validation/validate-component-roles.sh
+    points: 1
+  - name: aggregated-role
+    description: The ClusterRole fleet-reader aggregates exactly the two labelled ClusterRoles
+    type: file
+    source: validation/validate-aggregated-role.sh
+    points: 1
+  - name: probe-binding
+    description: probe holds fleet-reader in dock only, through the RoleBinding probe-fleet-reader
+    type: file
+    source: validation/validate-probe-binding.sh
+    points: 1

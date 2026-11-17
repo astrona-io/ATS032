@@ -2,91 +2,134 @@
 exam_objectives:
 - Use Role Based Access Controls to minimize exposure
 ---
-# Remove Wildcards From A Group Role Solution
+# Remove Wildcards From A Group Role: Solution
 
-Use a host shell with this lab's private kubeconfig. A kubeconfig contains the cluster address and credentials used by kubectl, the Kubernetes command-line tool. The lab has a separate kind cluster from the module playground.
+Connect to the lab cluster first. Every command below uses this connection.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-032-lab-010-03-01)"
 test "$(kubectl config current-context)" = "kind-astro-ats-032-lab-010-03-01" || exit 1
 ```
 
-Keep this connection selected for every command below.
+## See what the group can do
 
-## Diagnose The Starting State
-
-The `starfleet` and `outpost` namespaces exist. In `outpost`, the Role `crew-operator` uses the wildcard `*` for API groups, resources and verbs, and the RoleBinding `outpost-crew-operator` gives it to the group `outpost-crew`. A group is a set of users named in the identity that authentication produces. The crew only needs to read Pods, Services and ConfigMaps and to manage Deployments in `outpost`.
-
-Act as a member of the group and try an action that the crew does not need:
+A group is a name that authentication attaches to a user. RBAC (Role Based Access Control) does not check that a user or group exists, so you can test a group with any user name. The `--as` flag sets the user name and `--as-group` adds the group to the request:
 
 ```sh
-kubectl auth can-i get secrets -n outpost --as=jane --as-group=outpost-crew
-kubectl -n outpost get role crew-operator -o yaml
+kubectl auth can-i get secrets -n outpost-032-010-03-01 --as=jane --as-group=outpost-crew
+kubectl auth can-i delete pods -n starfleet-032-010-03-01 --as=jane --as-group=outpost-crew
 ```
 
-The first command prints `yes`, because the wildcard matches Secrets. The second command shows the rule with `'*'` in all three lists. Role-Based Access Control (RBAC) has no deny rule, so the only way to remove the access is to replace the rule.
+```text
+yes
+yes
+```
 
-## Replace The Rule
+The first answer comes from the wildcard Role. The second shows access in a namespace that the Role cannot reach, because a Role only works in its own namespace. So a second binding gives the group access in `starfleet-032-010-03-01`.
 
-Save this as `crew-operator.yaml`. It has the same name and namespace as the existing Role, so `kubectl apply` updates it in place and the RoleBinding keeps working:
+## Find every binding of the group
+
+Search the bindings by subject name. The output below has its spaces shortened:
+
+```sh
+kubectl get rolebindings,clusterrolebindings -A -o custom-columns='NAMESPACE:.metadata.namespace,NAME:.metadata.name,ROLE:.roleRef.name,SUBJECTS:.subjects[*].name' | grep -E 'NAMESPACE|outpost-crew'
+```
+
+```text
+NAMESPACE                 NAME                    ROLE           SUBJECTS
+outpost-032-010-03-01     outpost-crew-operator   crew-operator  outpost-crew
+starfleet-032-010-03-01   crew-maintenance        edit           outpost-crew
+```
+
+`outpost-crew-operator` stays; its Role needs new rules. `crew-maintenance` gives the built-in ClusterRole `edit` in `starfleet-032-010-03-01`, which the crew does not need.
+
+## Rewrite the Role
+
+Write one rule for each API group. Each rule lists only the resources and verbs the crew needs. Pods, Services and ConfigMaps are in the core API group, written as `""`. Deployments are in `apps`.
+
+Save this as `role-crew-operator.yaml`:
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: crew-operator
-  namespace: outpost
+  namespace: outpost-032-010-03-01
 rules:
-- apiGroups:
-  - ''
-  resources:
-  - pods
-  - services
-  - configmaps
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - apps
-  resources:
-  - deployments
-  verbs:
-  - get
-  - list
-  - watch
-  - create
-  - update
-  - patch
-  - delete
+  - apiGroups: [""]
+    resources: ["pods", "services", "configmaps"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 ```
 
 Apply it:
 
 ```sh
-kubectl apply -f crew-operator.yaml
+kubectl apply -f role-crew-operator.yaml
 ```
 
-## Verify The Result
+```text
+role.rbac.authorization.k8s.io/crew-operator configured
+```
 
-Observe the actual result with these bounded checks. No example transcript is provided as evidence of a completed run.
+The `kubectl apply` command replaces the whole `rules` list, so the wildcard rule is gone. The RoleBinding still points at the Role by name, so you do not change it.
+
+## Remove the second grant
+
+Delete the RoleBinding in `starfleet-032-010-03-01`:
 
 ```sh
-kubectl auth can-i list pods -n outpost --as=jane --as-group=outpost-crew
-kubectl auth can-i delete deployments.apps -n outpost --as=jane --as-group=outpost-crew
-kubectl auth can-i get secrets -n outpost --as=jane --as-group=outpost-crew
-kubectl auth can-i get pods/log -n outpost --as=jane --as-group=outpost-crew
-kubectl auth can-i list pods -n starfleet --as=jane --as-group=outpost-crew
+kubectl delete rolebinding crew-maintenance -n starfleet-032-010-03-01
 ```
 
-The first two commands print `yes`. The other three print `no`. Pod logs are the subresource `pods/log`, so the rule for `pods` does not cover them. The denied answers exit with status 1, which is expected.
+```text
+rolebinding.rbac.authorization.k8s.io "crew-maintenance" deleted from starfleet-032-010-03-01 namespace
+```
 
-After recording your result, remove this lab with `astrona destroy ats-032-lab-010-03-01`.
+## Check the result
+
+Then check the result. Test one allowed action and several actions the crew must not have:
+
+```sh
+kubectl auth can-i list deployments.apps -n outpost-032-010-03-01 --as=jane --as-group=outpost-crew
+kubectl auth can-i get secrets -n outpost-032-010-03-01 --as=jane --as-group=outpost-crew
+kubectl auth can-i create pods -n outpost-032-010-03-01 --as=jane --as-group=outpost-crew
+kubectl auth can-i get pods --subresource=log -n outpost-032-010-03-01 --as=jane --as-group=outpost-crew
+kubectl auth can-i create rolebindings -n outpost-032-010-03-01 --as=jane --as-group=outpost-crew
+kubectl auth can-i delete pods -n starfleet-032-010-03-01 --as=jane --as-group=outpost-crew
+```
+
+```text
+yes
+no
+no
+no
+no
+no
+```
+
+The full list confirms that nothing else is left. The output below is shortened: the non-resource URL lines (`/api`, `/healthz`, `/version` and similar) come from built-in bindings for every authenticated user and are left out:
+
+```sh
+kubectl auth can-i --list -n outpost-032-010-03-01 --as=jane --as-group=outpost-crew
+```
+
+```text
+Resources                                       Non-Resource URLs   Resource Names   Verbs
+selfsubjectreviews.authentication.k8s.io        []                  []               [create]
+selfsubjectaccessreviews.authorization.k8s.io   []                  []               [create]
+selfsubjectrulesreviews.authorization.k8s.io    []                  []               [create]
+deployments.apps                                []                  []               [get list watch create update patch delete]
+configmaps                                      []                  []               [get list watch]
+pods                                            []                  []               [get list watch]
+services                                        []                  []               [get list watch]
+```
+
+The three `self...` lines are also built in: they let every authenticated user ask what it may do. The other four lines are exactly the crew's job.
 
 ## Common pitfalls
 
 > [!WARNING]
-> - **Replacing `*` in resources but keeping `*` in verbs.** The Role still allows every action on the listed resources.
-> - **Forgetting the `apps` group.** Deployments are not in the core group, so a rule with `apiGroups: ['']` does not match them.
-> - **Expecting `pods` to include `pods/log` and `pods/exec`.** Subresources need their own entries, and the task does not allow them.
-> - **Deleting the Role and creating a new one with another name.** The RoleBinding then points at a Role that does not exist.
+> Removing the wildcards from the Role is not enough when the group has another binding. Always search the bindings by subject before you call a group least privilege. Also check the API group of each resource: a rule for `deployments` with `apiGroups: [""]` matches nothing, because Deployments live in `apps`.

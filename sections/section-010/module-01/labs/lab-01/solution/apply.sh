@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
+# Reference solution: the Role pod-reader and its RoleBinding for shuttle.
 set -euo pipefail
-if [[ "$(kubectl config current-context)" != "kind-astro-ats-032-lab-010-01-01" ]]; then
+context="${ASTRONA_KUBE_CONTEXT:-kind-astro-ats-032-lab-010-01-01}"
+if [[ "$(kubectl config current-context)" != "$context" ]]; then
   printf 'Refusing to operate on another Kubernetes context\n' >&2
   exit 1
 fi
