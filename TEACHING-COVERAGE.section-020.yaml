@@ -1,0 +1,28 @@
+version: 1
+labs:
+  sections/section-020/module-01/labs/lab-01:
+    preparation:
+    - sections/section-020/module-01/course-01-serviceaccounts-and-the-default-token.md
+    - sections/section-020/module-01/course-02-disable-automounting-and-minimize-permissions.md
+  sections/section-020/module-01/labs/lab-02:
+    preparation:
+    - sections/section-020/module-01/course-03-bound-tokens-audience-and-legacy-secrets.md
+  sections/section-020/module-02/labs/lab-01:
+    preparation:
+    - sections/section-020/module-02/course-01-one-serviceaccount-for-each-workload.md
+  sections/section-020/module-02/labs/lab-02:
+    preparation:
+    - sections/section-020/module-02/course-02-grant-only-what-the-workload-uses.md
+  sections/section-020/module-02/labs/lab-03:
+    preparation:
+    - sections/section-020/module-02/course-03-clean-up-the-default-serviceaccount.md
+  sections/section-020/module-03/labs/lab-01:
+    preparation:
+    - sections/section-020/module-03/course-01-find-which-pods-use-which-serviceaccount.md
+    - sections/section-020/module-03/course-02-audit-grants-that-reach-serviceaccounts.md
+  sections/section-020/module-03/labs/lab-02:
+    preparation:
+    - sections/section-020/module-03/course-03-audit-tokens-secrets-lifetimes-and-audience.md
+additional_readings:
+- sections/section-020/module-01/course-01-serviceaccounts-and-the-default-token.md
+- sections/section-020/module-03/course-01-find-which-pods-use-which-serviceaccount.md

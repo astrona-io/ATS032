@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: outpost-032-020-01-02
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: reporter
+  namespace: outpost-032-020-01-02
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: reporter-legacy-token
+  namespace: outpost-032-020-01-02
+  annotations:
+    kubernetes.io/service-account.name: reporter
+type: kubernetes.io/service-account-token
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ledger-client
+  namespace: outpost-032-020-01-02
+  labels:
+    app: ledger-client
+spec:
+  serviceAccountName: reporter
+  restartPolicy: Never
+  containers:
+  - name: client
+    image: docker.io/library/busybox:1.37.0
+    command: ["sh", "-c", "sleep 86400"]
+    volumeMounts:
+    - name: ledger-token
+      mountPath: /var/run/tokens
+      readOnly: true
+  volumes:
+  - name: ledger-token
+    secret:
+      secretName: reporter-legacy-token
+      items:
+      - key: token
+        path: ledger-token

@@ -5,27 +5,24 @@ exam_objectives:
 ---
 # Disable Unneeded ServiceAccount Tokens
 
-Run a workload without mounting credentials it does not need.
+Allow about 6 minutes for the tasks.
 
-## Starting state
+The `starfleet` team runs a small reader Pod that never calls the Kubernetes API. It still receives an API token, because it runs as the `default` ServiceAccount. Give it an identity that gets no token at all.
 
-The isolated environment has two healthy probe replicas, an internal Service and two client Pods. The required result has not been configured.
+## Connect to the lab
 
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+Use a shell on your own machine. The kubeconfig file holds the address and the credentials of this lab's cluster, and `kubectl` uses it.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-032-lab-020-01-01)"
 test "$(kubectl config current-context)" = "kind-astro-ats-032-lab-020-01-01" || exit 1
-node_name="astro-ats-032-lab-020-01-01-control-plane"
-worker_name="astro-ats-032-lab-020-01-01-worker"
 ```
 
-Keep this connection selected. Host-level commands name only this environment's node containers. They do not operate on the host operating system.
+## Tasks
 
-## Required result
+Work in the namespace `starfleet-032-020-01-01`.
 
-Create ServiceAccount no-api with automountServiceAccountToken false. Run no-token-reader as that account with Pod-level automount also false. Keep the restricted security context and writable scratch volume. The Pod must be Ready and the default service-account token path must not exist. Do not grant this identity application permissions.
-
-## Verify The Result
-
-The grader checks the required object fields and actual observations. Wait for controller convergence before submitting. Preserve the task's namespace, workload names and unrelated components.
+1. Create the ServiceAccount `no-api`. Set it so that Pods which use it do not get a ServiceAccount token mounted.
+2. Do not give `no-api` any permission: no Role, ClusterRole or binding may reach it.
+3. The Pod `no-token-reader` runs as the `default` ServiceAccount and has a token. Recreate it so that it runs as `no-api` and also sets `automountServiceAccountToken: false` in its own Pod spec. Keep the Pod name, the container `reader` and its image `docker.io/library/busybox:1.37.0`.
+4. The new Pod must be running and ready. Its container must have no ServiceAccount token: the directory `/var/run/secrets/kubernetes.io/serviceaccount` must not exist, and no volume may project a token.

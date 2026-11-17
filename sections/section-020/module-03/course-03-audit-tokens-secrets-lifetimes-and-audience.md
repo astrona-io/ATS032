@@ -35,22 +35,28 @@ Pods that use the default mount show 3607. The line for `outpost/ledger-client` 
 
 ## Request a token and test it against the API server
 
-You can request a token yourself and use it. The command `kubectl create token` calls the TokenRequest API and prints the JWT. The option `--token` makes `kubectl` send a given token instead of your own credentials. Put the first command inside `$(...)` so the token goes straight into the second command and never appears on the screen. `kubectl auth whoami` prints the identity that the API server sees.
+You can request a token yourself and use it. The command `kubectl create token` calls the TokenRequest API and prints the JWT. Put it inside `$(...)` so the token goes straight into the next command and never appears on the screen.
+
+The option `kubectl --token` does not test the token on every cluster. When your kubeconfig user also has a client certificate, as on a kind cluster, the API server authenticates the certificate and you stay the administrator. So store the token as a separate kubeconfig user with `kubectl config set-credentials`, and select that user with `--user`. `kubectl auth whoami` prints the identity that the API server sees:
 
 ```sh
-kubectl --token="$(kubectl -n outpost create token archive)" auth whoami
-kubectl --token="$(kubectl -n outpost create token archive --audience=ledger)" auth whoami
+kubectl config set-credentials archive-token --token="$(kubectl -n outpost create token archive)"
+kubectl --user=archive-token auth whoami
+kubectl config set-credentials archive-token --token="$(kubectl -n outpost create token archive --audience=ledger)"
+kubectl --user=archive-token auth whoami
 ```
 
-The first command prints the user name `system:serviceaccount:outpost:archive` together with its groups. The second fails with an `Unauthorized` error. The token is valid, but its audience is `ledger`, and the API server accepts only tokens that name its own audience. This is the property you use when a workload needs a token for another service: the token is useless against the API server.
+The first `whoami` prints the user name `system:serviceaccount:outpost:archive` together with its groups. The second fails with `error: You must be logged in to the server (Unauthorized)`. The token is valid, but its audience is `ledger`, and the API server accepts only tokens that name its own audience. This is the property you use when a workload needs a token for another service: the token is useless against the API server.
 
-The same call shows the effect of the lifetime. Ask for the shortest token and test it:
+The same method shows the effect of the lifetime. Ask for the shortest token, test it, and then remove the user from your kubeconfig file:
 
 ```sh
-kubectl --token="$(kubectl -n outpost create token archive --duration=10m)" auth can-i list pods -n outpost
+kubectl config set-credentials archive-token --token="$(kubectl -n outpost create token archive --duration=10m)"
+kubectl --user=archive-token auth can-i list pods -n outpost
+kubectl config delete-user archive-token
 ```
 
-The answer is `yes`, because of the group binding found earlier. Ten minutes after the token was created, the same call is refused. Tokens from `kubectl create token` can also be tied to an object with `--bound-object-kind` and `--bound-object-name`, and then they stop working as soon as that pod or Secret is deleted.
+The answer is `yes` while the group binding found earlier still exists. Ten minutes after the token was created, the same call is refused. Tokens from `kubectl create token` can also be tied to an object with `--bound-object-kind` and `--bound-object-name`, and then they stop working as soon as that pod or Secret is deleted.
 
 ## What to record in a review
 

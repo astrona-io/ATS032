@@ -1,34 +1,27 @@
 ---
 exam_objectives:
-- Exercise caution in using service accounts e.g. disable defaults, minimize permissions on newly created ones
+- Exercise caution in using service accounts e.g. disable defaults, minimize permissions
+  on newly created ones
 ---
-# Give Each Workload Its Own Least-Privilege ServiceAccount
+# Give a Deployment Its Own ServiceAccount
 
-Move one workload to a dedicated ServiceAccount without a token, create a ServiceAccount that has one narrow grant, and remove the grant from the default account.
+Allow about 6 minutes for the tasks.
 
-## Starting state
+The `probe` web server in the `starfleet` namespace never calls the Kubernetes API, but its Pods run as the `default` ServiceAccount and get an API token. Give the Deployment its own ServiceAccount that mounts no token.
 
-The `starfleet` namespace runs the Deployment `probe` (two replicas) and the pod `shuttle`. Both use the `default` ServiceAccount. Someone fixed an old error by creating the Role `pod-access` and binding it to the `default` ServiceAccount of `starfleet` with the RoleBinding `default-pod-access`, so every pod of the namespace can read pods. The `outpost` namespace runs the pod `drifter`.
+## Connect to the lab
 
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+Use a shell on your own machine. The kubeconfig file holds the address and the credentials of this lab's cluster, and `kubectl` uses it.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-032-lab-020-02-01)"
 test "$(kubectl config current-context)" = "kind-astro-ats-032-lab-020-02-01" || exit 1
 ```
 
-Keep this connection selected. Every script supplied by the lab refuses a different context.
+## Tasks
 
-## Required result
+Work in the namespace `starfleet-032-020-02-01`.
 
-Make these changes in the `starfleet` namespace and keep the namespace, workload names and unrelated components as they are.
-
-1. Create the ServiceAccount `probe` with `automountServiceAccountToken: false`. Change the Deployment `probe` to use it and wait until the rollout is complete with two ready replicas. The `probe` pods must have no token directory.
-2. Create the ServiceAccount `pod-lister`, the Role `pod-lister` and the RoleBinding `pod-lister`. The Role has exactly one rule: the verbs `get` and `list` on `pods` in the core API group. The binding gives the Role to the ServiceAccount `pod-lister` only. Run a new pod named `pod-lister` with that ServiceAccount.
-3. Remove the RoleBinding `default-pod-access`, and set `automountServiceAccountToken: false` on the `default` ServiceAccount of `starfleet`.
-
-When you finish, `pod-lister` can get pods in `starfleet` but cannot delete pods there and cannot read pods in `outpost`, and the `default` ServiceAccount of `starfleet` cannot get pods.
-
-## Verify The Result
-
-The grader checks the object fields and asks the API server what each ServiceAccount may do. Wait for the rollout to finish before you submit. Do not change the Role `pod-access`; only the binding must go.
+1. Create the ServiceAccount `probe` with `automountServiceAccountToken: false`. Do not give it any permission: no Role, ClusterRole or binding may reach it.
+2. Change the Deployment `probe` so that its Pods run as the ServiceAccount `probe`. Keep two replicas.
+3. Wait until the rollout is complete. Both running Pods of the Deployment must use `probe` and must have no directory `/var/run/secrets/kubernetes.io/serviceaccount`.
