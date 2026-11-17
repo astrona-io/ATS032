@@ -1,0 +1,44 @@
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-032-lab-030-02-03
+  docs:
+    examQuestion: question.md
+    guide: solution.md
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
+    nodes:
+      workers: 1
+bootstrap:
+  init:
+  - name: seed-lab
+    type: file
+    source: bootstrap/setup.sh
+teardown:
+  keepCluster: false
+testing:
+  init:
+  - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
+  - name: reference-result
+    type: file
+    source: solution/apply.sh
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
+    type: file
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: authorization-mode-secure
+    description: The kube-apiserver uses Node and RBAC authorization without AlwaysAllow
+    type: file
+    source: validation/validate-authorization-mode-secure.sh
+    points: 1
+  - name: impersonation-narrowed
+    description: The group helpdesk can impersonate only the ServiceAccount probe in the starfleet namespace
+    type: file
+    source: validation/validate-impersonation-narrowed.sh
+    points: 1

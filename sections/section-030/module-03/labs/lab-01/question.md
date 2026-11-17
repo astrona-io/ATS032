@@ -2,31 +2,25 @@
 exam_objectives:
 - Restrict access to Kubernetes API
 ---
-# Enforce Admission Rules In A Namespace
+# Enforce Pod Security Standards On A Namespace
 
-The `outpost` team shares a cluster with other teams and wants guard rails on what it can create.
+Allow about 10 minutes for the tasks.
 
-## Objective
+The namespace `outpost-032-030-03-01` has no Pod Security labels, so the API server admits any Pod there, including privileged ones. The Deployment `web` in that namespace runs its container in privileged mode, although the application does not need it.
 
-Make the API server reject privileged Pods and NodePort Services in one namespace and still admit ordinary objects.
+## Connect to the lab
 
-## Starting state
-
-The `outpost` namespace must stop accepting Pods that ask for host-level power and Services that open a port on every node. The namespaces `outpost` and `starfleet` have no admission rule. The Pod `drifter` and the Deployment `probe` are healthy. Do not change any workload.
-
-Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
+Use a shell on your own machine. The kubeconfig file holds the address and the credentials of this lab's cluster, and `kubectl` uses it.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-032-lab-030-03-01)"
 test "$(kubectl config current-context)" = "kind-astro-ats-032-lab-030-03-01" || exit 1
 ```
 
-Keep this connection selected throughout the task. Every script supplied by the lab refuses a different context.
+## Tasks
 
-## Required result
+1. Make the Pod Security admission controller enforce the `baseline` standard in the namespace `outpost-032-030-03-01`.
+2. In the same namespace, make it warn about Pods that do not meet the `restricted` standard. Do not enforce `restricted`.
+3. Change the Deployment `web` so that its container no longer runs in privileged mode. Keep the name, the image, the command and 2 replicas.
 
-Label the namespace `outpost` with `pod-security.kubernetes.io/enforce=baseline`. Create a ValidatingAdmissionPolicy named `no-nodeport` that matches `CREATE` and `UPDATE` of Services in the core API group and rejects a Service of type `NodePort`. Create a ValidatingAdmissionPolicyBinding named `no-nodeport-outpost` with the policy name `no-nodeport`, the validation action `Deny` and a namespace selector that selects only `outpost`. A privileged Pod and a NodePort Service in `outpost` must be rejected. A ClusterIP Service and a plain Pod in `outpost` must be admitted, and a NodePort Service in `starfleet` must still be admitted.
-
-## Verify The Result
-
-The grader checks the stated resource fields and live evidence. Wait for controller convergence before submitting. Inspect actual results rather than relying on a sample transcript.
+After the change, a new privileged Pod in the namespace must be rejected. A Pod that meets `baseline` but not `restricted` must be admitted with a warning. Both replicas of `web` must be ready.

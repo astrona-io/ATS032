@@ -1,0 +1,49 @@
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-032-lab-030-03-02
+  docs:
+    examQuestion: question.md
+    guide: solution.md
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
+    nodes:
+      workers: 1
+bootstrap:
+  init:
+  - name: seed-lab
+    type: file
+    source: bootstrap/setup.sh
+teardown:
+  keepCluster: false
+testing:
+  init:
+  - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
+  - name: reference-result
+    type: file
+    source: solution/apply.sh
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
+    type: file
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: create-denied
+    description: Creating a NodePort Service in the outpost namespace is denied by deny-nodeport and a ClusterIP Service is admitted
+    type: file
+    source: validation/validate-create-denied.sh
+    points: 1
+  - name: update-denied
+    description: Changing an existing Service in the outpost namespace to NodePort is denied
+    type: file
+    source: validation/validate-update-denied.sh
+    points: 1
+  - name: binding-scoped
+    description: The binding deny-nodeport-outpost applies the policy to the outpost namespace only
+    type: file
+    source: validation/validate-binding-scoped.sh
+    points: 1

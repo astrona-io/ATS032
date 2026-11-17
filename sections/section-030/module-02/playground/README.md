@@ -1,3 +1,5 @@
 # Authentication, Anonymous Access And Authorization Modes Playground
 
-This ungraded environment has a private context and pinned node image. The guide contains a complete exercise. Author verification is under testing; runtime verification is pending. The configuration has no submission or grading fields.
+This ungraded environment has a private context and a pinned node image. `bootstrap/setup.sh` creates the example workloads, and `docs/overview.md` is the guide the learner reads. The configuration has no submission, grading or testing fields.
+
+Start it with `astrona run .` from this directory.

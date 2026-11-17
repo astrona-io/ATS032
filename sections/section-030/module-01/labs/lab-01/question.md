@@ -2,32 +2,28 @@
 exam_objectives:
 - Restrict access to Kubernetes API
 ---
-# Use A Workload Identity For An API Request
+# Give A Workload A Narrow ServiceAccount
 
-Run the application with a narrow identity and authenticate a real API request from its container. Use the isolated `starfleet` environment to verify the result.
+Allow about 10 minutes for the tasks.
 
-## Objective
+The `probe` Deployment in `starfleet-032-030-01-01` must read the list of Pods in its own namespace through the Kubernetes API. Today it runs as the namespace's `default` ServiceAccount, which has no access. Give it its own identity with the smallest set of rights that does the job.
 
-Run the application with a narrow identity and authenticate a real API request from its container.
+## Connect to the lab
 
-## Starting state
-
-The application and client fixtures are healthy. Complete the required change without replacing unrelated resources.
-
-Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
+Use a shell on your own machine. The kubeconfig file holds the address and the credentials of this lab's cluster, and `kubectl` uses it.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-032-lab-030-01-01)"
 test "$(kubectl config current-context)" = "kind-astro-ats-032-lab-030-01-01" || exit 1
 ```
 
-Keep this connection selected throughout the task. Every script supplied by the lab refuses a different context.
+## Tasks
 
+Work in the namespace `starfleet-032-030-01-01`.
 
-## Required result
+1. Create the ServiceAccount `observer`.
+2. Create the Role `observer-reader`. It allows only the verbs `get` and `list` on core `pods`, and nothing else.
+3. Create the RoleBinding `observer-read`. It binds the Role `observer-reader` to the ServiceAccount `observer`. Do not bind `observer` to any other Role or ClusterRole.
+4. Run the `probe` Deployment as `observer`. Wait until both replicas are ready again.
 
-Create ServiceAccount `observer`, Role `observer-reader` granting exactly get and list on core Pods, and RoleBinding `observer-read` for that identity in `starfleet`. Run both probe replicas as that ServiceAccount. A request from the application container using its mounted token and certificate authority must read the namespace Pod list. Secret reads and Pod creation must remain denied.
-
-## Verify The Result
-
-The grader checks the stated resource fields and live evidence. Wait for controller convergence before submitting. Inspect actual results rather than relying on a sample transcript.
+A request from a `probe` Pod, sent with the Pod's own mounted token and certificate authority, must read the Pod list of `starfleet-032-030-01-01`. The same token must get `403 Forbidden` for the Secrets of that namespace and for the Services of `outpost-032-030-01-01`.

@@ -2,89 +2,91 @@
 exam_objectives:
 - Restrict access to Kubernetes API
 ---
-# Enforce Admission Rules In A Namespace Solution
+# Enforce Pod Security Standards On A Namespace: Solution
 
-Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
+Connect to the lab first, so that `kubectl` talks to this lab's cluster:
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-032-lab-030-03-01)"
-test "$(kubectl config current-context)" = "kind-astro-ats-032-lab-030-03-01" || exit 1
 ```
 
-Keep this connection selected throughout the task. Every script supplied by the lab refuses a different context.
+## Label the namespace
 
-## Inspect And Explain
-
-Check that nothing enforces a rule yet. A server-side dry run runs the full admission chain without storing the object:
+The Pod Security admission controller is built into the API server. It reads two labels on each namespace for this task: `pod-security.kubernetes.io/enforce` rejects Pods that break the named standard, and `pod-security.kubernetes.io/warn` only prints a warning. Add both labels in one command:
 
 ```sh
-kubectl -n outpost run priv --image=docker.io/library/busybox:1.37.0 --privileged --dry-run=server -o name
-kubectl -n outpost create service nodeport demo --tcp=80:80 --dry-run=server -o name
+kubectl label namespace outpost-032-030-03-01 \
+  pod-security.kubernetes.io/enforce=baseline \
+  pod-security.kubernetes.io/warn=restricted
 ```
 
-Both commands succeed in the starting state. Pod Security admission reads the labels of the namespace, and a ValidatingAdmissionPolicy needs a policy and a binding.
+The controller checks the Pods that already run in the namespace against the new enforce level. It prints a warning for the two `web` Pods, because they are privileged, but it does not stop them. Only new Pods are rejected.
 
-Label the namespace:
+## Fix the Deployment
 
-```sh
-kubectl label namespace outpost pod-security.kubernetes.io/enforce=baseline
-```
-
-Save this as `admission-outpost.yaml`:
+The `web` container does not need privileged mode, so remove the `securityContext` with `privileged: true` from the Pod template. Save this as `deployment-web.yaml`:
 
 ```yaml
-apiVersion: admissionregistration.k8s.io/v1
-kind: ValidatingAdmissionPolicy
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: no-nodeport
+  name: web
+  namespace: outpost-032-030-03-01
 spec:
-  failurePolicy: Fail
-  matchConstraints:
-    resourceRules:
-      - apiGroups: [""]
-        apiVersions: ["v1"]
-        operations: ["CREATE", "UPDATE"]
-        resources: ["services"]
-  validations:
-    - expression: "object.spec.type != 'NodePort'"
-      message: "NodePort Services are not allowed in this namespace"
----
-apiVersion: admissionregistration.k8s.io/v1
-kind: ValidatingAdmissionPolicyBinding
-metadata:
-  name: no-nodeport-outpost
-spec:
-  policyName: no-nodeport
-  validationActions: ["Deny"]
-  matchResources:
-    namespaceSelector:
-      matchLabels:
-        kubernetes.io/metadata.name: outpost
+  replicas: 2
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+      - name: web
+        image: docker.io/library/busybox:1.37.0
+        command:
+        - sh
+        - -c
+        - echo web started; sleep 86400
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            memory: 32Mi
 ```
 
-Apply the required change:
+Apply it:
 
 ```sh
-kubectl apply -f admission-outpost.yaml
+kubectl apply -f deployment-web.yaml
 ```
 
-## Verify The Result
+The API server stores the Deployment and prints a warning that the Pod template would violate `restricted`. The warning does not block the change, because `restricted` is only in `warn` mode.
 
-The binding becomes active after a short time, so repeat a request that is still admitted. A rejected request returns a nonzero status, so run each request on its own.
+Then check the result:
 
 ```sh
-kubectl -n outpost run priv --image=docker.io/library/busybox:1.37.0 --privileged --dry-run=server -o name
-kubectl -n outpost create service nodeport demo --tcp=80:80 --dry-run=server -o name
-kubectl -n outpost create service clusterip demo --tcp=80:80 --dry-run=server -o name
-kubectl -n starfleet create service nodeport demo --tcp=80:80 --dry-run=server -o name
+kubectl -n outpost-032-030-03-01 rollout status deployment/web
+kubectl -n outpost-032-030-03-01 get pods -l app=web
 ```
 
-The first command fails because the Pod violates the `baseline` level. The second fails with the message of the policy `no-nodeport`. The third and fourth succeed, because a ClusterIP Service is allowed and the binding selects only `outpost`.
+The rollout finishes, and two new `web` Pods are `Running`. The ReplicaSet controller could create them because the new Pod template meets `baseline`.
 
+## Prove that enforcement works
 
-After recording the result, remove this independent lab with `astrona destroy ats-032-lab-030-03-01`.
+A server-side dry run sends the request through admission without storing anything. Send a privileged Pod:
+
+```sh
+kubectl -n outpost-032-030-03-01 run test --image=docker.io/library/busybox:1.37.0 --privileged --dry-run=server -- sleep 60
+```
+
+The API server rejects the request. The error says that the Pod violates PodSecurity `baseline:latest` and names the privileged container.
 
 ## Common pitfalls
 
 > [!WARNING]
-> A policy without a binding enforces nothing. Use the namespace name label in the selector, and match both `CREATE` and `UPDATE`. Test one allowed and one denied object, and remember that `cluster-admin` is checked too.
+> - **Expecting the label to stop running Pods.** The enforce label checks only new Pods. A privileged Deployment keeps running until its Pods are replaced.
+> - **Enforcing `restricted` by mistake.** The task asks for `restricted` in `warn` mode only. Enforcing it would also block the fixed `web` Pods.
+> - **Reading the Deployment status only.** If Pods are rejected, the reason is in the events of the ReplicaSet, not of the Deployment.

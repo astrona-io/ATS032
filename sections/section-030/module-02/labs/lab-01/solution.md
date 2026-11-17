@@ -2,53 +2,73 @@
 exam_objectives:
 - Restrict access to Kubernetes API
 ---
-# Remove Anonymous Access To The API Solution
+# Remove RBAC Grants For Anonymous Requests: Solution
 
-Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
+Connect to the lab first, so that `kubectl` talks to this lab's cluster:
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-032-lab-030-02-01)"
-test "$(kubectl config current-context)" = "kind-astro-ats-032-lab-030-02-01" || exit 1
+control_plane="astro-ats-032-lab-030-02-01-control-plane"
 ```
 
-Keep this connection selected throughout the task. Every script supplied by the lab refuses a different context.
+## Prove that anonymous requests read data
 
-## Inspect And Explain
-
-Anonymous requests receive the user `system:anonymous` and the group `system:unauthenticated`, and then go through authorization. Find the binding that names those subjects:
+The helper below sends a request with no credentials from the control plane node and prints only the HTTP status code:
 
 ```sh
-kubectl get clusterrolebindings -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.roleRef.name}{"\t"}{.subjects[*].name}{"\n"}{end}'
-kubectl auth can-i list pods -n starfleet --as=system:anonymous --as-group=system:unauthenticated
+anonymous_status() {
+  podman exec $control_plane curl -sk -o /dev/null -w '%{http_code}\n' "https://127.0.0.1:6443$1"
+}
+anonymous_status /version
+anonymous_status /api/v1/namespaces/outpost-032-030-02-01/pods
+anonymous_status /api/v1/namespaces/starfleet-032-030-02-01/secrets
 ```
 
-The first command lists the bindings with the role and the subjects. The line for `anonymous-viewer` shows `view` and `system:unauthenticated`. The second command prints `yes`, which confirms the effect. The binding `ops-viewer` names a different group and is not part of the fault.
+All three print `200`. The first is expected: the built-in ClusterRole `system:public-info-viewer` lets every caller read `/version`, `/healthz`, `/livez` and `/readyz`. The other two mean that RBAC allows anonymous callers to read cluster data.
 
-Delete the binding that grants access to anonymous callers:
+## Find the bindings
+
+Print every ClusterRoleBinding with its role and the names of its subjects, and keep only the lines that name an anonymous subject:
 
 ```sh
-kubectl delete clusterrolebinding anonymous-viewer
+kubectl get clusterrolebindings -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.roleRef.name}{"\t"}{.subjects[*].name}{"\n"}{end}' | grep -E 'system:(anonymous|unauthenticated)'
 ```
 
-## Verify The Result
+Two lines appear. `system:public-info-viewer` is built in; it carries the label `kubernetes.io/bootstrapping=rbac-defaults`, and it stays. `metrics-reader` grants the ClusterRole `view` to the group `system:unauthenticated` in every namespace. That is the cause of the Pod list.
 
-The anonymous request is sent from a `probe` Pod, and the status code is printed. The authorizer needs a short time to see the change, so repeat a request that still shows `200`.
+Do the same for RoleBindings in all namespaces:
 
 ```sh
-kubectl -n starfleet exec deployment/probe -- python -c "import ssl,urllib.request as r,urllib.error as e;c=ssl.create_default_context(cafile='/var/run/secrets/kubernetes.io/serviceaccount/ca.crt')
-try:
-    print(r.urlopen('https://kubernetes.default.svc/api/v1/namespaces/starfleet/pods',context=c,timeout=5).status)
-except e.HTTPError as x:
-    print(x.code)"
-kubectl auth can-i list pods -n starfleet --as=ops-user --as-group=ops
+kubectl get rolebindings -A -o jsonpath='{range .items[*]}{.metadata.namespace}{"\t"}{.metadata.name}{"\t"}{.roleRef.name}{"\t"}{.subjects[*].name}{"\n"}{end}' | grep -E 'system:(anonymous|unauthenticated)'
 ```
 
-The first command prints `403`. Replace the path with `/version` and the same command prints `200`. The second command prints `yes`.
+The RoleBinding `support-read` in `starfleet-032-030-02-01` grants the ClusterRole `edit` to the user `system:anonymous`. The role `view` does not include Secrets, but `edit` does, which is why the Secret list worked. A RoleBinding in `kube-public` may also appear; kubeadm creates it so that new nodes can read the cluster information while they join. It is outside this task.
 
+## Remove the bindings
 
-After recording the result, remove this independent lab with `astrona destroy ats-032-lab-030-02-01`.
+Delete both bindings by name:
+
+```sh
+kubectl delete clusterrolebinding metrics-reader
+kubectl -n starfleet-032-030-02-01 delete rolebinding support-read
+```
+
+## Check the result
+
+Run the same requests again:
+
+```sh
+anonymous_status /version
+anonymous_status /api/v1/namespaces/outpost-032-030-02-01/pods
+anonymous_status /api/v1/namespaces/starfleet-032-030-02-01/secrets
+kubectl auth can-i list pods -n starfleet-032-030-02-01 --as=ops-user --as-group=ops
+```
+
+`/version` still returns `200`, and the two data requests now return `403`. The caller is still authenticated as `system:anonymous`, but the RBAC authorizer finds no rule that allows the request. The last command prints `yes`, because `ops-viewer` is unchanged.
 
 ## Common pitfalls
 
 > [!WARNING]
-> Delete the binding, not the role `view` or a built-in role. Keep `ops-viewer`. Test as the anonymous subject and not as `cluster-admin`, which passes every check.
+> - **Searching only ClusterRoleBindings.** A RoleBinding can grant anonymous access inside one namespace. Search both kinds.
+> - **Deleting or editing `system:public-info-viewer`.** The API server restores its default roles when it starts, and health checks need that access.
+> - **Switching anonymous authentication off as a shortcut.** Requests then get `401`, and on kubeadm clusters the API server probes can fail. The task asks you to remove the grants.
