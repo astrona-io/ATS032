@@ -4,7 +4,7 @@ exam_objectives:
 ---
 # Hardening The Endpoint And The Kubelet
 
-The first two parts looked at requests from the inside. This part looks at the server side: which settings decide who can reach the API server, how callers are authenticated and authorized, how a node is limited, and what is recorded. The API server and the kubelet are configured through files and flags on the control-plane and worker hosts. In the playground you can read the live API server settings. Changing them is described here, but you do not change the playground.
+A narrow identity limits what one caller can do, but the server decides who can call at all. This part looks at the server side: which settings decide who can reach the API server, how callers are authenticated and authorized, how a node is limited, and what is recorded. The API server and the kubelet are configured through files and flags on each node. In the playground you read the live settings of both, through the API and from the files on the node `controlplane`. Changing them is described here, but you do not need to change the playground.
 
 ## Where the settings live
 
@@ -14,7 +14,7 @@ The kubelet on every node reads its settings from a configuration file, `/var/li
 
 ## Read the live API server flags
 
-You can see the flags from the API with `kubectl`, which is read-only and works from your machine.
+You can see the flags through the API with `kubectl`. This is read-only and needs no `sudo`.
 
 <!-- astrona:playground:renew -->
 
@@ -22,7 +22,40 @@ You can see the flags from the API with `kubectl`, which is read-only and works 
 kubectl -n kube-system get pod -l component=kube-apiserver -o jsonpath='{range .items[0].spec.containers[0].command[*]}{@}{"\n"}{end}'
 ```
 
-The command prints one flag per line. Look for the flags in this list:
+The command prints one flag per line. This is the output in the playground:
+
+```text
+kube-apiserver
+--advertise-address=10.0.2.15
+--allow-privileged=true
+--authorization-mode=Node,RBAC
+--client-ca-file=/etc/kubernetes/pki/ca.crt
+--enable-admission-plugins=NodeRestriction
+--enable-bootstrap-token-auth=true
+--etcd-cafile=/etc/kubernetes/pki/etcd/ca.crt
+--etcd-certfile=/etc/kubernetes/pki/apiserver-etcd-client.crt
+--etcd-keyfile=/etc/kubernetes/pki/apiserver-etcd-client.key
+--etcd-servers=https://127.0.0.1:2379
+--kubelet-client-certificate=/etc/kubernetes/pki/apiserver-kubelet-client.crt
+--kubelet-client-key=/etc/kubernetes/pki/apiserver-kubelet-client.key
+--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
+--proxy-client-cert-file=/etc/kubernetes/pki/front-proxy-client.crt
+--proxy-client-key-file=/etc/kubernetes/pki/front-proxy-client.key
+--requestheader-allowed-names=front-proxy-client
+--requestheader-client-ca-file=/etc/kubernetes/pki/front-proxy-ca.crt
+--requestheader-extra-headers-prefix=X-Remote-Extra-
+--requestheader-group-headers=X-Remote-Group
+--requestheader-username-headers=X-Remote-User
+--secure-port=6443
+--service-account-issuer=https://kubernetes.default.svc.cluster.local
+--service-account-key-file=/etc/kubernetes/pki/sa.pub
+--service-account-signing-key-file=/etc/kubernetes/pki/sa.key
+--service-cluster-ip-range=10.96.0.0/12
+--tls-cert-file=/etc/kubernetes/pki/apiserver.crt
+--tls-private-key-file=/etc/kubernetes/pki/apiserver.key
+```
+
+Look for the flags in this list:
 
 | Flag | What it controls | Expected in a hardened cluster |
 | --- | --- | --- |
@@ -34,7 +67,20 @@ The command prints one flag per line. Look for the flags in this list:
 | `--profiling` | The `/debug/pprof` endpoints | `false` |
 | `--audit-policy-file` and `--audit-log-path` | Audit logging | Both set when audit logging is required |
 
-In a default kubeadm cluster, you will see `--authorization-mode=Node,RBAC` and `--enable-admission-plugins=NodeRestriction`. You will not see `--anonymous-auth`, because its default is `true`, and you will not see the audit flags, because kubeadm does not enable auditing by default. Missing flags show where the defaults leave work to do.
+In a default kubeadm cluster, you see `--authorization-mode=Node,RBAC` and `--enable-admission-plugins=NodeRestriction`. You do not see `--anonymous-auth`, because its default is `true`, and you do not see the audit flags, because kubeadm does not enable auditing by default. `--profiling` and `--tls-min-version` are missing as well. Missing flags show where the defaults leave work to do.
+
+The same flags are in the static Pod manifest on the node. The file belongs to root, so read it with `sudo`. Search it for the flags of the table:
+
+```sh
+sudo grep -E 'anonymous-auth|authorization-mode|admission-plugins|audit|profiling|tls-min' /etc/kubernetes/manifests/kube-apiserver.yaml
+```
+
+```text
+    - --authorization-mode=Node,RBAC
+    - --enable-admission-plugins=NodeRestriction
+```
+
+Only two of the flags are in the file. This is the file you edit when you add a flag, and the kubelet recreates the API server Pod from it.
 
 Anonymous access has a middle path. The structured authentication configuration, passed with `--authentication-config`, can allow anonymous requests only for a list of paths such as `/livez`, `/readyz` and `/healthz`. This keeps health checks that need no credential and refuses everything else.
 
@@ -61,7 +107,52 @@ authorization:
 readOnlyPort: 0
 ```
 
-`anonymous.enabled: false` refuses unauthenticated requests to the kubelet. `authorization.mode: Webhook` makes the kubelet ask the API server whether the caller is allowed, in place of the unsafe `AlwaysAllow`. `readOnlyPort: 0` turns off the old unauthenticated read-only port 10255. Kubeadm sets the first two by default. After a change, run `systemctl restart kubelet` on that node.
+`anonymous.enabled: false` refuses unauthenticated requests to the kubelet. `authorization.mode: Webhook` makes the kubelet ask the API server whether the caller is allowed, in place of the unsafe `AlwaysAllow`. `readOnlyPort: 0` turns off the old unauthenticated read-only port 10255. Kubeadm sets the first two by default. After a change, run `sudo systemctl restart kubelet` on that node, because the kubelet reads the file only when it starts.
+
+Check the file in the playground. It belongs to root, so use `sudo`:
+
+```sh
+sudo grep -n -A1 -E 'anonymous:|^authorization:|readOnlyPort' /var/lib/kubelet/config.yaml
+```
+
+```text
+3:  anonymous:
+4-    enabled: false
+--
+10:authorization:
+11-  mode: Webhook
+```
+
+The file has no `readOnlyPort` line, so the kubelet uses the default `0`. The file shows what the kubelet reads at its next start, not what it runs with now. The API server can ask the running kubelet for its configuration through the `/configz` endpoint. The `jq` filter keeps the four settings above:
+
+```sh
+kubectl get --raw /api/v1/nodes/controlplane/proxy/configz | jq '.kubeletconfig | {anonymous: .authentication.anonymous.enabled, webhook: .authentication.webhook.enabled, mode: .authorization.mode, readOnlyPort}'
+```
+
+```text
+{
+  "anonymous": false,
+  "webhook": true,
+  "mode": "Webhook",
+  "readOnlyPort": null
+}
+```
+
+The kubelet leaves out `readOnlyPort` when it is `0`, so `jq` prints `null`. The last test is a request with no credentials, sent to both ports of the node's own address:
+
+```sh
+node_ip=$(kubectl get node controlplane -o jsonpath='{.status.addresses[?(@.type=="InternalIP")].address}')
+curl -sk -o /dev/null -w '%{http_code}\n' https://$node_ip:10250/pods
+curl -s -o /dev/null -w '%{http_code}\n' http://$node_ip:10255/pods; echo "curl exit code: $?"
+```
+
+```text
+401
+000
+curl exit code: 7
+```
+
+Port 10250 answers `401 Unauthorized`, because the kubelet refuses anonymous requests. On port 10255 `curl` prints `000` and exits with code 7, because no process listens there. A kubelet with `anonymous.enabled: true` and `AlwaysAllow` answers the same request with `200` and its full Pod list.
 
 ## Reduce network exposure
 
@@ -101,7 +192,7 @@ To use it, edit the static Pod manifest. Add `--audit-policy-file=/etc/kubernete
 
 ## Edit the manifest carefully
 
-Before you edit `/etc/kubernetes/manifests/kube-apiserver.yaml`, copy it to a directory outside `/etc/kubernetes/manifests`. The kubelet runs every manifest file it finds in that directory, so a backup stored there starts a second API server and conflicts with the first. After the edit, wait for the Pod to be recreated, then check it with `kubectl -n kube-system get pod -l component=kube-apiserver`. If `kubectl` no longer answers, read the container logs on the node with `crictl ps -a` and `crictl logs <container-id>`, fix the flag, and wait again.
+Before you edit `/etc/kubernetes/manifests/kube-apiserver.yaml`, copy it to a directory outside `/etc/kubernetes/manifests`. The kubelet runs every manifest file it finds in that directory, so a backup stored there starts a second API server and conflicts with the first. After the edit, wait for the Pod to be recreated, then check it with `kubectl -n kube-system get pod -l component=kube-apiserver`. If `kubectl` no longer answers, read the container logs on the node with `sudo crictl ps -a` and `sudo crictl logs <container-id>`, fix the flag, and wait again.
 
 You now know where the API server and kubelet settings live, which ones remove common risks, and how to read them. Together with narrow workload identities, these settings narrow who can reach the API, what they can do, and what is recorded.
 

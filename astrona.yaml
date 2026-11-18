@@ -500,24 +500,23 @@ modules:
     title: Hardening The Endpoint And The Kubelet
     path: sections/section-030/module-01/course-03-hardening-the-endpoint-and-the-kubelet.md
   - type: reading
-    title: Harden The Kubelet On A Worker Node — Task
+    title: Harden The Kubelet On A Node — Task
     path: sections/section-030/module-01/labs/lab-02/question.md
   - type: lab
-    title: Harden The Kubelet On A Worker Node
+    title: Harden The Kubelet On A Node
     path: sections/section-030/module-01/labs/lab-02
-    examScope: cluster
     difficulty: intermediate
     estimated_duration: 10m
     topic: kubelet-hardening
     task_kind: build
     learning_goals:
     - Turn off anonymous kubelet access, use Webhook authorization and close the
-      read-only port on a worker node, and check the effective kubelet configuration.
+      read-only port on a node, and check the effective kubelet configuration.
     tags:
     - cks
     - kubelet-hardening
   - type: reading
-    title: Harden The Kubelet On A Worker Node — Solution
+    title: Harden The Kubelet On A Node — Solution
     path: sections/section-030/module-01/labs/lab-02/solution.md
   - type: reading
     title: Summary
