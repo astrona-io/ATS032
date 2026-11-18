@@ -131,22 +131,23 @@ grade() {
 # <<< shared checks <<<
 
 main() {
-  local attempt outcome output all_passed
+  local attempt outcome line all_passed
+  local -a lines
   for attempt in $(seq 1 60); do
     all_passed=true
-    output=""
+    lines=()
     for outcome in $OUTCOMES; do
-      output+="$(grade "$outcome")"'
-' || all_passed=false
+      line=$(grade "$outcome") || all_passed=false
+      lines+=("$line")
     done
     if $all_passed; then
-      printf '%s' "$output"
+      printf '%s\n' "${lines[@]}"
       echo "PASS: the reference solution settled (attempt $attempt)"
       return 0
     fi
     sleep 5
   done
-  printf '%s' "$output"
+  printf '%s\n' "${lines[@]}"
   echo "FAIL: the reference solution did not pass within five minutes"
   return 1
 }
