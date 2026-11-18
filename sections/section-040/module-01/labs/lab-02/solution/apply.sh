@@ -24,10 +24,10 @@ main() {
   fi
 
   # Point the Kubernetes package source at the v1.36 repository.
-  sudo -n sed -i 's#/v1\.34/#/v1.36/#' "$LIST"
+  sudo -n sed -i 's#/v1\.35/#/v1.36/#' "$LIST"
   sudo -n apt-get update </dev/null
   local version
-  version=$(apt-cache madison kubeadm | awk '$3 ~ /^1\.35\./ {print $3; exit}')
+  version=$(apt-cache madison kubeadm | awk '$3 ~ /^1\.36\./ {print $3; exit}')
   [ -n "$version" ] || { echo "no kubeadm 1.36 package in the repository" >&2; exit 1; }
   echo "target package version: $version"
 
