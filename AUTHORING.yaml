@@ -460,7 +460,7 @@ sections:
     - id: lab-02
       path: sections/section-040/module-01/labs/lab-02
       after_reading: sections/section-040/module-01/course-03-the-kubeadm-upgrade-sequence.md
-      objective: Upgrade A kubeadm Control Plane From v1.34 To v1.35.
+      objective: Upgrade A kubeadm Control Plane From v1.35 To v1.36.
       runtime: qemu
       status: alpha
       runtime_verification: passed astrona validate and astrona test on 2026-11-17

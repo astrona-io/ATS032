@@ -9,7 +9,7 @@ LAB_NAME=ats-032-lab-040-01-02
 LAB_CONTEXT="kubernetes-admin@astro-$LAB_NAME"
 NODE=controlplane
 NAMESPACE=starfleet-032-040-01-02
-TARGET_MINOR=1.35
+TARGET_MINOR=1.36
 OUTCOMES="control-plane-upgraded packages-held node-uncordoned"
 
 kube() {
@@ -17,7 +17,7 @@ kube() {
 }
 
 on_target_minor() {
-  # Accepts v1.35.N, 1.35.N and Debian versions such as 1.35.N-1.1.
+  # Accepts v1.36.N, 1.36.N and Debian versions such as 1.36.N-1.1.
   [[ "${1#v}" == "$TARGET_MINOR".* ]]
 }
 

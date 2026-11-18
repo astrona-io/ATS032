@@ -9,10 +9,10 @@ runtime:
   qemu:
   - image:
       type: oci
-      source: ghcr.io/astrona-io/ubuntu-qcow2-image:24.04-kubeadm-20261117-{ARCH}
+      source: ghcr.io/astrona-io/ubuntu-qcow2-image:24.04-cks-{ARCH}
       checksums:
-        amd64: sha256:69438739d55d00a48357f218743d7af6f33def8fa5e838c57556053814e7890e
-        arm64: sha256:6fc0d4c0e6b538adfdb67497ead8d7e2abd8cc1bb03d868a64212669d7d8b110
+        amd64: sha256:dc3348c725b6b36d08888acdcbda44cc34894b76d5b56a594f7ce253b6d2e773
+        arm64: sha256:31798490219e2ee856d7f8c2cb9df83182bbac64c7d8ce7c15e81445527d7898
     cpus: 2
     memoryMB: 4096
     diskSizeGB: 20
@@ -20,7 +20,7 @@ runtime:
 bootstrap:
   init:
   - name: create-kubeadm-cluster
-    description: Creates the single-node kubeadm cluster at v1.34 from pre-pulled images and starts the probe Deployment
+    description: Creates the single-node kubeadm cluster at v1.35 from pre-pulled images and starts the probe Deployment
     type: file
     source: bootstrap/setup.sh
 testing:
@@ -30,7 +30,7 @@ testing:
     type: file
     source: testing/verify-start.sh
   - name: reference-result
-    description: Upgrade the control plane, kubelet and kubectl to v1.35 with kubeadm
+    description: Upgrade the control plane, kubelet and kubectl to v1.36 with kubeadm
     type: file
     source: solution/apply.sh
   - name: wait-solved
@@ -40,7 +40,7 @@ testing:
 validation:
   scripts:
   - name: control-plane-upgraded
-    description: The API server, controller manager, scheduler and kube-proxy run v1.35, and kubeadm-config records v1.35
+    description: The API server, controller manager, scheduler and kube-proxy run v1.36, and kubeadm-config records v1.36
     type: file
     source: validation/validate-control-plane-upgraded.sh
     points: 2
@@ -50,7 +50,7 @@ validation:
     source: validation/validate-packages-held.sh
     points: 1
   - name: node-uncordoned
-    description: Node controlplane is Ready and schedulable with a v1.35 kubelet, and Deployment probe is available
+    description: Node controlplane is Ready and schedulable with a v1.36 kubelet, and Deployment probe is available
     type: file
     source: validation/validate-node-uncordoned.sh
     points: 1

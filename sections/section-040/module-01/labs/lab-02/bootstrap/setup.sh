@@ -2,8 +2,8 @@
 # Bootstrap for lab ats-032-lab-040-01-02. astrona pipes this script into bash
 # on the lab VM as the astrona account (passwordless sudo).
 #
-# The image (ghcr.io/astrona-io/ubuntu-qcow2-image:24.04-kubeadm-*) already has
-# containerd, kubeadm/kubelet/kubectl v1.34 on hold, every v1.34 and v1.35
+# The image (ghcr.io/astrona-io/ubuntu-qcow2-image:24.04-cks-*) already has
+# containerd, kubeadm/kubelet/kubectl v1.35 on hold, every v1.35 and v1.36
 # control-plane image in containerd and an offline apt repository per minor
 # under /opt/kubernetes-apt. This script only creates the cluster and the
 # starting workload; it needs no network.
@@ -21,7 +21,7 @@ main() {
 
   # Context guard: run only on a VM built from the kubeadm image.
   if [ ! -x /usr/local/sbin/astrona-kubeadm-init ] || [ ! -r /etc/astrona-kubeadm/versions.env ]; then
-    echo "Refusing to run: this VM is not built from the kubeadm practice image" >&2
+    echo "Refusing to run: this VM is not built from the CKS practice image" >&2
     exit 1
   fi
   # shellcheck disable=SC1091

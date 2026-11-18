@@ -43,6 +43,6 @@ This course has 12 ungraded module playgrounds and 31 graded labs: 30 on a kind 
 | 030/01 | Give A Workload A Narrow ServiceAccount; Harden The Kubelet On A Worker Node |
 | 030/02 | Remove Static Token Authentication From The API Server; Remove RBAC Grants For Anonymous Requests; Remove AlwaysAllow And Narrow Impersonation Rights |
 | 030/03 | Enforce Pod Security Standards On A Namespace; Block NodePort Services With A ValidatingAdmissionPolicy; Make An Admission Webhook Fail Closed Safely |
-| 040/01 | Drain A Worker Node With A PodDisruptionBudget; Upgrade A kubeadm Control Plane From v1.34 To v1.35 (QEMU VM); Save An etcd Snapshot Before An Upgrade |
+| 040/01 | Drain A Worker Node With A PodDisruptionBudget; Upgrade A kubeadm Control Plane From v1.35 To v1.36 (QEMU VM); Save An etcd Snapshot Before An Upgrade |
 | 040/02 | Record A Cluster Version Inventory With Image Digests; Triage Vulnerability Records And Label Patch Waves |
 | 040/03 | Restart The Container Runtime On A Drained Worker; Verify And Repair A Cluster After Maintenance; Run An etcd Restore Drill From A Snapshot |

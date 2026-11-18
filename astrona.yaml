@@ -728,10 +728,10 @@ modules:
     title: The kubeadm Upgrade Sequence
     path: sections/section-040/module-01/course-03-the-kubeadm-upgrade-sequence.md
   - type: reading
-    title: "Upgrade A kubeadm Control Plane From v1.34 To v1.35 — Task"
+    title: "Upgrade A kubeadm Control Plane From v1.35 To v1.36 — Task"
     path: sections/section-040/module-01/labs/lab-02/question.md
   - type: lab
-    title: Upgrade A kubeadm Control Plane From v1.34 To v1.35
+    title: Upgrade A kubeadm Control Plane From v1.35 To v1.36
     path: sections/section-040/module-01/labs/lab-02
     difficulty: intermediate
     estimated_duration: 15m
@@ -746,7 +746,7 @@ modules:
     - cks
     - cluster-upgrade
   - type: reading
-    title: "Upgrade A kubeadm Control Plane From v1.34 To v1.35 — Solution"
+    title: "Upgrade A kubeadm Control Plane From v1.35 To v1.36 — Solution"
     path: sections/section-040/module-01/labs/lab-02/solution.md
   - type: reading
     title: Snapshot And Verify
