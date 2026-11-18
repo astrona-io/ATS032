@@ -25,14 +25,13 @@ After this module you can:
 
 You need Kubernetes basics: Pods, Deployments, namespaces and `kubectl exec`. Basic RBAC helps: a Role lists permissions and a binding gives them to a subject.
 
-The commands run against a playground cluster. Your terminal must use the playground's private kubeconfig, the file that holds the cluster address and credentials for `kubectl`. Run these two commands once in every new terminal:
+The commands run on a playground: a virtual machine (VM) with a Kubernetes 1.35 cluster that `kubeadm` created. The cluster has one node, called `controlplane`. That node runs the control plane, which includes the API server as a static Pod, and it also runs the example workloads. Open a shell on the VM from your own machine:
 
 ```sh
-export KUBECONFIG="$(astrona kubeconfig ats-032-playground-030-02)"
-test "$(kubectl config current-context)" = "kind-astro-ats-032-playground-030-02" || exit 1
+astrona ssh astro-ats-032-playground-030-02
 ```
 
-The playground is a `kind` cluster running Kubernetes 1.35 with one control-plane node and one worker node. Your own credentials have the `cluster-admin` role. The cluster starts with this content:
+You are the user `student`. You can run commands as root with `sudo`, and `kubectl` already works for this cluster. Its credentials belong to the user `kubernetes-admin`, which has the `cluster-admin` role. Run every command of this module in that shell. The cluster starts with this content:
 
 | Namespace | What is in it |
 | --- | --- |
