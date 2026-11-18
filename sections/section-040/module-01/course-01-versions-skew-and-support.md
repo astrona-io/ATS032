@@ -28,19 +28,53 @@ The consequence is the upgrade order: the API server first, then the controller 
 
 ## Read the versions of a live cluster
 
-The first command prints the client and server versions. The second lists the nodes with the version of each kubelet, the operating system and the container runtime. The third lists the images of the control-plane Pods in `kube-system`.
+The rules only help if you know what runs. Open a shell on the playground with `astrona ssh astro-ats-032-playground-040-01` and start with the client and the server. `kubectl version` prints the version of `kubectl` itself and the version that the API server reports:
 
 <!-- astrona:playground:renew -->
 
 ```sh
 kubectl version
+```
+
+The playground printed:
+
+```text
+Client Version: v1.35.10
+Kustomize Version: v5.7.1
+Server Version: v1.35.10
+```
+
+The client and the server are on the same version, which is inside the skew of one minor version. Kustomize is a tool built into `kubectl`, and its version is not a Kubernetes version. The server version is the version of the API server. The kubelet on each node can still differ, so list the nodes next:
+
+```sh
 kubectl get nodes -o wide
+```
+
+```text
+NAME           STATUS   ROLES           AGE   VERSION    INTERNAL-IP   EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
+controlplane   Ready    control-plane   57s   v1.35.10   10.0.2.15     <none>        Ubuntu 24.04.5 LTS   6.8.0-149-generic   containerd://2.2.1
+```
+
+The `VERSION` column is the version of the kubelet on that node, and the last column is the container runtime. The playground has one node. In a cluster with many nodes, all nodes show the same value when no upgrade is in progress. The control-plane components run as Pods in `kube-system`, and their image tags are their versions:
+
+```sh
 kubectl -n kube-system get pods -o custom-columns=NAME:.metadata.name,IMAGE:.spec.containers[*].image
 ```
 
-In the output of `kubectl version`, compare the client version with the server version. They must be within one minor version of each other. In the node list, the `VERSION` column shows the kubelet version of each node, and in a healthy cluster all nodes show the same value. In the image list, the control-plane Pods `kube-apiserver`, `kube-controller-manager`, `kube-scheduler` and `kube-proxy` show their image tags, and these tags are the component versions. The `etcd` and `coredns` images have their own version numbers, which are not Kubernetes versions.
+```text
+NAME                                   IMAGE
+coredns-7d764666f9-kgspt               registry.k8s.io/coredns/coredns:v1.13.1
+coredns-7d764666f9-mjqbv               registry.k8s.io/coredns/coredns:v1.13.1
+etcd-controlplane                      registry.k8s.io/etcd:3.6.6-0
+kube-apiserver-controlplane            registry.k8s.io/kube-apiserver:v1.35.10
+kube-controller-manager-controlplane   registry.k8s.io/kube-controller-manager:v1.35.10
+kube-proxy-plpdt                       registry.k8s.io/kube-proxy:v1.35.10
+kube-scheduler-controlplane            registry.k8s.io/kube-scheduler:v1.35.10
+```
 
-For a kubeadm cluster, `kubeadm version` on a node shows the version of the tool itself, and `kubeadm upgrade plan` shows the versions it can upgrade to. Both are covered in a later part.
+The Pods `kube-apiserver`, `kube-controller-manager`, `kube-scheduler` and `kube-proxy` all show `v1.35.10`. The `etcd` image (`3.6.6-0`) and the `coredns` image (`v1.13.1`) have their own version numbers, which are not Kubernetes versions. Your Pod names end in other random letters.
+
+On a kubeadm cluster, the `kubeadm` tool has a version too. `kubeadm version` on the node prints it, and here it is `v1.35.10`. Before an upgrade, `kubeadm upgrade plan` lists the versions that you can upgrade to.
 
 ## Plan the upgrade
 

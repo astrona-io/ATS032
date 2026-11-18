@@ -756,7 +756,6 @@ modules:
   - type: lab
     title: Save An etcd Snapshot Before An Upgrade
     path: sections/section-040/module-01/labs/lab-03
-    examScope: cluster
     difficulty: intermediate
     estimated_duration: 8m
     topic: etcd-snapshot
