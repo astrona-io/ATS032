@@ -4,7 +4,7 @@ Author notes for lab `ats-032-lab-040-03-02`. The learner reads `question.md` an
 
 ## Runtime
 
-This is a QEMU lab, not a kind lab: restarting `containerd` with `systemctl` needs a real host. The VM boots from `ghcr.io/astrona-io/ubuntu-qcow2-image:24.04-cks-{ARCH}`, pinned by the disk digests in `config.yaml`. `bootstrap/setup.sh` runs `/usr/local/sbin/astrona-kubeadm-init` to create a single-node cluster (node `controlplane`, cluster name `astro-ats-032-lab-040-03-02`). The lab needs no network: the `probe` Pods use `busybox:1.37.0`, which the image already holds.
+This is a QEMU lab, not a kind lab: restarting `containerd` with `systemctl` needs a real host. The VM boots from `ghcr.io/astrona-io/ubuntu-qcow2-image:24.04-cks`, pinned by the disk digests in `config.yaml`. `bootstrap/setup.sh` runs `/usr/local/sbin/astrona-kubeadm-init` to create a single-node cluster (node `controlplane`, cluster name `astro-ats-032-lab-040-03-02`). The lab needs no network: the `probe` Pods use `busybox:1.37.0`, which the image already holds.
 
 Start state: the Deployment `probe` (two replicas) runs on `controlplane`, and the node is cordoned but not drained. The ConfigMap `maintenance-baseline` in `starfleet-032-040-03-02` records the `InvocationID` of the `containerd` service and the UIDs of the `probe` Pods. The `InvocationID` changes on every start of the unit, also after a reboot, so the check does not depend on the monotonic clock.
 

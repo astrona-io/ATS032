@@ -4,7 +4,7 @@ Author notes for lab `ats-032-lab-030-01-02`. The learner reads `question.md` an
 
 ## Runtime
 
-This is a QEMU lab, not a kind lab: the task edits the kubelet configuration file and restarts the `kubelet` systemd service on a real host. The VM boots from `ghcr.io/astrona-io/ubuntu-qcow2-image:24.04-cks-{ARCH}`, pinned by the disk digests in `config.yaml`. It is a single kubeadm node called `controlplane`; there is no worker node.
+This is a QEMU lab, not a kind lab: the task edits the kubelet configuration file and restarts the `kubelet` systemd service on a real host. The VM boots from `ghcr.io/astrona-io/ubuntu-qcow2-image:24.04-cks`, pinned by the disk digests in `config.yaml`. It is a single kubeadm node called `controlplane`; there is no worker node.
 
 `bootstrap/setup.sh` runs `/usr/local/sbin/astrona-kubeadm-init` (cluster name `astro-ats-032-lab-030-01-02`, admin kubeconfig also for `student`), then opens the kubelet API in `/var/lib/kubelet/config.yaml`: `anonymous.enabled: true`, `authorization.mode: AlwaysAllow` and `readOnlyPort: 10255`. It restarts the kubelet, waits until `/configz` reports `AlwaysAllow`, and starts the Pod `probe` (`busybox:1.37.0`, already in containerd) in `starfleet-032-030-01-02`. The lab needs no network.
 

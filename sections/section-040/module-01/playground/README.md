@@ -2,7 +2,7 @@
 
 Author notes for the ungraded playground `ats-032-playground-040-01`. The learner guide is `docs/overview.md`.
 
-It is a QEMU VM from `ghcr.io/astrona-io/ubuntu-qcow2-image:24.04-cks-{ARCH}`, pinned by the disk digests in `config.yaml` (the same image as the module's labs `lab-02` and `lab-03`). The image carries kubeadm, kubelet and kubectl 1.35 and an offline package repository for 1.35 and 1.36 under `/opt/kubernetes-apt`, so the course text can run a real `kubeadm upgrade` from 1.35 to 1.36.
+It is a QEMU VM from `ghcr.io/astrona-io/ubuntu-qcow2-image:24.04-cks`, pinned by the disk digests in `config.yaml` (the same image as the module's labs `lab-02` and `lab-03`). The image carries kubeadm, kubelet and kubectl 1.35 and an offline package repository for 1.35 and 1.36 under `/opt/kubernetes-apt`, so the course text can run a real `kubeadm upgrade` from 1.35 to 1.36.
 
 `bootstrap/setup.sh` runs inside the VM. It:
 

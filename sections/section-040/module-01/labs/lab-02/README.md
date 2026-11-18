@@ -4,7 +4,7 @@ Author notes for lab `ats-032-lab-040-01-02`. The learner reads `question.md` an
 
 ## Runtime
 
-This is a QEMU lab, not a kind lab: `kubeadm upgrade` needs a real host with `apt`, systemd and a kubelet service. The VM boots from `ghcr.io/astrona-io/ubuntu-qcow2-image:24.04-cks-{ARCH}`, pinned by the disk digests in `config.yaml` and built from the `cks` layer in [qcow2-base-image](https://github.com/astrona-io/qcow2-base-image/tree/main/distros/ubuntu/layers/cks). The image already holds:
+This is a QEMU lab, not a kind lab: `kubeadm upgrade` needs a real host with `apt`, systemd and a kubelet service. The VM boots from `ghcr.io/astrona-io/ubuntu-qcow2-image:24.04-cks`, pinned by the disk digests in `config.yaml` and built from the `cks` layer in [qcow2-base-image](https://github.com/astrona-io/qcow2-base-image/tree/main/distros/ubuntu/layers/cks). The image already holds:
 
 - containerd, the kernel modules and sysctls, and swap off;
 - `kubeadm`, `kubelet` and `kubectl` v1.35 on hold;

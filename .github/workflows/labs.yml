@@ -41,8 +41,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  ASTRONA_VERSION: "0.5.16"
-  ASTRONA_SHA256: "0a6ff33057f57386101dc1784296eeac3d31b8662b931b885ced528d4d61bec2"
+  ASTRONA_VERSION: "0.5.17"
+  ASTRONA_SHA256: "3236d1d917eac9d096cd1cee1edfab41a4d2897fce96858fb9a09a22b9792600"
   KIND_VERSION: "0.33.0"
   # astrona pulls the OCI QEMU images (type: oci) with oras.
   ORAS_VERSION: "1.3.6"
