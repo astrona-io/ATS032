@@ -56,7 +56,7 @@ sudo apt-get upgrade --simulate
 test -f /var/run/reboot-required && echo reboot needed
 ```
 
-The output of `apt-get update` is a list of package sources and is left out here. If the VM has no network, it only prints warnings, and the simulation uses the lists it already has. The rest of the output in this run was:
+The output of `apt-get update` is a list of package sources and is left out here. If the VM has no network, it only prints warnings, and the simulation uses the lists it already has. The rest of the output below comes from one run on 2026-11-18, when the VM could reach the Ubuntu mirror. The three held packages are the same on every run. The list of upgrades is not: it depends on the updates published since the image was built and on whether the VM can reach the mirror, so your list will differ.
 
 ```text
 kubeadm
