@@ -26,7 +26,7 @@ The diagram shows that the difference between a safe cluster and an open one is 
 
 ## Send anonymous requests
 
-The playground starts with a binding that you have to find. Define the helper from the previous steps if it is not defined in this terminal. It prints the HTTP status code of a request from a `probe` Pod. The second argument is `anon`, `token` or `bad`.
+The playground starts with a binding that you have to find. Define this helper in your shell on the playground if it is not defined there yet. It prints the HTTP status code of a request from a `probe` Pod. The second argument is `anon`, `token` or `bad`.
 
 <!-- astrona:playground:renew -->
 
@@ -58,23 +58,77 @@ call_api /version anon
 call_api /api/v1/namespaces/starfleet/pods anon
 ```
 
-The first prints `200`. The second also prints `200`, which a hardened cluster must not do: an unauthenticated caller just listed the Pods of a namespace. Authorization found a rule for the anonymous subjects, so one binding exists that does not belong.
+The output is two lines:
+
+```text
+200
+200
+```
+
+The first `200` is expected. The second `200` is one that a hardened cluster must not return: an unauthenticated caller just listed the Pods of a namespace. Authorization found a rule for the anonymous subjects, so one binding exists that does not belong.
 
 ## Find the binding
 
-You can ask the authorizer the same question without a Pod. The `--as` and `--as-group` options send the request with the anonymous names:
+You can ask the authorizer the same question without a Pod. A `SubjectAccessReview` is an API object that asks the authorizer whether a given user and groups may do one action. The API server does not store it. It fills in the answer in the `status` field of its response. Save this as `subjectaccessreview-anonymous-pods.yaml`:
 
-```sh
-kubectl auth can-i list pods -n starfleet --as=system:anonymous --as-group=system:unauthenticated
+```yaml
+apiVersion: authorization.k8s.io/v1
+kind: SubjectAccessReview
+spec:
+  user: system:anonymous
+  groups:
+  - system:unauthenticated
+  resourceAttributes:
+    verb: list
+    resource: pods
+    namespace: starfleet
 ```
 
-The command prints `yes`. To find the cause, print every ClusterRoleBinding with the role it grants and the subjects it names:
+A review is a question, not an object to keep, so `kubectl apply` cannot send it. Send it with `kubectl create` and print only its `status`:
+
+```sh
+kubectl create -f subjectaccessreview-anonymous-pods.yaml -o jsonpath='{.status}{"\n"}'
+```
+
+The authorizer allows the request and names the binding that allowed it:
+
+```text
+{"allowed":true,"reason":"RBAC: allowed by ClusterRoleBinding \"anonymous-viewer\" of ClusterRole \"view\" to Group \"system:unauthenticated\""}
+```
+
+You may expect `kubectl auth can-i list pods -n starfleet --as=system:anonymous --as-group=system:unauthenticated` to give the same answer. On this cluster it fails with `User "system:anonymous" cannot create resource "selfsubjectaccessreviews"`. With `--as`, `kubectl` sends its question as the impersonated identity. The right to ask that question comes from the ClusterRoleBinding `system:basic-user`, which names only `system:authenticated`, so an anonymous caller may not ask. The `SubjectAccessReview` avoids this, because your own `cluster-admin` credentials send it.
+
+The reason names one binding. To see every binding that could matter, print each ClusterRoleBinding with the role it grants and the subjects it names:
 
 ```sh
 kubectl get clusterrolebindings -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.roleRef.name}{"\t"}{.subjects[*].name}{"\n"}{end}'
 ```
 
-Read the third column of each line. In the playground the line for `anonymous-viewer` shows the role `view` and the subject `system:unauthenticated`. The line for `ops-viewer` shows `view` for the group `ops`, which is a normal grant for a named team and stays. The built-in lines, such as `system:public-info-viewer`, belong to the cluster and stay as well. Also search RoleBindings, because a Role can grant anonymous access inside a namespace: use `kubectl get rolebindings -A` with the same jsonpath idea.
+The list has more than 50 lines. The output below is shortened to the lines that name the anonymous subjects, `system:authenticated` or the group `ops`:
+
+```text
+anonymous-viewer	view	system:unauthenticated
+ops-viewer	view	ops
+system:basic-user	system:basic-user	system:authenticated
+system:discovery	system:discovery	system:authenticated
+system:public-info-viewer	system:public-info-viewer	system:authenticated system:unauthenticated
+```
+
+Read the third column of each line. The line for `anonymous-viewer` shows the role `view` and the subject `system:unauthenticated`. That binding does not belong. The line for `ops-viewer` shows `view` for the group `ops`, which is a normal grant for a named team and stays. The built-in lines, such as `system:public-info-viewer`, belong to the cluster and stay as well.
+
+A Role can also grant anonymous access inside one namespace, so search the RoleBindings in the same way:
+
+```sh
+kubectl get rolebindings -A -o jsonpath='{range .items[*]}{.metadata.namespace}{"\t"}{.metadata.name}{"\t"}{.roleRef.name}{"\t"}{.subjects[*].name}{"\n"}{end}'
+```
+
+The output has eleven lines. Only one of them names an anonymous subject:
+
+```text
+kube-public	kubeadm:bootstrap-signer-clusterinfo	kubeadm:bootstrap-signer-clusterinfo	system:anonymous
+```
+
+`kubeadm` created this RoleBinding. It lets anonymous callers read only the ConfigMap `cluster-info` in `kube-public`, which a new node reads when it joins the cluster with `kubeadm join`. It is a known, narrow grant. Remove it only if no node will join with a bootstrap token.
 
 ## Remove the binding and test again
 
@@ -91,7 +145,20 @@ call_api /version anon
 call_api /api/v1/namespaces/starfleet/pods anon
 ```
 
-The first still prints `200`. The second now prints `403`: the caller is still `system:anonymous`, but no rule allows it to list Pods. The change takes effect within a short time, so if you still see `200`, repeat the request after a few seconds.
+The output is:
+
+```text
+200
+403
+```
+
+The first request still gets `200`. The second now gets `403`: the caller is still `system:anonymous`, but no rule allows it to list Pods. If you still see `200`, repeat the request after a few seconds. Then send the same review again:
+
+```sh
+kubectl create -f subjectaccessreview-anonymous-pods.yaml -o jsonpath='{.status}{"\n"}'
+```
+
+The answer is now `{"allowed":false}`. No authorizer allows the request, so the review has no reason.
 
 ## Switching anonymous access off
 
@@ -103,7 +170,7 @@ You now know how to prove that a cluster is open to anonymous callers and how to
 
 > [!WARNING]
 > - **Binding a role to `system:unauthenticated`, `system:anonymous` or `system:authenticated` for convenience.** Any caller that can reach the API port, or any identity in the cluster, gets the grant.
-> - **Testing only from inside the cluster.** The risk is a caller outside it. Use `kubectl auth can-i` with `--as=system:anonymous --as-group=system:unauthenticated` to see the effective rights.
+> - **Testing only from inside the cluster.** The risk is a caller outside it. Send a `SubjectAccessReview` for `system:anonymous` in `system:unauthenticated` to see the effective rights. `kubectl auth can-i --as=system:anonymous` fails, because an anonymous caller may not ask the question itself.
 > - **Checking only ClusterRoleBindings.** A RoleBinding to the anonymous names opens one namespace.
 > - **Editing `system:public-info-viewer`.** The API server resets built-in roles. Change the binding and the flag, not the role.
 > - **Setting `--anonymous-auth=false` without checking the probes.** The API server probes can fail and the Pod restarts in a loop.

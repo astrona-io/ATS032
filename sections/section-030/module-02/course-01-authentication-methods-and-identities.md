@@ -38,13 +38,28 @@ The `kubectl auth whoami` command sends a `SelfSubjectReview` to the API server,
 kubectl auth whoami
 ```
 
-The output shows the user name from your client certificate and a list of groups. The group `system:authenticated` is in the list, because the API server adds it to every caller that is not anonymous. You can run the same review for another identity with impersonation:
+The output shows the user name and the groups from your client certificate, and the ID of that certificate:
+
+```text
+ATTRIBUTE                                           VALUE
+Username                                            kubernetes-admin
+Groups                                              [kubeadm:cluster-admins system:authenticated]
+Extra: authentication.kubernetes.io/credential-id   [X509SHA256=560de0fbce577c903e099684e4520b63c41c6cf8834dc4b507501e4538f74f46]
+```
+
+The user `kubernetes-admin` comes from the common name of the certificate that `kubeadm` wrote, and the group `kubeadm:cluster-admins` comes from its organization. `kubeadm` binds that group to the `cluster-admin` ClusterRole. The group `system:authenticated` is not in the certificate. The API server adds it to every caller that is not anonymous. You can run the same review for another identity with impersonation:
 
 ```sh
 kubectl auth whoami --as=system:serviceaccount:starfleet:default
 ```
 
-This time the user name is `system:serviceaccount:starfleet:default`, and the groups are the three ServiceAccount groups named above.
+This time the user name is the ServiceAccount, and the groups are the three ServiceAccount groups named above:
+
+```text
+ATTRIBUTE   VALUE
+Username    system:serviceaccount:starfleet:default
+Groups      [system:serviceaccounts system:serviceaccounts:starfleet system:authenticated]
+```
 
 ## Look inside a ServiceAccount token
 
@@ -54,7 +69,30 @@ A ServiceAccount token is three Base64-encoded parts separated by dots. The midd
 kubectl -n starfleet create token default | python3 -c "import sys,base64,json;p=sys.stdin.read().split('.')[1];print(json.dumps(json.loads(base64.urlsafe_b64decode(p+'='*(-len(p)%4))),indent=2))"
 ```
 
-The claims include `iss` (the issuer of the token), `aud` (the audience, the service the token is meant for), `exp` (the expiry time), `sub` (the subject) and a `kubernetes.io` object. The value of `sub` is `system:serviceaccount:starfleet:default`, and the `kubernetes.io` object names the namespace and the ServiceAccount. Decoding a token does not check the signature, so a decoded claim is information and not proof. Only the API server, which holds the public key, can validate it.
+The command prints the claims as JSON. Your `exp`, `iat`, `jti`, `nbf` and `uid` values differ:
+
+```text
+{
+  "aud": [
+    "https://kubernetes.default.svc.cluster.local"
+  ],
+  "exp": 1794995277,
+  "iat": 1794991677,
+  "iss": "https://kubernetes.default.svc.cluster.local",
+  "jti": "b33926a5-f8c2-45b1-8bc6-5f97c0ab3e33",
+  "kubernetes.io": {
+    "namespace": "starfleet",
+    "serviceaccount": {
+      "name": "default",
+      "uid": "93b0fd45-3407-41c1-b50f-58884ff491af"
+    }
+  },
+  "nbf": 1794991677,
+  "sub": "system:serviceaccount:starfleet:default"
+}
+```
+
+The claims include `iss` (the issuer of the token), `aud` (the audience, the service the token is meant for), `exp` (the expiry time), `sub` (the subject) and a `kubernetes.io` object. The value of `exp` is 3600 seconds after `iat` (issued at), which is the one-hour lifetime. The value of `sub` is `system:serviceaccount:starfleet:default`, and the `kubernetes.io` object names the namespace and the ServiceAccount. Decoding a token does not check the signature, so a decoded claim is information and not proof. Only the API server, which holds the public key, can validate it.
 
 ## An invalid credential is not anonymous
 
@@ -87,6 +125,14 @@ Paste the function into your terminal. Then send the same request with all three
 call_api /version anon
 call_api /version token
 call_api /version bad
+```
+
+The three lines of output are:
+
+```text
+200
+200
+401
 ```
 
 The first two print `200`, because the path `/version` is readable by every caller. The third prints `401`. A caller with no credential can be treated as anonymous. A caller that presents a credential which fails verification is rejected, even on a path that anonymous callers may read. The API server does not downgrade a bad credential to anonymous, which is why a `401` always points to the credential and never to RBAC.
