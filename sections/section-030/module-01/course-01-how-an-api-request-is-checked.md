@@ -37,7 +37,7 @@ A kubeadm cluster grants anonymous callers only a small, read-only set of paths 
 
 ## Send requests from inside a Pod
 
-The Pods of the `probe` Deployment run Python, and every Pod has a ServiceAccount token and the cluster CA certificate mounted. That is enough to call the API as a workload would. Define a shell function on your machine that runs a small script in a probe Pod and prints only the HTTP status code. The first argument is the request path and the second is either `anon` for no credential or `token` for the mounted ServiceAccount token. The certificate check stays on, so the call verifies the identity of the API server.
+The Pods of the `probe` Deployment run Python, and every Pod has a ServiceAccount token and the cluster CA certificate mounted. That is enough to call the API as a workload would. Define a shell function in the playground shell that runs a small script in a probe Pod and prints only the HTTP status code. The first argument is the request path and the second is either `anon` for no credential or `token` for the mounted ServiceAccount token. The certificate check stays on, so the call verifies the identity of the API server.
 
 <!-- astrona:playground:renew -->
 
@@ -60,7 +60,7 @@ PY
 }
 ```
 
-Define the function by pasting the block into your terminal. Then send four requests:
+Define the function by pasting the block into the playground shell. Then send four requests:
 
 ```sh
 call_api /version anon
@@ -69,7 +69,14 @@ call_api /version token
 call_api /api/v1/namespaces/starfleet/pods token
 ```
 
-On a kubeadm-style cluster such as the playground, the first request prints `200`, because `/version` is readable by anyone. The second prints `403`: the caller is `system:anonymous`, and no rule allows listing Pods. The third prints `200`. The fourth prints `403` as well. This time the caller is known: it is the `default` ServiceAccount of `starfleet`, and it has no Role that allows listing Pods. The mounted token proves identity, not permission.
+```text
+200
+403
+200
+403
+```
+
+On a kubeadm cluster such as the playground, the first request prints `200`, because `/version` is readable by anyone. The second prints `403`: the caller is `system:anonymous`, and no rule allows listing Pods. The third prints `200`. The fourth prints `403` as well. This time the caller is known: it is the `default` ServiceAccount of `starfleet`, and it has no Role that allows listing Pods. The mounted token proves identity, not permission.
 
 You can ask the same question about the identity without a Pod. The command asks the authorizer whether the `default` ServiceAccount of `starfleet` may list Pods, and `--list` shows everything it may do:
 
@@ -78,7 +85,20 @@ kubectl auth can-i list pods -n starfleet --as=system:serviceaccount:starfleet:d
 kubectl auth can-i --list -n starfleet --as=system:serviceaccount:starfleet:default
 ```
 
-The first command prints `no`. The second prints only the few rules that every authenticated identity receives, such as checking its own permissions.
+The first command prints `no`. The second prints only the few rules that every authenticated identity receives. This is the start of the output; the rest of the lines are more read-only paths such as `/livez`, `/readyz` and `/version`:
+
+```text
+Resources                                       Non-Resource URLs                      Resource Names   Verbs
+selfsubjectreviews.authentication.k8s.io        []                                     []               [create]
+selfsubjectaccessreviews.authorization.k8s.io   []                                     []               [create]
+selfsubjectrulesreviews.authorization.k8s.io    []                                     []               [create]
+                                                [/.well-known/openid-configuration/]   []               [get]
+                                                [/.well-known/openid-configuration]    []               [get]
+                                                [/api/*]                               []               [get]
+                                                [/api]                                 []               [get]
+```
+
+The three `create` rules let the identity ask who it is and what it may do. None of the rules reads or changes a namespaced object such as a Pod.
 
 ## Admission is a separate decision
 

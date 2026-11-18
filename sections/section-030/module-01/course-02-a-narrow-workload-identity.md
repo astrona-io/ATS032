@@ -60,6 +60,12 @@ Apply it:
 kubectl apply -f serviceaccount-lister.yaml
 ```
 
+```text
+serviceaccount/lister created
+role.rbac.authorization.k8s.io/service-lister created
+rolebinding.rbac.authorization.k8s.io/service-lister-bind created
+```
+
 Then check the result from the authorizer's point of view:
 
 ```sh
@@ -79,13 +85,25 @@ kubectl -n starfleet set serviceaccount deployment/probe lister
 kubectl -n starfleet rollout status deployment/probe --timeout=180s
 ```
 
+The last line of the output is `deployment "probe" successfully rolled out`.
+
 Confirm what the new Pods use:
 
 ```sh
 kubectl -n starfleet get pods -l app=probe -o custom-columns=NAME:.metadata.name,SA:.spec.serviceAccountName
 ```
 
-Each row of the output shows `lister` in the `SA` column. If one row still shows `default`, that Pod is an old replica that has not been replaced yet.
+Right after the rollout, the output can still list the old Pods:
+
+```text
+NAME                     SA
+probe-7789f7bdd6-7n6mq   lister
+probe-7789f7bdd6-z4x2g   lister
+probe-7db6ffd7d6-slchb   default
+probe-7db6ffd7d6-v4d85   default
+```
+
+The two rows with `default` are the old replicas. `kubectl get pods` shows them as `Terminating`, and they disappear after their grace period of 30 seconds. Run the command again after that, and only the two `lister` rows remain. Your Pod names differ from these.
 
 ## Send the requests
 
@@ -119,6 +137,13 @@ call_api /api/v1/namespaces/starfleet/secrets token
 call_api /api/v1/namespaces/outpost/services token
 ```
 
+```text
+200
+403
+403
+403
+```
+
 The first request prints `200`: the token authenticates as `lister`, and the Role allows listing Services in `starfleet`. The other three print `403`, because Pods and Secrets are not in the rule and the binding does not reach `outpost`. A pair of results like this proves both sides of the design: the workload can do its job, and a stolen token cannot do more.
 
 ## Why one identity per workload
@@ -127,7 +152,7 @@ The `default` ServiceAccount is shared by every Pod in the namespace that names 
 
 Keep the Role small in three ways. List the exact `resources` and `verbs`. Add `resourceNames` when the workload needs only a few named objects. Prefer a Role and RoleBinding over a ClusterRole and ClusterRoleBinding when the work is in one namespace. If the workload does not call the API at all, give it no permissions and turn off token mounting.
 
-You now have a workload with an identity that allows one action, and you checked it from inside the Pod. The endpoint that serves all of these requests also needs hardening, which is the last part.
+You now have a workload with an identity that allows one action, and you checked it from inside the Pod. The endpoint that serves all of these requests also needs hardening: the open question is which server settings decide who can reach it at all.
 
 ## Common pitfalls
 

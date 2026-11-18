@@ -5,11 +5,10 @@ exam_objectives:
 ---
 # Remove AlwaysAllow And Narrow Impersonation Rights: Solution
 
-Connect to the lab first, so that `kubectl` talks to this lab's cluster:
+Open a shell on the lab VM from your own machine. All later commands run in that shell as the user `student`:
 
 ```sh
-export KUBECONFIG="$(astrona kubeconfig ats-032-lab-030-02-03)"
-control_plane="astro-ats-032-lab-030-02-03-control-plane"
+astrona ssh astro-ats-032-lab-030-02-03
 ```
 
 ## See the problem
@@ -22,22 +21,45 @@ kubectl auth can-i list secrets -n kube-system --as=nobody
 
 The command prints `yes`. RBAC has no rule for `nobody`, so the `yes` comes from `AlwaysAllow` at the end of the list.
 
-`AlwaysAllow` has one more effect. The API server turns anonymous authentication off when `AlwaysAllow` is in the list, and its log says `AnonymousAuth is not allowed with the AlwaysAllow authorizer`. A request without credentials therefore gets `401`, but every authenticated user, including any ServiceAccount, may do everything. The kubelet's health probes of the API server are anonymous HTTPS requests, so this lab changed them to TCP checks to keep the API server running.
+`AlwaysAllow` has one more effect. The API server turns anonymous authentication off when `AlwaysAllow` is in the list, and its log says `AnonymousAuth is not allowed with the AlwaysAllow authorizer`. A request without credentials therefore gets `401`, but every authenticated user, including any ServiceAccount, may do everything. The kubelet's health probes of the API server are anonymous HTTPS requests. With `AlwaysAllow` they get `401`, and the Pod never becomes Ready. This lab therefore changed the probes to TCP checks, which only open a connection to the port:
+
+```sh
+sudo grep -A3 -e livenessProbe -e readinessProbe -e startupProbe /etc/kubernetes/manifests/kube-apiserver.yaml
+```
+
+Each probe shows `tcpSocket` instead of `httpGet`:
+
+```text
+    livenessProbe:
+      failureThreshold: 8
+      tcpSocket:
+        host: 10.0.2.15
+--
+    readinessProbe:
+      failureThreshold: 3
+      tcpSocket:
+        host: 10.0.2.15
+--
+    startupProbe:
+      failureThreshold: 24
+      tcpSocket:
+        host: 10.0.2.15
+```
+
+Leave the probes as they are.
 
 ## Fix the authorization modes
 
-Open a shell on the control plane node. Copy the manifest to a directory outside `/etc/kubernetes/manifests` first, because the kubelet runs every manifest in that directory. Then set the flag back to `Node,RBAC`:
+Only root can change the manifest, so every command on it uses `sudo`. Copy the manifest to a directory outside `/etc/kubernetes/manifests` first, because the kubelet runs every manifest in that directory. Then set the flag back to `Node,RBAC`:
 
 ```sh
-podman exec -it $control_plane bash
-cp /etc/kubernetes/manifests/kube-apiserver.yaml /root/kube-apiserver.yaml.bak
-grep authorization-mode /etc/kubernetes/manifests/kube-apiserver.yaml
-sed -i 's/--authorization-mode=Node,RBAC,AlwaysAllow/--authorization-mode=Node,RBAC/' /etc/kubernetes/manifests/kube-apiserver.yaml
-grep authorization-mode /etc/kubernetes/manifests/kube-apiserver.yaml
-exit
+sudo cp /etc/kubernetes/manifests/kube-apiserver.yaml /root/kube-apiserver.yaml.bak
+sudo grep authorization-mode /etc/kubernetes/manifests/kube-apiserver.yaml
+sudo sed -i 's/--authorization-mode=Node,RBAC,AlwaysAllow/--authorization-mode=Node,RBAC/' /etc/kubernetes/manifests/kube-apiserver.yaml
+sudo grep authorization-mode /etc/kubernetes/manifests/kube-apiserver.yaml
 ```
 
-The first `grep` shows `- --authorization-mode=Node,RBAC,AlwaysAllow`, and the second shows `- --authorization-mode=Node,RBAC`. The kubelet sees the changed file and starts a new API server container. This takes about a minute, and `kubectl` cannot connect during that time.
+The first `grep` shows `    - --authorization-mode=Node,RBAC,AlwaysAllow`, and the second shows `    - --authorization-mode=Node,RBAC`. The kubelet sees the changed file and starts a new API server container. During that time `kubectl` cannot connect, and it prints `The connection to the server 10.0.2.15:6443 was refused - did you specify the right host or port?`. In the test run this lasted about 40 seconds.
 
 Repeat the same question every few seconds until the API server answers:
 
@@ -55,6 +77,20 @@ The verb `impersonate` lets a caller send requests as another identity. Look at 
 ```sh
 kubectl get clusterrole helpdesk-impersonate -o yaml
 kubectl auth can-i impersonate groups/system:masters --as=helpdesk-user --as-group=helpdesk
+```
+
+The `rules` part of the ClusterRole is:
+
+```text
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - users
+  - groups
+  - serviceaccounts
+  verbs:
+  - impersonate
 ```
 
 The ClusterRole allows `impersonate` on `users`, `groups` and `serviceaccounts` with no `resourceNames`. The `can-i` command prints `yes`: a member of `helpdesk` can act as a member of `system:masters`, which is a full administrator.
@@ -96,6 +132,14 @@ Apply it, and delete the old ClusterRoleBinding:
 ```sh
 kubectl apply -f clusterrole-helpdesk-impersonate.yaml
 kubectl delete clusterrolebinding helpdesk-impersonate
+```
+
+The output is:
+
+```text
+clusterrole.rbac.authorization.k8s.io/helpdesk-impersonate configured
+rolebinding.rbac.authorization.k8s.io/helpdesk-impersonate created
+clusterrolebinding.rbac.authorization.k8s.io "helpdesk-impersonate" deleted
 ```
 
 ## Check the result

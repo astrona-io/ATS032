@@ -16,7 +16,25 @@ The API server flag `--authorization-mode` takes a comma-separated list. The API
 kubectl -n kube-system get pod -l component=kube-apiserver -o jsonpath='{range .items[0].spec.containers[0].command[*]}{@}{"\n"}{end}' | grep -e authorization -e anonymous
 ```
 
-On a kubeadm-based cluster such as the playground, the output contains the line `--authorization-mode=Node,RBAC`. The command filters the full flag list, so it prints nothing for `--anonymous-auth` when the flag is not set and the default `true` applies.
+On a kubeadm-based cluster such as the playground, the output is one line:
+
+```text
+--authorization-mode=Node,RBAC
+```
+
+The command filters the full flag list, so it prints nothing for `--anonymous-auth` when the flag is not set and the default `true` applies. The kubelet starts the API server from the static Pod manifest `/etc/kubernetes/manifests/kube-apiserver.yaml` on the node. That file is where you change the flag. Only root can read it:
+
+```sh
+sudo grep -e authorization -e anonymous /etc/kubernetes/manifests/kube-apiserver.yaml
+```
+
+The file holds the same flag as a list item:
+
+```text
+    - --authorization-mode=Node,RBAC
+```
+
+When you save a change to this file, the kubelet stops the old API server container and starts a new one with the new flags. During the restart, `kubectl` cannot connect for a short time.
 
 ## The modes
 
@@ -24,7 +42,7 @@ On a kubeadm-based cluster such as the playground, the output contains the line 
 - **RBAC** allows a request when a Role or ClusterRole bound to the identity lists the verb, resource and name. It has only allow rules and never answers `deny`.
 - **Webhook** sends a `SubjectAccessReview` to an external service. That service can allow or deny. Use it when decisions come from a policy engine outside the cluster.
 - **ABAC** reads rules from a static file and needs an API server restart for each change. Do not use it.
-- **AlwaysAllow** authorizes every request that reaches it. With it, the permission model is gone, and every authenticated user and ServiceAccount can do everything. The API server turns anonymous authentication off when `AlwaysAllow` is in the list, so requests without credentials get `401`. It exists for tests.
+- **AlwaysAllow** authorizes every request that reaches it. With it, the permission model is gone, and every authenticated user and ServiceAccount can do everything. The API server turns anonymous authentication off when `AlwaysAllow` is in the list. Its log then says `AnonymousAuth is not allowed with the AlwaysAllow authorizer. Resetting AnonymousAuth to false`, and requests without credentials get `401`. On a kubeadm cluster this also breaks the kubelet's health probes of the API server, which are anonymous requests to `/livez` and `/readyz`: the Pod stays at `0/1` Ready. It exists for tests.
 - **AlwaysDeny** refuses every request and also exists for tests.
 
 A hardened kubeadm cluster uses `Node,RBAC`. `Node` comes first so that a kubelet request is decided cheaply, and `RBAC` handles everyone else. If `AlwaysAllow` is in the list, RBAC never gets a chance to refuse anything, because the request is already authorized.
@@ -49,6 +67,13 @@ kubectl auth can-i list pods -n starfleet --as=system:serviceaccount:starfleet:d
 kubectl auth can-i list pods -n starfleet --as=ops-user --as-group=ops
 ```
 
+The output is:
+
+```text
+no
+yes
+```
+
 The first command prints `no`, because the `default` ServiceAccount has no Role. The second prints `yes`, because the group `ops` holds `view` through the ClusterRoleBinding `ops-viewer`. The second command shows that the group is what matters. The user name `ops-user` does not need to exist anywhere, because Kubernetes has no user objects: a user is whatever name the authenticator reports.
 
 ## Impersonation
@@ -58,6 +83,13 @@ Impersonation lets a caller send a request as another identity. `kubectl` does i
 ```sh
 kubectl get pods -n starfleet --as=system:serviceaccount:starfleet:default
 kubectl auth can-i impersonate serviceaccounts
+```
+
+The output is:
+
+```text
+Error from server (Forbidden): pods is forbidden: User "system:serviceaccount:starfleet:default" cannot list resource "pods" in API group "" in the namespace "starfleet"
+yes
 ```
 
 The first command fails with a `Forbidden` error that names the ServiceAccount and says it cannot list Pods. That error proves that your administrator rights let you impersonate, and it shows what the identity can do. The second command prints `yes`, because `cluster-admin` has every verb.

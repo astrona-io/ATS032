@@ -2,106 +2,111 @@
 exam_objectives:
 - Upgrade Kubernetes to avoid vulnerabilities
 ---
-# Restart The Container Runtime On A Drained Worker: Solution
+# Restart The Container Runtime On A Drained Node: Solution
 
-Connect to the lab first, so that `kubectl` talks to this lab's cluster:
+The container runtime `containerd` starts and stops the containers of every Pod on the node. A new `containerd` package only takes effect after the service restarts, and the safe order is: drain the node, restart the service, check it, then return the node to service. Connect with `astrona ssh astro-ats-032-lab-040-03-02` and run every command below on the VM.
 
-```sh
-export KUBECONFIG="$(astrona kubeconfig ats-032-lab-040-03-02)"
-worker_name="astro-ats-032-lab-040-03-02-worker"
-```
+The output below comes from one run of this lab. Pod names, process IDs, IP addresses and times differ in your run.
 
-The output below comes from one run of this lab. Pod names, IP addresses and times differ in your run.
+## Step 1: Look at the starting state
 
-## Look at the starting state
-
-Both `probe` Pods run on the worker:
+The node is cordoned, and both `probe` Pods still run on it:
 
 ```sh
+kubectl get nodes
 kubectl -n starfleet-032-040-03-02 get pods -o wide
 ```
 
 ```text
-NAME                     READY   STATUS    RESTARTS   AGE   IP           NODE                                 NOMINATED NODE   READINESS GATES
-probe-6784f7b9b5-j69f2   1/1     Running   0          2s    10.244.1.2   astro-ats-032-lab-040-03-02-worker   <none>           <none>
-probe-6784f7b9b5-jq5ff   1/1     Running   0          2s    10.244.1.3   astro-ats-032-lab-040-03-02-worker   <none>           <none>
+NAME           STATUS                     ROLES           AGE   VERSION
+controlplane   Ready,SchedulingDisabled   control-plane   40s   v1.35.10
+NAME                     READY   STATUS    RESTARTS   AGE   IP           NODE           NOMINATED NODE   READINESS GATES
+probe-56fdb498b8-97s62   1/1     Running   0          25s   10.244.0.4   controlplane   <none>           <none>
+probe-56fdb498b8-kwjxk   1/1     Running   0          25s   10.244.0.5   controlplane   <none>           <none>
 ```
 
-`systemd` records when the `containerd` service last started. Read it now, so that you can compare it after the restart:
+`systemd`, the service manager of Ubuntu, records the process ID of the service and the time it last started. Read both now, so that you can compare them after the restart:
 
 ```sh
-podman exec "$worker_name" systemctl show containerd --property=MainPID --property=ActiveEnterTimestamp
+systemctl show containerd --property=MainPID --property=ActiveEnterTimestamp
 ```
 
 ```text
-MainPID=123
-ActiveEnterTimestamp=Tue 2026-11-17 21:41:30 UTC
+MainPID=799
+ActiveEnterTimestamp=Wed 2026-11-18 08:53:18 UTC
 ```
 
-## Drain the worker
+## Step 2: Drain the node
 
-A runtime patch can stop or disturb the containers on the node. Drain the worker first, so that the eviction API moves the Pods while the PodDisruptionBudget still protects them:
+A runtime restart can disturb the containers on the node, so the workload leaves first. `kubectl drain` cordons the node (it already is) and asks the API server to evict every Pod that a controller manages. `--ignore-daemonsets` skips the `kube-proxy` Pod, because its DaemonSet would put it straight back:
 
 ```sh
-kubectl drain "$worker_name" --ignore-daemonsets --timeout=180s
-```
-
-```text
-node/astro-ats-032-lab-040-03-02-worker already cordoned
-Warning: ignoring DaemonSet-managed Pods: kube-system/kindnet-rrpkq, kube-system/kube-proxy-x9hzc
-evicting pod starfleet-032-040-03-02/probe-6784f7b9b5-jq5ff
-evicting pod starfleet-032-040-03-02/probe-6784f7b9b5-j69f2
-error when evicting pods/"probe-6784f7b9b5-jq5ff" -n "starfleet-032-040-03-02" (will retry after 5s): Cannot evict pod as it would violate the pod's disruption budget.
-evicting pod starfleet-032-040-03-02/probe-6784f7b9b5-jq5ff
-pod/probe-6784f7b9b5-j69f2 evicted
-pod/probe-6784f7b9b5-jq5ff evicted
-node/astro-ats-032-lab-040-03-02-worker drained
-```
-
-The error line is normal. The PodDisruptionBudget allows one Pod to be unavailable, so the API server refused the second eviction until the first replacement Pod was Ready. `kubectl drain` retried, and the second eviction then succeeded. The new Pods run on the control plane node, because they tolerate its taint:
-
-```sh
+kubectl drain controlplane --ignore-daemonsets --timeout=180s
 kubectl -n starfleet-032-040-03-02 get pods -o wide
 ```
 
 ```text
-NAME                     READY   STATUS    RESTARTS   AGE   IP           NODE                                        NOMINATED NODE   READINESS GATES
-probe-6784f7b9b5-24wdd   1/1     Running   0          37s   10.244.0.5   astro-ats-032-lab-040-03-02-control-plane   <none>           <none>
-probe-6784f7b9b5-pm6j6   1/1     Running   0          32s   10.244.0.6   astro-ats-032-lab-040-03-02-control-plane   <none>           <none>
+node/controlplane already cordoned
+Warning: ignoring DaemonSet-managed Pods: kube-system/kube-proxy-q2d6l
+evicting pod starfleet-032-040-03-02/probe-56fdb498b8-kwjxk
+evicting pod kube-system/coredns-7d764666f9-sf4zn
+evicting pod kube-system/coredns-7d764666f9-nflzt
+evicting pod starfleet-032-040-03-02/probe-56fdb498b8-97s62
+pod/coredns-7d764666f9-sf4zn evicted
+pod/coredns-7d764666f9-nflzt evicted
+pod/probe-56fdb498b8-kwjxk evicted
+pod/probe-56fdb498b8-97s62 evicted
+node/controlplane drained
+NAME                     READY   STATUS    RESTARTS   AGE   IP       NODE     NOMINATED NODE   READINESS GATES
+probe-56fdb498b8-mb27x   0/1     Pending   0          31s   <none>   <none>   <none>           <none>
+probe-56fdb498b8-wsctd   0/1     Pending   0          31s   <none>   <none>   <none>           <none>
 ```
 
-## Restart containerd
+The Deployment controller created two new `probe` Pods at once. They stay `Pending`, because the scheduler has no schedulable node to place them on. In a cluster with more nodes they would start on another node. With one node, the application is down for the window, which is why production clusters patch one node of several at a time.
 
-`systemctl` inside the worker restarts the service. Check that it is active and that it has a new process ID and a new start time:
+The drain also evicted the two CoreDNS Pods. If a PodDisruptionBudget had protected `probe` with `maxUnavailable: 1`, this drain would wait until it times out: the first replacement Pod can never become Ready on a cordoned single node, so the API server would refuse the second eviction.
+
+## Step 3: Restart containerd
+
+`systemctl` restarts the service. Then check that it is active and that it has a new process ID and a new start time:
 
 ```sh
-podman exec "$worker_name" systemctl restart containerd
-podman exec "$worker_name" systemctl is-active containerd
-podman exec "$worker_name" systemctl show containerd --property=MainPID --property=ActiveEnterTimestamp
+sudo systemctl restart containerd
+systemctl is-active containerd
+systemctl show containerd --property=MainPID --property=ActiveEnterTimestamp
 ```
 
 ```text
 active
-MainPID=1062
-ActiveEnterTimestamp=Tue 2026-11-17 21:42:45 UTC
+MainPID=3344
+ActiveEnterTimestamp=Wed 2026-11-18 08:54:42 UTC
 ```
 
-## Return the worker to service
+The new process ID and the later time prove that the new binary now runs. If `is-active` prints `failed` or `activating`, read the reason with `sudo journalctl -u containerd -n 20` before you go on.
 
-The kubelet reports the node status again after the runtime is back. Wait for Ready, then uncordon the worker:
+## Step 4: Return the node to service
+
+The kubelet reports the node status again after the runtime is back. Wait for Ready, uncordon the node and wait for the Deployment:
 
 ```sh
-kubectl wait --for=condition=Ready node/"$worker_name" --timeout=180s
-kubectl uncordon "$worker_name"
+kubectl wait --for=condition=Ready node/controlplane --timeout=180s
+kubectl uncordon controlplane
+kubectl -n starfleet-032-040-03-02 rollout status deployment/probe --timeout=180s
 kubectl get nodes
+kubectl -n starfleet-032-040-03-02 get pods -o wide
 ```
 
 ```text
-node/astro-ats-032-lab-040-03-02-worker condition met
-node/astro-ats-032-lab-040-03-02-worker uncordoned
-NAME                                        STATUS   ROLES           AGE   VERSION
-astro-ats-032-lab-040-03-02-control-plane   Ready    control-plane   67s   v1.35.0
-astro-ats-032-lab-040-03-02-worker          Ready    <none>          55s   v1.35.0
+node/controlplane condition met
+node/controlplane uncordoned
+Waiting for deployment "probe" rollout to finish: 0 of 2 updated replicas are available...
+Waiting for deployment "probe" rollout to finish: 1 of 2 updated replicas are available...
+deployment "probe" successfully rolled out
+NAME           STATUS   ROLES           AGE   VERSION
+controlplane   Ready    control-plane   77s   v1.35.10
+NAME                     READY   STATUS    RESTARTS   AGE   IP           NODE           NOMINATED NODE   READINESS GATES
+probe-56fdb498b8-mb27x   1/1     Running   0          37s   10.244.0.9   controlplane   <none>           <none>
+probe-56fdb498b8-wsctd   1/1     Running   0          37s   10.244.0.7   controlplane   <none>           <none>
 ```
 
-Uncordon does not move the `probe` Pods back. They stay on the control plane node until something replaces them. The grader checks that the original Pods are gone, that two `probe` Pods are available, that `containerd` started after the lab began and that the worker is Ready and schedulable.
+As soon as the node accepted Pods again, the scheduler placed the two `Pending` Pods on it. The grader checks that the original `probe` Pods are gone, that two `probe` Pods are available, that `containerd` started again after the lab began, and that the node is Ready and schedulable.
