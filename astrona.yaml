@@ -839,23 +839,22 @@ modules:
     title: Patch The Operating System And Container Runtime On Nodes
     path: sections/section-040/module-03/course-01-patch-the-operating-system-and-container-runtime-on-nodes.md
   - type: reading
-    title: Restart The Container Runtime On A Drained Worker — Task
+    title: Restart The Container Runtime On A Drained Node — Task
     path: sections/section-040/module-03/labs/lab-02/question.md
   - type: lab
-    title: Restart The Container Runtime On A Drained Worker
+    title: Restart The Container Runtime On A Drained Node
     path: sections/section-040/module-03/labs/lab-02
-    examScope: cluster
     difficulty: intermediate
     estimated_duration: 10m
     topic: runtime-patching
     task_kind: build
     learning_goals:
-    - Drain a worker, restart containerd on it and return it to service.
+    - Drain the only node, restart containerd on it with systemctl and return it to service.
     tags:
     - cks
     - runtime-patching
   - type: reading
-    title: Restart The Container Runtime On A Drained Worker — Solution
+    title: Restart The Container Runtime On A Drained Node — Solution
     path: sections/section-040/module-03/labs/lab-02/solution.md
   - type: reading
     title: Verify The Cluster After An Upgrade
@@ -883,23 +882,22 @@ modules:
     title: Rollback Limits And Restore Drills
     path: sections/section-040/module-03/course-03-rollback-limits-and-restore-drills.md
   - type: reading
-    title: Run An etcd Restore Drill From A Snapshot — Task
+    title: Restore etcd From A Snapshot — Task
     path: sections/section-040/module-03/labs/lab-03/question.md
   - type: lab
-    title: Run An etcd Restore Drill From A Snapshot
+    title: Restore etcd From A Snapshot
     path: sections/section-040/module-03/labs/lab-03
-    examScope: cluster
     difficulty: intermediate
-    estimated_duration: 8m
+    estimated_duration: 15m
     topic: etcd-restore-drill
     task_kind: build
     learning_goals:
-    - Restore an etcd snapshot into a separate data directory without touching the live etcd.
+    - Restore an etcd snapshot into a new data directory and point the etcd static Pod at it.
     tags:
     - cks
     - etcd-restore-drill
   - type: reading
-    title: Run An etcd Restore Drill From A Snapshot — Solution
+    title: Restore etcd From A Snapshot — Solution
     path: sections/section-040/module-03/labs/lab-03/solution.md
   - type: reading
     title: Summary

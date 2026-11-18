@@ -2,108 +2,126 @@
 exam_objectives:
 - Upgrade Kubernetes to avoid vulnerabilities
 ---
-# Run An etcd Restore Drill From A Snapshot: Solution
+# Restore etcd From A Snapshot: Solution
 
-Connect to the lab first, so that `kubectl` talks to this lab's cluster:
+A restore turns a snapshot file back into an etcd data directory, and then etcd must run on that directory. On a kubeadm node, etcd is a static Pod, so you change its manifest and the kubelet starts a new etcd container. Connect with `astrona ssh astro-ats-032-lab-040-03-03` and run every command below on the VM.
 
-```sh
-export KUBECONFIG="$(astrona kubeconfig ats-032-lab-040-03-03)"
-node_name="astro-ats-032-lab-040-03-03-control-plane"
-etcd_pod="etcd-astro-ats-032-lab-040-03-03-control-plane"
-```
+The output below comes from one run of this lab. Hashes, revisions, IDs and times differ in your run.
 
-The output below comes from one run of this lab. The hash, the revision and the times differ in your run.
+## Step 1: Look at the starting state
 
-## Read the snapshot
-
-`etcdutl` works on files and does not need a connection to a running etcd. Run it inside the etcd Pod, because the node itself has no `etcdutl`:
+The ConfigMap `fleet-roster` is missing, and `course-correction` exists. The snapshot is a root-only file:
 
 ```sh
-kubectl -n kube-system exec "$etcd_pod" -- etcdutl snapshot status /var/lib/etcd/backup/nightly.db --write-out=table
+kubectl -n starfleet-032-040-03-03 get configmaps
+sudo ls -l /var/backups/etcd
+sudo etcdutl snapshot status /var/backups/etcd/nightly.db --write-out=table
 ```
 
 ```text
-+---------+----------+------------+------------+---------+
-|  HASH   | REVISION | TOTAL KEYS | TOTAL SIZE | VERSION |
-+---------+----------+------------+------------+---------+
-| 786b5b8 |      503 |        363 |     1.1 MB |   3.6.0 |
-+---------+----------+------------+------------+---------+
-```
-
-The revision is the counter of the etcd key-value store at the time of the snapshot. Note it: in this run it is `503`.
-
-## Restore into a separate data directory
-
-`etcdutl snapshot restore` writes a new data directory from the snapshot. It does not change the running etcd, because the live data stays in `/var/lib/etcd/member` and the drill writes to `/var/lib/etcd/drill`:
-
-```sh
-kubectl -n kube-system exec "$etcd_pod" -- etcdutl snapshot restore /var/lib/etcd/backup/nightly.db --data-dir /var/lib/etcd/drill
-```
-
-The command logs each step. The first and the last line of this run were (the lines between them are left out):
-
-```text
-2026-11-17T21:46:47Z	info	snapshot/v3_snapshot.go:305	restoring snapshot	{"path": "/var/lib/etcd/backup/nightly.db", "wal-dir": "/var/lib/etcd/drill/member/wal", "data-dir": "/var/lib/etcd/drill", "snap-dir": "/var/lib/etcd/drill/member/snap", "initial-memory-map-size": 10737418240}
-2026-11-17T21:46:47Z	info	snapshot/v3_snapshot.go:333	restored snapshot	{"path": "/var/lib/etcd/backup/nightly.db", "wal-dir": "/var/lib/etcd/drill/member/wal", "data-dir": "/var/lib/etcd/drill", "snap-dir": "/var/lib/etcd/drill/member/snap", "initial-memory-map-size": 10737418240}
-```
-
-The restore refuses a directory that already has content. A second run of the same command printed:
-
-```text
-Error: data-dir "/var/lib/etcd/drill" not empty or could not be read
-```
-
-## Check the restored data
-
-A data directory has a `member` folder with a write-ahead log (`wal`) and the database (`snap/db`):
-
-```sh
-podman exec "$node_name" ls -l /var/lib/etcd/drill/member
-kubectl -n kube-system exec "$etcd_pod" -- etcdutl snapshot status /var/lib/etcd/drill/member/snap/db --write-out=table
-```
-
-```text
-total 0
-drwx------. 2 root root 62 Nov 17 21:46 snap
-drwx------. 2 root root 51 Nov 17 21:46 wal
+NAME                DATA   AGE
+course-correction   1      8s
+kube-root-ca.crt    1      8s
+total 732
+-rw------- 1 root root 745504 Nov 18 08:58 nightly.db
 +----------+----------+------------+------------+---------+
 |   HASH   | REVISION | TOTAL KEYS | TOTAL SIZE | VERSION |
 +----------+----------+------------+------------+---------+
-| 4bf50c27 |      503 |        363 |     1.1 MB |   3.6.0 |
+| 9a5ab1c2 |      392 |        308 |     746 kB |   3.6.0 |
 +----------+----------+------------+------------+---------+
 ```
 
-The revision and the number of keys match the snapshot. The hash differs, because the restore removes the old membership information and writes new cluster membership into the database. Compare revisions and key counts, not hashes, when you check a restore.
+`etcdutl` reads the file directly and does not need a running etcd. The revision is the counter of the etcd key-value store when the snapshot was taken.
 
-## Record the result
-
-Save this as `configmap-restore-drill.yaml`, with your own revision:
-
-```yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: restore-drill
-  namespace: starfleet-032-040-03-03
-data:
-  revision: "503"
-```
-
-Apply it:
+Now find where the manifest sets the data directory:
 
 ```sh
-kubectl apply -f configmap-restore-drill.yaml
-```
-
-The live etcd Pod was never stopped:
-
-```sh
-kubectl -n kube-system get pods -l component=etcd
+sudo grep -n "data-dir\|/var/lib/etcd\|etcd-data" /etc/kubernetes/manifests/etcd.yaml
 ```
 
 ```text
-NAME                                             READY   STATUS    RESTARTS   AGE
-etcd-astro-ats-032-lab-040-03-03-control-plane   1/1     Running   0          28s
+18:    - --data-dir=/var/lib/etcd
+75:    - mountPath: /var/lib/etcd
+76:      name: etcd-data
+91:      path: /var/lib/etcd
+93:    name: etcd-data
 ```
 
-In a real restore you would now point the `etcd-data` volume in `/etc/kubernetes/manifests/etcd.yaml` at the restored directory. The drill stops before that step, because it only has to prove that the snapshot can be restored.
+Three places name the directory. `--data-dir` (line 18) is the path inside the container. The volume mount (line 75) puts the volume `etcd-data` at that path. The `hostPath` (line 91) says which host directory the volume is. To switch etcd to new data, you only change the `hostPath`: the container keeps using `/var/lib/etcd`, but that path now shows the restored directory.
+
+## Step 2: Restore the snapshot
+
+`etcdutl snapshot restore` writes a new data directory. `--bump-revision` and `--mark-compacted` raise the revision far above any revision the API server has already seen and mark the older revisions as compacted. Without them, the API server and the controllers can keep cached objects with higher revisions than the restored data, and they do not notice the rollback:
+
+```sh
+sudo etcdutl snapshot restore /var/backups/etcd/nightly.db --data-dir /var/lib/etcd-restore --bump-revision 1000000000 --mark-compacted
+sudo ls -l /var/lib/etcd-restore/member
+```
+
+The command prints one log line per step. The lines below are the start, the two revision steps and the end of this run; the `bbolt` lines and the member lines between them are left out:
+
+```text
+2026-11-18T08:59:01Z	info	snapshot/v3_snapshot.go:305	restoring snapshot	{"path": "/var/backups/etcd/nightly.db", "wal-dir": "/var/lib/etcd-restore/member/wal", "data-dir": "/var/lib/etcd-restore", "snap-dir": "/var/lib/etcd-restore/member/snap", "initial-memory-map-size": 10737418240}
+2026-11-18T08:59:01Z	info	snapshot/v3_snapshot.go:396	bumping latest revision	{"latest-revision": 392, "bump-amount": 1000000000, "new-latest-revision": 1000000392}
+2026-11-18T08:59:01Z	info	snapshot/v3_snapshot.go:413	marking revision compacted	{"revision": 1000000392}
+2026-11-18T08:59:01Z	info	snapshot/v3_snapshot.go:333	restored snapshot	{"path": "/var/backups/etcd/nightly.db", "wal-dir": "/var/lib/etcd-restore/member/wal", "data-dir": "/var/lib/etcd-restore", "snap-dir": "/var/lib/etcd-restore/member/snap", "initial-memory-map-size": 10737418240}
+total 8
+drwx------ 2 root root 4096 Nov 18 08:59 snap
+drwx------ 2 root root 4096 Nov 18 08:59 wal
+```
+
+The new directory has a `member` folder with the database (`snap`) and the write-ahead log (`wal`). The restore refuses a directory that already has content, so pick a new, empty path.
+
+## Step 3: Point the etcd static Pod at the restored directory
+
+Keep a copy of the manifest outside `/etc/kubernetes/manifests`, because the kubelet would start every manifest file in that folder. Then change only the `hostPath` line:
+
+```sh
+sudo cp /etc/kubernetes/manifests/etcd.yaml /root/etcd.yaml.before-restore
+sudo sed -i 's#^\( *path: \)/var/lib/etcd$#\1/var/lib/etcd-restore#' /etc/kubernetes/manifests/etcd.yaml
+sudo grep -n -B1 -A2 "path: /var/lib/etcd-restore" /etc/kubernetes/manifests/etcd.yaml
+```
+
+```text
+90-  - hostPath:
+91:      path: /var/lib/etcd-restore
+92-      type: DirectoryOrCreate
+93-    name: etcd-data
+```
+
+You can also make the same change with `sudo vi /etc/kubernetes/manifests/etcd.yaml`. The kubelet watches the folder, stops the old etcd container and starts a new one on the restored data. While etcd restarts, `kubectl` fails for some seconds.
+
+## Step 4: Check etcd and the restored objects
+
+Wait about a minute, then ask etcd for its status and list the ConfigMaps:
+
+```sh
+sudo etcdctl --endpoints=https://127.0.0.1:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key endpoint status --write-out=table
+kubectl -n starfleet-032-040-03-03 get configmaps
+kubectl -n kube-system get pods
+```
+
+The status table is wide; this copy keeps its first columns and leaves out the rest:
+
+```text
++------------------------+------------------+---------+-----------------+---------+--------+
+|        ENDPOINT        |        ID        | VERSION | STORAGE VERSION | DB SIZE | IN USE |
++------------------------+------------------+---------+-----------------+---------+--------+
+| https://127.0.0.1:2379 | 8e9e05c52164694d |   3.6.6 |           3.6.0 |  918 kB | 471 kB |
++------------------------+------------------+---------+-----------------+---------+--------+
+NAME               DATA   AGE
+fleet-roster       3      89s
+kube-root-ca.crt   1      89s
+NAME                                   READY   STATUS    RESTARTS      AGE
+coredns-7d764666f9-2frgf               1/1     Running   0             96s
+coredns-7d764666f9-5cpcx               1/1     Running   0             96s
+etcd-controlplane                      1/1     Running   0             11s
+kube-apiserver-controlplane            1/1     Running   0             104s
+kube-controller-manager-controlplane   1/1     Running   1 (65s ago)   104s
+kube-proxy-g4d4w                       1/1     Running   0             97s
+kube-scheduler-controlplane            0/1     Running   1 (59s ago)   104s
+```
+
+The member ID changed, because the restore writes new membership information. `fleet-roster` is back and `course-correction` is gone: the cluster now runs on the state of the snapshot. The controller manager and the scheduler restarted once, because they lost their leader lease while etcd was down. The scheduler becomes Ready a few seconds later. If the mirror Pod `etcd-controlplane` is missing for a short time, wait: the kubelet creates it again in the API server.
+
+If etcd does not come back, read its container log with `sudo crictl ps -a --name etcd` and `sudo crictl logs <container-id>`. To undo, copy `/root/etcd.yaml.before-restore` back into `/etc/kubernetes/manifests/etcd.yaml`.

@@ -5,20 +5,24 @@ metadata:
     examQuestion: question.md
     guide: solution.md
 runtime:
-  type: kind
-  kind:
-    image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
-    preloadImages:
-    - docker.io/library/busybox:1.37.0
-    nodes:
-      workers: 1
+  type: qemu
+  qemu:
+  - image:
+      type: oci
+      source: ghcr.io/astrona-io/ubuntu-qcow2-image:24.04-cks-{ARCH}
+      checksums:
+        amd64: sha256:dc3348c725b6b36d08888acdcbda44cc34894b76d5b56a594f7ce253b6d2e773
+        arm64: sha256:31798490219e2ee856d7f8c2cb9df83182bbac64c7d8ce7c15e81445527d7898
+    cpus: 2
+    memoryMB: 4096
+    diskSizeGB: 20
+    display: false
 bootstrap:
   init:
-  - name: seed-private-environment
+  - name: create-kubeadm-cluster
+    description: Creates the single-node kubeadm cluster, starts the probe Deployment, records the containerd baseline and cordons the node
     type: file
     source: bootstrap/setup.sh
-teardown:
-  keepCluster: false
 testing:
   init:
   - name: verify-start
@@ -26,26 +30,29 @@ testing:
     type: file
     source: testing/verify-start.sh
   - name: reference-result
+    description: Drain the node, restart containerd, wait for Ready and uncordon
     type: file
     source: solution/apply.sh
   - name: wait-solved
-    description: Wait until the reference solution settles and every outcome passes
+    description: Wait until the probe Pods run again and every outcome passes
     type: file
     source: testing/wait-solved.sh
 validation:
   scripts:
   - name: runtime-restarted
-    description: containerd on the worker is active and started again after the lab began
+    description: containerd on node controlplane is active and started again after the lab began
     type: file
     source: validation/validate-runtime-restarted.sh
     points: 1
   - name: probe-pods-replaced
-    description: None of the probe Pods that ran on the worker at the start remains, and two probe Pods are available
+    description: None of the probe Pods from the start remains, and two probe Pods are available
     type: file
     source: validation/validate-probe-pods-replaced.sh
     points: 1
-  - name: worker-in-service
-    description: The worker is Ready and schedulable again
+  - name: node-in-service
+    description: Node controlplane is Ready and schedulable again
     type: file
-    source: validation/validate-worker-in-service.sh
+    source: validation/validate-node-in-service.sh
     points: 1
+teardown:
+  keepCluster: false

@@ -161,7 +161,7 @@ questions:
     learning_objective: "Use the deprecated API metric."
     source_readings:
       - sections/section-040/module-03/course-02-verify-the-cluster-after-an-upgrade.md
-    prompt: "Which API server metric lists requests to deprecated APIs and the release that removes them?"
+    prompt: "Which API server metric counts the requests that clients send to deprecated APIs?"
     options:
       - id: a
         text: "`apiserver_requested_deprecated_apis`"
@@ -173,7 +173,7 @@ questions:
         text: "`etcd_db_total_size_in_bytes`"
         explanation: "It reports the etcd database size."
     correct_option: a
-    explanation: "The labels include the group, version, resource and `removed_release`."
+    explanation: "The labels include the group, version, resource and `removed_release`. `removed_release` is empty when no removal is planned yet, as for `endpoints` in `v1`."
 
   - id: ats032-040-03-q09
     type: single_choice
