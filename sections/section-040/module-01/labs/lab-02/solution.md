@@ -166,7 +166,7 @@ NAME           STATUS                     ROLES           AGE     VERSION
 controlplane   Ready,SchedulingDisabled   control-plane   7m22s   v1.36.6
 ```
 
-Right after the restart, `kubectl` can print `Error from server (Forbidden): nodes is forbidden: User "kubernetes-admin" cannot list resource "nodes"`. The API server is still starting its authorizer at that moment. Wait ten seconds and run the command again.
+Right after the restart, `kubectl` can print `Error from server (Forbidden): nodes is forbidden: User "kubernetes-admin" cannot list resource "nodes"` or `The connection to the server 10.0.2.15:6443 was refused`. The kubelet is starting the API server Pod again, and the API server is not ready yet. Wait ten seconds and run the command again.
 
 ## Step 7: Uncordon the node and check the result
 

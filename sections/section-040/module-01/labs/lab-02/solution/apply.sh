@@ -12,6 +12,20 @@ kube() {
   sudo -n kubectl --kubeconfig /etc/kubernetes/admin.conf "$@" </dev/null
 }
 
+# A kubelet restart briefly takes the API server static Pod down, so wait
+# (at most three minutes) until it answers with authorization working.
+wait_for_api() {
+  local attempt
+  for attempt in $(seq 1 36); do
+    if kube get "node/$NODE" >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep 5
+  done
+  echo "the API server did not come back within three minutes" >&2
+  return 1
+}
+
 main() {
   set -euo pipefail
   export DEBIAN_FRONTEND=noninteractive
@@ -50,6 +64,7 @@ main() {
   sudo -n apt-mark hold kubelet kubectl
   sudo -n systemctl daemon-reload
   sudo -n systemctl restart kubelet
+  wait_for_api
   kube wait --for=condition=Ready "node/$NODE" --timeout=180s
   kube uncordon "$NODE"
   apt-mark showhold
