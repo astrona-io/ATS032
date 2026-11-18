@@ -325,10 +325,10 @@ sections:
     - id: lab-02
       path: sections/section-030/module-01/labs/lab-02
       after_reading: sections/section-030/module-01/course-03-hardening-the-endpoint-and-the-kubelet.md
-      objective: Harden The Kubelet On A Worker Node.
-      runtime: kind
+      objective: Harden The Kubelet On A Node.
+      runtime: qemu
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-17
+      runtime_verification: passed astrona validate and astrona test on 2026-11-18 (arm64)
     quiz: sections/section-030/module-01/quiz.yaml
   - id: module-02
     title: Authentication, Anonymous Access And Authorization Modes
@@ -358,9 +358,9 @@ sections:
       path: sections/section-030/module-02/labs/lab-02
       after_reading: sections/section-030/module-02/course-01-authentication-methods-and-identities.md
       objective: Remove Static Token Authentication From The API Server.
-      runtime: kind
+      runtime: qemu
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-17
+      runtime_verification: passed astrona validate and astrona test on 2026-11-18 (arm64)
     - id: lab-01
       path: sections/section-030/module-02/labs/lab-01
       after_reading: sections/section-030/module-02/course-02-anonymous-access-in-practice.md
@@ -372,9 +372,9 @@ sections:
       path: sections/section-030/module-02/labs/lab-03
       after_reading: sections/section-030/module-02/course-03-authorization-modes-and-impersonation.md
       objective: Remove AlwaysAllow And Narrow Impersonation Rights.
-      runtime: kind
+      runtime: qemu
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-17
+      runtime_verification: passed astrona validate and astrona test on 2026-11-18 (arm64)
     quiz: sections/section-030/module-02/quiz.yaml
   - id: module-03
     title: Admission Control For API Writes
@@ -460,17 +460,17 @@ sections:
     - id: lab-02
       path: sections/section-040/module-01/labs/lab-02
       after_reading: sections/section-040/module-01/course-03-the-kubeadm-upgrade-sequence.md
-      objective: Upgrade A kubeadm Control Plane From v1.34 To v1.35.
+      objective: Upgrade A kubeadm Control Plane From v1.35 To v1.36.
       runtime: qemu
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-17
+      runtime_verification: passed astrona validate and astrona test on 2026-11-18 (arm64)
     - id: lab-03
       path: sections/section-040/module-01/labs/lab-03
       after_reading: sections/section-040/module-01/course-04-snapshot-and-verify.md
       objective: Save An etcd Snapshot Before An Upgrade.
-      runtime: kind
+      runtime: qemu
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-17
+      runtime_verification: passed astrona validate and astrona test on 2026-11-18 (arm64)
     quiz: sections/section-040/module-01/quiz.yaml
   - id: module-02
     title: Track Vulnerabilities And Inventory Versions
@@ -532,10 +532,10 @@ sections:
     - id: lab-02
       path: sections/section-040/module-03/labs/lab-02
       after_reading: sections/section-040/module-03/course-01-patch-the-operating-system-and-container-runtime-on-nodes.md
-      objective: Restart The Container Runtime On A Drained Worker.
-      runtime: kind
+      objective: Restart The Container Runtime On A Drained Node.
+      runtime: qemu
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-17
+      runtime_verification: passed astrona validate and astrona test on 2026-11-18 (arm64)
     - id: lab-01
       path: sections/section-040/module-03/labs/lab-01
       after_reading: sections/section-040/module-03/course-02-verify-the-cluster-after-an-upgrade.md
@@ -546,8 +546,8 @@ sections:
     - id: lab-03
       path: sections/section-040/module-03/labs/lab-03
       after_reading: sections/section-040/module-03/course-03-rollback-limits-and-restore-drills.md
-      objective: Run An etcd Restore Drill From A Snapshot.
-      runtime: kind
+      objective: Restore etcd From A Snapshot.
+      runtime: qemu
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-17
+      runtime_verification: passed astrona validate and astrona test on 2026-11-18 (arm64)
     quiz: sections/section-040/module-03/quiz.yaml

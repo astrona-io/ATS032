@@ -22,23 +22,24 @@ After this module you can:
 
 ## Before you start
 
-You need Kubernetes basics: Pods, Deployments, nodes, `kubectl cordon` and `kubectl drain`. The playground is a `kind` cluster, whose nodes are containers. Host commands that need `apt` or `systemctl` are shown to read and are not run in it. Every `kubectl` command runs in the playground.
+You need Kubernetes basics: Pods, Deployments, nodes, `kubectl cordon` and `kubectl drain`. You also need a little Linux: `sudo`, `apt` and `systemctl`.
 
-Your terminal must use the playground's private kubeconfig, the file that holds the cluster address and credentials for `kubectl`. Run these two commands once in every new terminal:
+The playground is a virtual machine (VM) with Ubuntu 24.04 and a one-node Kubernetes 1.35 cluster that `kubeadm` installed. The node is called `controlplane`. It runs the control plane and the example workloads, and it uses `containerd` as its container runtime. Because the VM is a real host, every command in this module runs in it, including `apt`, `systemctl`, `etcdctl` and `etcdutl`.
+
+Open a shell on the VM from your own machine:
 
 ```sh
-export KUBECONFIG="$(astrona kubeconfig ats-032-playground-040-03)"
-test "$(kubectl config current-context)" = "kind-astro-ats-032-playground-040-03" || exit 1
+astrona ssh astro-ats-032-playground-040-03
 ```
 
-The playground is a `kind` cluster running Kubernetes 1.35 with one control-plane node and two workers. Your own credentials have the `cluster-admin` role. The cluster starts with this content:
+You are the user `student`. `kubectl` already works and has the `cluster-admin` role, and you can run host commands as root with `sudo`. The cluster starts with this content:
 
 | Namespace | What is in it |
 | --- | --- |
-| `starfleet` | The Deployment `probe` with two replicas and a Service `probe`, and the Pod `shuttle`, a client with BusyBox tools. `shuttle` runs on the second worker |
-| `outpost` | The Pod `drifter`, a client with BusyBox tools. It runs on the second worker |
+| `starfleet` | The Deployment `probe` with two replicas and a Service `probe`, and the Pod `shuttle`, a client with BusyBox tools |
+| `outpost` | The Pod `drifter`, a client with BusyBox tools |
 
-The nodes are named `astro-ats-032-playground-040-03-control-plane`, `astro-ats-032-playground-040-03-worker` and `astro-ats-032-playground-040-03-worker2`.
+`shuttle` and `drifter` are bare Pods: no controller such as a Deployment manages them. The tools `etcdctl` and `etcdutl` are installed on the node.
 
 Launch your playground now, and keep it running next to you while you read the parts:
 

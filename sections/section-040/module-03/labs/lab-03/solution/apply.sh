@@ -1,16 +1,62 @@
 #!/usr/bin/env bash
-# Reference solution: restore the nightly snapshot into a separate data
-# directory with etcdutl inside the etcd Pod, then record the snapshot
-# revision in the ConfigMap restore-drill. The live etcd keeps running.
-set -euo pipefail
-context="${ASTRONA_KUBE_CONTEXT:-kind-astro-ats-032-lab-040-03-03}"
-if [[ "$(kubectl config current-context)" != "$context" ]]; then
-  printf 'Refusing to operate on another Kubernetes context\n' >&2
+# Reference solution for lab ats-032-lab-040-03-03, run by `astrona test`.
+# astrona pipes it into bash on the lab VM as the astrona account. It follows
+# solution.md: restore the snapshot into /var/lib/etcd-restore, then point the
+# etcd-data hostPath of the etcd static Pod at it. Every step is safe to run
+# again: an existing restore and an already edited manifest are kept.
+
+LAB_NAME=ats-032-lab-040-03-03
+SNAPSHOT=/var/backups/etcd/nightly.db
+RESTORE_DIR=/var/lib/etcd-restore
+MANIFEST=/etc/kubernetes/manifests/etcd.yaml
+
+kube() {
+  sudo -n kubectl --kubeconfig /etc/kubernetes/admin.conf "$@" </dev/null
+}
+
+etcd_healthy() {
+  sudo -n etcdctl --endpoints=https://127.0.0.1:2379 \
+    --cacert=/etc/kubernetes/pki/etcd/ca.crt \
+    --cert=/etc/kubernetes/pki/etcd/server.crt \
+    --key=/etc/kubernetes/pki/etcd/server.key \
+    --command-timeout=5s endpoint health >/dev/null 2>&1
+}
+
+main() {
+  set -euo pipefail
+
+  local context
+  context=$(kube config current-context)
+  if [ "$context" != "kubernetes-admin@astro-$LAB_NAME" ]; then
+    echo "Refusing to operate on context $context" >&2
+    exit 1
+  fi
+
+  if sudo -n test -f "$RESTORE_DIR/member/snap/db"; then
+    echo "$RESTORE_DIR already holds a restored data directory"
+  else
+    sudo -n etcdutl snapshot restore "$SNAPSHOT" --data-dir "$RESTORE_DIR" \
+      --bump-revision 1000000000 --mark-compacted
+  fi
+
+  if sudo -n grep -q "^ *path: $RESTORE_DIR\$" "$MANIFEST"; then
+    echo "$MANIFEST already mounts $RESTORE_DIR"
+  else
+    sudo -n sed -i "s#^\( *path: \)/var/lib/etcd\$#\1$RESTORE_DIR#" "$MANIFEST"
+  fi
+  sudo -n grep -n "path: $RESTORE_DIR" "$MANIFEST"
+
+  # The kubelet notices the changed manifest and starts a new etcd container.
+  local attempt
+  for attempt in $(seq 1 60); do
+    sleep 5
+    if etcd_healthy && kube get --raw /readyz >/dev/null 2>&1; then
+      echo "etcd and the API server answer (attempt $attempt)"
+      return 0
+    fi
+  done
+  echo "etcd or the API server did not become healthy" >&2
   exit 1
-fi
-etcd_pod="$(kubectl -n kube-system get pods -l component=etcd -o jsonpath='{.items[0].metadata.name}')"
-kubectl -n kube-system exec "$etcd_pod" -- etcdutl snapshot restore /var/lib/etcd/backup/nightly.db --data-dir /var/lib/etcd/drill
-revision="$(kubectl -n kube-system exec "$etcd_pod" -- etcdutl snapshot status /var/lib/etcd/backup/nightly.db --write-out=json \
-  | python3 -c 'import json, sys; print(json.loads(sys.stdin.read().strip().splitlines()[-1])["revision"])')"
-kubectl -n starfleet-032-040-03-03 create configmap restore-drill \
-  --from-literal=revision="$revision" --dry-run=client -o yaml | kubectl apply -f -
+}
+
+main "$@"
