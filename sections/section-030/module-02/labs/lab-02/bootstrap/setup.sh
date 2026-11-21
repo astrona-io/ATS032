@@ -69,6 +69,22 @@ main() {
     fi
     sleep 5
   done
+  # The kubelet replaces the mirror Pod of kube-apiserver a little after the
+  # new container starts. Wait until the API shows the flag, so the graders
+  # never read the old mirror Pod on the starting state.
+  local command
+  for attempt in $(seq 1 36); do
+    command=$(kube -n kube-system get pod "kube-apiserver-$NODE" \
+      -o jsonpath='{.spec.containers[0].command}' 2>/dev/null </dev/null) || command=""
+    case "$command" in
+      *--token-auth-file*) break ;;
+    esac
+    if [ "$attempt" = 36 ]; then
+      echo "The mirror Pod kube-apiserver-$NODE did not show --token-auth-file within three minutes" >&2
+      exit 1
+    fi
+    sleep 5
+  done
   kube -n kube-system wait --for=condition=Ready "pod/kube-apiserver-$NODE" --timeout=180s </dev/null
 
   # Leave the student a shell that knows the cluster.
