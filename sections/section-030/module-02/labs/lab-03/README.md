@@ -9,7 +9,7 @@ Author notes for lab `ats-032-lab-030-02-03`. The learner reads `question.md` an
 
 ## Runtime
 
-This is a QEMU lab, not a kind lab: the learner edits the kube-apiserver static Pod manifest with `sudo` on a real node. The VM boots from `ghcr.io/astrona-io/ubuntu-qcow2-image:24.04-cks`, pinned by the disk digests in `config.yaml` and built from the `cks` layer in [qcow2-base-image](https://github.com/astrona-io/qcow2-base-image/tree/main/distros/ubuntu/layers/cks). The image holds Kubernetes v1.35 and every control-plane image, so the lab needs no network.
+This is a QEMU lab, not a kind lab: the learner edits the kube-apiserver static Pod manifest with `sudo` on a real node. The VM boots from `ghcr.io/astrona-io/ubuntu-qcow2-image:24.04-cks`, built from the `cks` layer in [qcow2-base-image](https://github.com/astrona-io/qcow2-base-image/tree/main/distros/ubuntu/layers/cks). The image holds Kubernetes v1.35 and every control-plane image, so the lab needs no network.
 
 `bootstrap/setup.sh` runs `/usr/local/sbin/astrona-kubeadm-init` (node `controlplane`, cluster `astro-ats-032-lab-030-02-03`, user `student`). It creates the namespaces `starfleet-032-030-02-03` and `outpost-032-030-02-03` with a ServiceAccount `probe` in each, and gives the group `helpdesk` `impersonate` on users, groups and ServiceAccounts through a ClusterRoleBinding. It then appends `AlwaysAllow` to `--authorization-mode`.
 
