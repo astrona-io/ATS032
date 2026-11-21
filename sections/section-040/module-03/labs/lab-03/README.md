@@ -4,7 +4,7 @@ Author notes for lab `ats-032-lab-040-03-03`. The learner reads `question.md` an
 
 ## Runtime
 
-This is a QEMU lab, not a kind lab: the student edits the etcd static Pod manifest on a real kubeadm host. The VM boots from `ghcr.io/astrona-io/ubuntu-qcow2-image:24.04-cks`, pinned by the disk digests in `config.yaml`. `bootstrap/setup.sh` runs `/usr/local/sbin/astrona-kubeadm-init` to create a single-node cluster (node `controlplane`, cluster name `astro-ats-032-lab-040-03-03`). The lab needs no network.
+This is a QEMU lab, not a kind lab: the student edits the etcd static Pod manifest on a real kubeadm host. The VM boots from `ghcr.io/astrona-io/ubuntu-qcow2-image:24.04-cks`. `bootstrap/setup.sh` runs `/usr/local/sbin/astrona-kubeadm-init` to create a single-node cluster (node `controlplane`, cluster name `astro-ats-032-lab-040-03-03`). The lab needs no network.
 
 The image has no `etcdctl` or `etcdutl` on the host. The bootstrap exports the etcd image that containerd already holds (`ctr images export --local`), unpacks the layers and installs both binaries to `/usr/local/bin`. `ctr images mount` does not work on containerd 2.2.1 in this image ("no such device").
 
