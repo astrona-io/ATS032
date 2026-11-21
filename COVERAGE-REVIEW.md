@@ -16,6 +16,7 @@ These four readings are listed in `additional_readings` and have no lab of their
 ## Remaining practical gaps and boundaries
 
 - The qemu labs run a single-node kubeadm cluster (node `controlplane`) with no worker node. The upgrade lab grades the control plane, the package holds and the node state; it does not upgrade a separate worker, and its grader cannot prove that the drain happened before the kubelet restart.
+- The upgrade lab (`sections/section-040/module-01/labs/lab-02`) fails on amd64 CI with the current `24.04-cks` image. The kubeadm upgrade health check starts a Job with `registry.k8s.io/pause:3.10.2`, and that image in the virtual machine exits with `exec /pause: exec format error`. The lab passed on arm64 on 2026-11-18. The fix belongs in the image build, not in the lab.
 - The upgrade lab installs packages from an offline apt repository in the image, not from the public Kubernetes package repository.
 - The vulnerability triage lab uses eight made-up records that `bootstrap/feed.py` writes for the running versions. It grades the triage rule, not the use of a real scanner or a real advisory.
 - The version inventory lab grades values read from the live cluster (API server version, node status, control-plane images and the image digest of running Pods). It does not run an image scanner.
