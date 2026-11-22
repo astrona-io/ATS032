@@ -8,7 +8,7 @@ quiz API. No YAML question file is registered as a Markdown reading.
 Banks follow their declared module summaries. Larger domains use an intermediate
 checkpoint after the third section and a final domain review; smaller domains
 use a final domain review. The index records covered sections and teaching order. Banks contain 5–15 original single-choice
-questions, scoped to concepts taught in the course. They remain draft for review.
+questions, scoped to concepts taught in the course.
 
 ## Fields And Rendering
 
@@ -32,11 +32,19 @@ a secure examination bank. Do not treat scores as an official CKS result.
 
 ## Hands-On Coverage
 
-This course has 4 ungraded module playgrounds and 4 draft independent labs. Tasks and solutions are registered around each lab immediately after its teaching reading. Static configuration, shell/Python/YAML, parser, lifecycle and offline grader checks pass. Live execution remains pending because the session cannot access Podman; installed CLI configuration validation is separately blocked by its maintenance lock.
+This course has 12 ungraded module playgrounds (8 on kind, 4 on a qemu VM) and 31 graded labs (24 on kind, 7 on a qemu VM). Each lab sits right after the reading it practises, with its task before and its solution after. The kind labs passed `astrona validate` and `astrona test` on 2026-11-17 and the qemu labs on 2026-11-18 on arm64. GitHub Actions starts every lab and playground on amd64 runners, solves each lab with its reference solution and checks every graded outcome. The qemu VM boots the CKS practice image `ghcr.io/astrona-io/ubuntu-qcow2-image:24.04-cks` with a single-node kubeadm cluster; the qemu labs are the tasks that change the kubelet, the API server manifest, etcd data or the container runtime on a node.
 
 | Module | Labs in teaching order |
 | --- | --- |
-| 010/01 | Grant Namespace Pod Read Access |
-| 020/01 | Disable Unneeded ServiceAccount Tokens |
-| 030/01 | Use A Workload Identity For An API Request |
-| 040/01 | Drain And Return A Worker To Service |
+| 010/01 | Grant Namespace Pod Read Access; Reuse A ClusterRole In One Namespace And Delegate Role Management; Revoke An Action That Several Bindings Grant |
+| 010/02 | Remove Bindings To Broad Groups; Rewrite A Broad Grant As Least Privilege |
+| 010/03 | Fix The Subjects Of A RoleBinding; Build An Aggregated ClusterRole; Remove Wildcards From A Group Role |
+| 020/01 | Disable Unneeded ServiceAccount Tokens; Replace a Legacy Token Secret With a Projected Token |
+| 020/02 | Give a Deployment Its Own ServiceAccount; Grant a ServiceAccount Least-Privilege Access; Lock Down the Default ServiceAccount |
+| 020/03 | Remove Over-Broad ServiceAccount Bindings; Remove Long-Lived ServiceAccount Tokens |
+| 030/01 | Give A Workload A Narrow ServiceAccount; Harden The Kubelet On A Node |
+| 030/02 | Remove Static Token Authentication From The API Server; Remove RBAC Grants For Anonymous Requests; Remove AlwaysAllow And Narrow Impersonation Rights |
+| 030/03 | Enforce Pod Security Standards On A Namespace; Block NodePort Services With A ValidatingAdmissionPolicy; Make An Admission Webhook Fail Closed Safely |
+| 040/01 | Drain A Worker Node With A PodDisruptionBudget; Upgrade A kubeadm Control Plane From v1.35 To v1.36; Save An etcd Snapshot Before An Upgrade |
+| 040/02 | Record A Cluster Version Inventory With Image Digests; Triage Vulnerability Records And Label Patch Waves |
+| 040/03 | Restart The Container Runtime On A Drained Node; Verify And Repair A Cluster After Maintenance; Restore etcd From A Snapshot |

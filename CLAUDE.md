@@ -208,8 +208,8 @@ line, follow ATS020. The context guard is the exception: ATS020 has none,
 the CKS labs keep theirs. ATS031 applies it to the CKS labs; copy from it. In short:
 
 - **Own namespaces.** Name each namespace `<role>-<training>-<section>-<module>-<lab>`
-  from the lab's `metadata.name`: `starfleet-031-020-05-02`,
-  `outpost-031-020-05-02`. Never a bare `starfleet`, `outpost` or `dock`.
+  from the lab's `metadata.name`: `starfleet-032-020-05-02`,
+  `outpost-032-020-05-02`. Never a bare `starfleet`, `outpost` or `dock`.
 - **Keep the context guard; no hardcoded cluster.** Every script and helper
   refuses to run unless `kubectl config current-context` is the lab's own
   context, read from `${ASTRONA_KUBE_CONTEXT:-kind-astro-<lab>}` so the guard
@@ -283,7 +283,7 @@ secure or official exam questions.
 
 Preserve the shared CLAUDE.md prefix copied from ATS015. Keep course IDs, official
 domain weights and ATP links unchanged. Technical pages carry no `draft: true`
-front matter. The ATP registration remains draft until publication is approved.
+front matter. The course registration in `astrona-content` is published (ATP007 version 1.0.0, approved 2026-11-21); maturity stays `alpha`.
 
 Primary author sources are recorded in `SOURCES.md`. The objective list was
 verified on 2026-10-11. Detailed reading expansions were written on 2026-10-11.

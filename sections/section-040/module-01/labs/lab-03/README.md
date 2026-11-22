@@ -4,7 +4,7 @@ Author notes for the graded lab `ats-032-lab-040-01-03`. The learner reads `ques
 
 ## Runtime
 
-This is a QEMU lab, not a kind lab: the learner runs `etcdctl` and `etcdutl` on the control-plane host with `sudo`, as on the exam. The VM boots from `ghcr.io/astrona-io/ubuntu-qcow2-image:24.04-cks`, pinned by the disk digests in `config.yaml` (the same image as `lab-02`). The image has no `etcdctl` or `etcdutl` on the host.
+This is a QEMU lab, not a kind lab: the learner runs `etcdctl` and `etcdutl` on the control-plane host with `sudo`, as on the exam. The VM boots from `ghcr.io/astrona-io/ubuntu-qcow2-image:24.04-cks` (the same image as `lab-02`). The image has no `etcdctl` or `etcdutl` on the host.
 
 `bootstrap/setup.sh`:
 
