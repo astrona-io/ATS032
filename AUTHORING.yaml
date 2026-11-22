@@ -499,7 +499,7 @@ sections:
       objective: Upgrade A kubeadm Control Plane From v1.35 To v1.36.
       runtime: qemu
       status: alpha
-      runtime_verification: failed on amd64 CI on 2026-11-21 (registry.k8s.io/pause:3.10.2 in the qemu image exits with exec format error, so the kubeadm upgrade health check fails)
+      runtime_verification: passed
     - id: lab-03
       path: sections/section-040/module-01/labs/lab-03
       after_reading: sections/section-040/module-01/course-04-snapshot-and-verify.md
