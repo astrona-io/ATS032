@@ -34,10 +34,10 @@ all context and node ownership guards.
 Scripts read `ASTRONA_KUBE_CONTEXT`, `ASTRONA_KIND_CLUSTER` and
 `ASTRONA_CONTAINER_ENGINE`, with their existing local defaults. The pinned CLI in
 CI needs the test context exported explicitly. Do not remove a guard to make a
-test pass, or operate on unrelated clusters. The qemu labs run their scripts on the
-VM, so their guard checks the context in `/etc/kubernetes/admin.conf` instead of
-`ASTRONA_KUBE_CONTEXT`; keep `testing/render-graders.sh --check` clean after
-changing a qemu lab's `validate.sh`.
+test pass, or operate on unrelated clusters. The qemu labs run their scripts inside the
+VM from `/opt/astrona-lab`, with the same shared files and context guard as the
+kind labs. Their `vm/` scripts are generated: run `python3 scripts/ci/vm-lab.py
+<lab directory>` after changing a qemu lab file, and keep `--check` clean.
 
 Score each required repair or submitted finding with its own validation script.
 Preserving staged evidence and unrelated workloads is a constraint, not a scored

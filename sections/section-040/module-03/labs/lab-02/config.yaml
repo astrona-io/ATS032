@@ -19,37 +19,37 @@ bootstrap:
   - name: create-kubeadm-cluster
     description: Creates the single-node kubeadm cluster, starts the probe Deployment, records the containerd baseline and cordons the node
     type: file
-    source: bootstrap/setup.sh
+    source: vm/install.sh
 testing:
   init:
   - name: verify-start
     description: Verify the starting state and reject the unfinished lab
     type: file
-    source: testing/verify-start.sh
+    source: vm/verify-start.sh
   - name: reference-result
     description: Drain the node, restart containerd, wait for Ready and uncordon
     type: file
-    source: solution/apply.sh
+    source: vm/apply-solution.sh
   - name: wait-solved
     description: Wait until the probe Pods run again and every outcome passes
     type: file
-    source: testing/wait-solved.sh
+    source: vm/wait-solved.sh
 validation:
   scripts:
   - name: runtime-restarted
     description: containerd on node controlplane is active and started again after the lab began
     type: file
-    source: validation/validate-runtime-restarted.sh
+    source: vm/validate-runtime-restarted.sh
     points: 1
   - name: probe-pods-replaced
     description: None of the probe Pods from the start remains, and two probe Pods are available
     type: file
-    source: validation/validate-probe-pods-replaced.sh
+    source: vm/validate-probe-pods-replaced.sh
     points: 1
   - name: node-in-service
     description: Node controlplane is Ready and schedulable again
     type: file
-    source: validation/validate-node-in-service.sh
+    source: vm/validate-node-in-service.sh
     points: 1
 teardown:
   keepCluster: false

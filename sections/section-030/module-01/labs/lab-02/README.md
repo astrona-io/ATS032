@@ -6,15 +6,15 @@ Author notes for lab `ats-032-lab-030-01-02`. The learner reads `question.md` an
 
 This is a QEMU lab, not a kind lab: the task edits the kubelet configuration file and restarts the `kubelet` systemd service on a real host. The VM boots from `ghcr.io/astrona-io/ubuntu-qcow2-image:24.04-cks`. It is a single kubeadm node called `controlplane`; there is no worker node.
 
-`bootstrap/setup.sh` runs `/usr/local/sbin/astrona-kubeadm-init` (cluster name `astro-ats-032-lab-030-01-02`, admin kubeconfig also for `student`), then opens the kubelet API in `/var/lib/kubelet/config.yaml`: `anonymous.enabled: true`, `authorization.mode: AlwaysAllow` and `readOnlyPort: 10255`. It restarts the kubelet, waits until `/configz` reports `AlwaysAllow`, and starts the Pod `probe` (`busybox:1.37.0`, already in containerd) in `starfleet-032-030-01-02`. The lab needs no network.
+`vm/install.sh` runs `/usr/local/sbin/astrona-kubeadm-init` (node `controlplane`, cluster name `astro-ats-032-lab-030-01-02`, admin kubeconfig also for `student`), then runs `bootstrap/setup.sh`, which opens the kubelet API in `/var/lib/kubelet/config.yaml`: `anonymous.enabled: true`, `authorization.mode: AlwaysAllow` and `readOnlyPort: 10255`. It restarts the kubelet, waits until `/configz` reports `AlwaysAllow`, and starts the Pod `probe` (`busybox:1.37.0`, already in containerd) in `starfleet-032-030-01-02`. The lab needs no network.
 
 ## Scripts and graders
 
-astrona pipes each script into `bash` on the VM as the `astrona` account, with no other lab file next to it. Every script is therefore self-contained:
+The lab uses the shared qemu layout. `vm/` holds the scripts astrona pipes into the VM; `scripts/ci/vm-lab.py` generates them from the lab files, so regenerate them with `python3 scripts/ci/vm-lab.py sections/section-030/module-01/labs/lab-02` after you change a lab file (`--check` reports stale files). `vm/install.sh` builds the cluster, writes the lab files to `/opt/astrona-lab` and runs `bootstrap/setup.sh` there; the other `vm/` scripts run their copy in `/opt/astrona-lab`.
 
-- `validate.sh` holds the shared check logic (one function per outcome and the context guard). It is the only file to edit.
-- `testing/render-graders.sh` copies that logic into `validation/validate-<outcome>.sh`, `testing/verify-start.sh` and `testing/wait-solved.sh`. Run it after every change to `validate.sh`; `--check` reports stale files.
-- The context guard requires `/etc/kubernetes/admin.conf` with the context `kubernetes-admin@astro-ats-032-lab-030-01-02`.
+- `testing/check.py`, `testing/verify-start.sh`, `testing/wait-solved.sh`, `validation/validate-<outcome>.sh` and `bootstrap/helpers.sh` are the shared files from `scripts/ci/lab-files`; do not edit them per lab.
+- `testing/live.py` holds the checks of this lab, one `if wants('<outcome>'):` block per outcome. `testing/requirements.json` holds the guard: the context, the namespace and an API server `/readyz` check.
+- Every script refuses to run unless `kubectl config current-context` is `${ASTRONA_KUBE_CONTEXT:-kubernetes-admin@astro-ats-032-lab-030-01-02}`. The node is named `controlplane`, as on an exam cluster.
 
 | Outcome | Points | Passes when |
 | --- | --- | --- |
@@ -29,4 +29,4 @@ astrona validate sections/section-030/module-01/labs/lab-02 --accept-terms
 astrona test sections/section-030/module-01/labs/lab-02 --accept-terms --headless
 ```
 
-`testing.init` runs `testing/verify-start.sh` (every outcome fails on the start), `solution/apply.sh`, then `testing/wait-solved.sh`.
+`testing.init` runs `vm/verify-start.sh` (every outcome fails on the start), `vm/apply-solution.sh` (the copy of `solution/apply.sh`), then `vm/wait-solved.sh`.

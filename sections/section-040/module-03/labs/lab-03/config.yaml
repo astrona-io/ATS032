@@ -19,37 +19,37 @@ bootstrap:
   - name: create-kubeadm-cluster
     description: Creates the single-node kubeadm cluster, copies etcdctl and etcdutl out of the etcd image, takes the nightly snapshot and then changes the cluster
     type: file
-    source: bootstrap/setup.sh
+    source: vm/install.sh
 testing:
   init:
   - name: verify-start
     description: Verify the starting state and reject the unfinished lab
     type: file
-    source: testing/verify-start.sh
+    source: vm/verify-start.sh
   - name: reference-result
     description: Restore the snapshot into /var/lib/etcd-restore and point the etcd static Pod at it
     type: file
-    source: solution/apply.sh
+    source: vm/apply-solution.sh
   - name: wait-solved
     description: Wait until etcd runs on the restored data and every outcome passes
     type: file
-    source: testing/wait-solved.sh
+    source: vm/wait-solved.sh
 validation:
   scripts:
   - name: etcd-on-restored-data
     description: etcd is healthy and its static Pod manifest mounts a restored data directory instead of /var/lib/etcd
     type: file
-    source: validation/validate-etcd-on-restored-data.sh
+    source: vm/validate-etcd-on-restored-data.sh
     points: 1
   - name: roster-restored
     description: The ConfigMap fleet-roster from the snapshot is back, with its original UID
     type: file
-    source: validation/validate-roster-restored.sh
+    source: vm/validate-roster-restored.sh
     points: 1
   - name: later-change-gone
     description: The ConfigMap course-correction, created after the snapshot, no longer exists
     type: file
-    source: validation/validate-later-change-gone.sh
+    source: vm/validate-later-change-gone.sh
     points: 1
 teardown:
   keepCluster: false

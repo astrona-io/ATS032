@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Bootstrap for lab ats-032-lab-040-03-02. astrona pipes this script into bash
-# on the lab VM as the astrona account (passwordless sudo), with no other lab
-# file next to it.
+# Bootstrap for lab ats-032-lab-040-03-02. vm/install.sh builds the one-node
+# cluster (node controlplane) and runs this script inside the lab VM from
+# /opt/astrona-lab as the VM administrator user (passwordless sudo).
 #
 # Start state: the single node controlplane runs the two probe Pods and is
 # cordoned for the maintenance window, but not drained. The ConfigMap
@@ -19,21 +19,10 @@ kube() {
 main() {
   set -euo pipefail
 
-  # Context guard: run only on a VM built from the kubeadm image.
-  if [ ! -x /usr/local/sbin/astrona-kubeadm-init ] || [ ! -r /etc/astrona-kubeadm/versions.env ]; then
-    echo "Refusing to run: this VM is not built from the CKS practice image" >&2
-    exit 1
-  fi
-
-  local users=()
-  id student >/dev/null 2>&1 && users+=(--user student)
-  sudo -n /usr/local/sbin/astrona-kubeadm-init \
-    --node-name "$NODE" --cluster-name "astro-$LAB_NAME" "${users[@]}" </dev/null
-
-  local context
-  context=$(kube config current-context </dev/null)
-  if [ "$context" != "kubernetes-admin@astro-$LAB_NAME" ]; then
-    echo "Refusing to continue on context $context" >&2
+  # Context guard: run only against this VM's own cluster.
+  local context="${ASTRONA_KUBE_CONTEXT:-kubernetes-admin@astro-$LAB_NAME}"
+  if [ "$(kubectl config current-context)" != "$context" ]; then
+    echo "Refusing to operate on another Kubernetes context" >&2
     exit 1
   fi
 
