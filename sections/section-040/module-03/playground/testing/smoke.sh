@@ -347,7 +347,8 @@ for readyz_check in etcd-readiness informer-sync shutdown; do
 done
 expect_no 'no readyz check failed' "$readyz" '[-]'
 expect_equal 'readyz passed' "$(tail -1 <<<"$readyz")" "$(text_from_page "$page" 'readyz check passed')"
-not_running="$(page_run "$page" 'kubectl get pods -A --field-selector=status.phase!=Running' 2>&1)"
+# Keep the command output only: page_run prints the command line first.
+not_running="$(page_run "$page" 'kubectl get pods -A --field-selector=status.phase!=Running' 2>&1 | grep -v '^\$ ')"
 expect_equal 'no Pod is outside the Running phase' "$not_running" "$(text_from_page "$page" 'No resources found')"
 probe_pods="$(page_run "$page" 'kubectl -n starfleet get pods -l app=probe')"
 printf '%s\n' "$probe_pods"

@@ -368,7 +368,8 @@ expect_equal 'readyz has 37 check lines' "$(grep -c '^\[' <<<"$readyz")" 37
 expect_no 'no readyz check failed' "$readyz" '[-]'
 expect 'readyz checks etcd' "$readyz" "$(text_from_page "$page" '[+]etcd ok')"
 expect_equal 'readyz passed' "$(tail -1 <<<"$readyz")" "$(text_from_page "$page" 'readyz check passed')"
-not_running="$(page_run "$page" 'kubectl get pods -A --field-selector=status.phase!=Running' 2>&1)"
+# Keep the command output only: page_run prints the command line first.
+not_running="$(page_run "$page" 'kubectl get pods -A --field-selector=status.phase!=Running' 2>&1 | grep -v '^\$ ')"
 expect_equal 'no Pod is outside the Running phase' "$not_running" "$(text_from_page "$page" 'No resources found')"
 certificates="$(page_run "$page" 'sudo kubeadm certs check-expiration')"
 printf '%s\n' "$certificates"
