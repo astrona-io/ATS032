@@ -30,11 +30,11 @@ The first command prints `yes`, because `edit` includes Secrets. The second prin
 
 ## Ask about names, subresources and URLs
 
-A rule can name one object, one subresource or a URL, and each of these needs its own question. A resource name is written after a slash, as in `configmaps/scout-report`. A subresource is also written after a slash, as in `pods/log` or `pods/exec`. A non-resource URL is written as a path that starts with `/`. The `--all-namespaces` flag asks whether the action is allowed in every namespace at once, which only a cluster-wide grant can give.
+A rule can name one object, one subresource or a URL, and each of these needs its own question. A resource name is written after a slash, as in `configmaps/scout-report`. A subresource is named with the `--subresource` flag, as in `pods --subresource=log` or `pods --subresource=exec`. Do not write `pods/exec` here: `kubectl auth can-i` reads the part after the slash as a resource name, so `pods/exec` asks about a Pod named `exec`. A non-resource URL is written as a path that starts with `/`. The `--all-namespaces` flag asks whether the action is allowed in every namespace at once, which only a cluster-wide grant can give.
 
 ```sh
 kubectl auth can-i update configmaps/scout-report -n outpost --as=system:serviceaccount:starfleet:scout
-kubectl auth can-i create pods/exec -n outpost --as=system:serviceaccount:starfleet:scout
+kubectl auth can-i create pods --subresource=exec -n outpost --as=system:serviceaccount:starfleet:scout
 kubectl auth can-i list pods --all-namespaces --as=system:serviceaccount:starfleet:scout
 kubectl auth can-i list pods --all-namespaces --as=system:serviceaccount:starfleet:shuttle
 kubectl auth can-i get /version --as=system:serviceaccount:starfleet:shuttle

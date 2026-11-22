@@ -16,7 +16,7 @@ For the crew the need is stated: read Pods in `outpost` and read their logs. The
 
 ```sh
 kubectl auth can-i list services -n outpost --as=jane --as-group=starfleet-crew
-kubectl auth can-i get pods/log -n outpost --as=jane --as-group=starfleet-crew
+kubectl auth can-i get pods --subresource=log -n outpost --as=jane --as-group=starfleet-crew
 ```
 
 Both commands print `yes`. The first answer is the exposure to remove. The second answer is the access to keep.
@@ -68,7 +68,7 @@ Delete the RoleBinding that gives `view`. Only the binding is deleted: the built
 ```sh
 kubectl -n outpost delete rolebinding crew-view
 kubectl auth can-i list pods -n outpost --as=jane --as-group=starfleet-crew
-kubectl auth can-i get pods/log -n outpost --as=jane --as-group=starfleet-crew
+kubectl auth can-i get pods --subresource=log -n outpost --as=jane --as-group=starfleet-crew
 kubectl auth can-i list services -n outpost --as=jane --as-group=starfleet-crew
 kubectl auth can-i list pods -n starfleet --as=jane --as-group=starfleet-crew
 ```
