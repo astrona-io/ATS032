@@ -96,7 +96,7 @@ Apply it:
 kubectl apply -f secret-reporter-legacy-token.yaml
 ```
 
-Then check the result. The `describe` command shows the keys of a Secret with their sizes and not their values. The second command is the audit that you run on a real cluster: it lists every long-lived token Secret in all namespaces.
+Then check the result. For most Secrets, the `describe` command shows each key with its size and not its value. A Secret of type `kubernetes.io/service-account-token` is different: `kubectl` prints the full `token` value, so the token appears on your screen. The second command is the audit that you run on a real cluster: it lists every long-lived token Secret in all namespaces.
 
 ```sh
 kubectl -n outpost describe secret reporter-legacy-token
