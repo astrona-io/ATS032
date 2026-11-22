@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Reference solution for lab ats-032-lab-030-02-02, run by `astrona test`.
-# astrona pipes it into bash on the lab VM as the astrona account. It follows
-# the same steps as solution.md: back up the manifest outside the manifests
-# directory, remove --token-auth-file, delete the token file and wait until
-# the restarted API server rejects the old token and is ready.
+# vm/apply-solution.sh runs it inside the lab VM as the VM administrator user.
+# It follows the same steps as solution.md: back up the manifest outside the
+# manifests directory, remove --token-auth-file, delete the token file and wait
+# until the restarted API server rejects the old token and is ready.
 
 LAB_NAME=ats-032-lab-030-02-02
 MANIFEST=/etc/kubernetes/manifests/kube-apiserver.yaml
@@ -15,10 +15,10 @@ kube() {
 main() {
   set -euo pipefail
 
-  local context
-  context=$(kube config current-context)
-  if [ "$context" != "kubernetes-admin@astro-$LAB_NAME" ]; then
-    echo "Refusing to operate on context $context" >&2
+  # Context guard: run only against this VM's own cluster.
+  local context="${ASTRONA_KUBE_CONTEXT:-kubernetes-admin@astro-$LAB_NAME}"
+  if [ "$(kubectl config current-context)" != "$context" ]; then
+    echo "Refusing to operate on another Kubernetes context" >&2
     exit 1
   fi
 

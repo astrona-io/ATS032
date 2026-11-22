@@ -72,7 +72,7 @@ kubectl auth can-i list pods -n outpost --as=jane --as-group=outpost-crew
 kubectl auth can-i delete configmaps -n outpost --as=jane --as-group=outpost-crew
 kubectl auth can-i get secrets -n outpost --as=jane --as-group=outpost-crew
 kubectl auth can-i delete pods -n outpost --as=jane --as-group=outpost-crew
-kubectl auth can-i create pods/exec -n outpost --as=jane --as-group=outpost-crew
+kubectl auth can-i create pods --subresource=exec -n outpost --as=jane --as-group=outpost-crew
 kubectl auth can-i create rolebindings.rbac.authorization.k8s.io -n outpost --as=jane --as-group=outpost-crew
 ```
 

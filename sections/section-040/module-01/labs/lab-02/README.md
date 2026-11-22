@@ -4,24 +4,24 @@ Author notes for lab `ats-032-lab-040-01-02`. The learner reads `question.md` an
 
 ## Runtime
 
-This is a QEMU lab, not a kind lab: `kubeadm upgrade` needs a real host with `apt`, systemd and a kubelet service. The VM boots from `ghcr.io/astrona-io/ubuntu-qcow2-image:24.04-cks`, pinned by the disk digests in `config.yaml` and built from the `cks` layer in [qcow2-base-image](https://github.com/astrona-io/qcow2-base-image/tree/main/distros/ubuntu/layers/cks). The image already holds:
+This is a QEMU lab, not a kind lab: `kubeadm upgrade` needs a real host with `apt`, systemd and a kubelet service. The VM boots from `ghcr.io/astrona-io/ubuntu-qcow2-image:24.04-cks`, built from the `cks` layer in [qcow2-base-image](https://github.com/astrona-io/qcow2-base-image/tree/main/distros/ubuntu/layers/cks). The image already holds:
 
 - containerd, the kernel modules and sysctls, and swap off;
 - `kubeadm`, `kubelet` and `kubectl` v1.35 on hold;
 - every v1.35 and v1.36 control-plane image in containerd;
 - a signed offline apt repository per minor in `/opt/kubernetes-apt/v1.35/deb/` and `/opt/kubernetes-apt/v1.36/deb/`, and `/etc/apt/sources.list.d/kubernetes.list` naming the v1.35 one;
 - a bridge CNI configuration that needs no images;
-- `/usr/local/sbin/astrona-kubeadm-init`, which `bootstrap/setup.sh` runs to create the cluster (node `controlplane`, cluster name `astro-ats-032-lab-040-01-02`).
+- `/usr/local/sbin/astrona-kubeadm-init`, which `vm/install.sh` runs to create the cluster (node `controlplane`, cluster name `astro-ats-032-lab-040-01-02`).
 
 The lab needs no network after the image is pulled. `apt-get update` still tries the Ubuntu archive; without network that only prints warnings.
 
 ## Scripts and graders
 
-astrona pipes each script into `bash` on the VM as the `astrona` account, with no other lab file next to it. Every script is therefore self-contained:
+The lab uses the shared qemu layout. `vm/` holds the scripts astrona pipes into the VM; `scripts/ci/vm-lab.py` generates them from the lab files, so regenerate them with `python3 scripts/ci/vm-lab.py sections/section-040/module-01/labs/lab-02` after you change a lab file (`--check` reports stale files). `vm/install.sh` builds the cluster, writes the lab files to `/opt/astrona-lab` and runs `bootstrap/setup.sh` there; the other `vm/` scripts run their copy in `/opt/astrona-lab`.
 
-- `validate.sh` holds the shared check logic (one function per outcome and the context guard). It is the only file to edit.
-- `testing/render-graders.sh` copies that logic into `validation/validate-<outcome>.sh`, `testing/verify-start.sh` and `testing/wait-solved.sh`. Run it after every change to `validate.sh`; `--check` reports stale files.
-- The context guard requires `/etc/kubernetes/admin.conf` with the context `kubernetes-admin@astro-ats-032-lab-040-01-02`. It does not read `ASTRONA_KUBE_CONTEXT`, because that variable names a kind context on the host and does not reach the VM.
+- `testing/check.py`, `testing/verify-start.sh`, `testing/wait-solved.sh`, `validation/validate-<outcome>.sh` and `bootstrap/helpers.sh` are the shared files from `scripts/ci/lab-files`; do not edit them per lab.
+- `testing/live.py` holds the checks of this lab, one `if wants('<outcome>'):` block per outcome. `testing/requirements.json` holds the guard: the context, the namespace and an API server `/readyz` check.
+- Every script refuses to run unless `kubectl config current-context` is `${ASTRONA_KUBE_CONTEXT:-kubernetes-admin@astro-ats-032-lab-040-01-02}`. The node is named `controlplane`, as on an exam cluster.
 
 Outcomes:
 
@@ -40,4 +40,4 @@ astrona validate sections/section-040/module-01/labs/lab-02 --accept-terms --hea
 astrona test sections/section-040/module-01/labs/lab-02 --accept-terms --headless
 ```
 
-`testing.init` runs `testing/verify-start.sh` (every outcome fails on the start), `solution/apply.sh`, then `testing/wait-solved.sh`.
+`testing.init` runs `vm/verify-start.sh` (every outcome fails on the start), `vm/apply-solution.sh` (the copy of `solution/apply.sh`), then `vm/wait-solved.sh`.

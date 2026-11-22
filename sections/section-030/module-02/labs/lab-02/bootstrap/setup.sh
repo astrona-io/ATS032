@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
-# Bootstrap for lab ats-032-lab-030-02-02. astrona pipes this script into
-# bash on the lab VM as the astrona account (passwordless sudo).
+# Bootstrap for lab ats-032-lab-030-02-02. vm/install.sh builds the one-node
+# cluster (node controlplane) and runs this script inside the lab VM from
+# /opt/astrona-lab as the VM administrator user (passwordless sudo).
 #
-# It creates the single-node kubeadm cluster, then turns on static token
-# authentication: it writes a token file with one random token for a
-# system:masters user, adds --token-auth-file to the kube-apiserver static Pod
-# manifest and waits until the restarted API server accepts the token. The
-# graders keep their own copy of the token in /var/lib/ats-032-lab.
+# It turns on static token authentication: it writes a token file with one
+# random token for a system:masters user, adds --token-auth-file to the
+# kube-apiserver static Pod manifest and waits until the restarted API server
+# accepts the token. The graders keep their own copy of the token in
+# /var/lib/ats-032-lab.
 
 LAB_NAME=ats-032-lab-030-02-02
 NODE=controlplane
@@ -21,21 +22,10 @@ kube() {
 main() {
   set -euo pipefail
 
-  # Context guard: run only on a VM built from the kubeadm image.
-  if [ ! -x /usr/local/sbin/astrona-kubeadm-init ] || [ ! -r /etc/astrona-kubeadm/versions.env ]; then
-    echo "Refusing to run: this VM is not built from the CKS practice image" >&2
-    exit 1
-  fi
-
-  local users=()
-  id student >/dev/null 2>&1 && users+=(--user student)
-  sudo -n /usr/local/sbin/astrona-kubeadm-init \
-    --node-name "$NODE" --cluster-name "astro-$LAB_NAME" "${users[@]}" </dev/null
-
-  local context
-  context=$(kube config current-context </dev/null)
-  if [ "$context" != "kubernetes-admin@astro-$LAB_NAME" ]; then
-    echo "Refusing to continue on context $context" >&2
+  # Context guard: run only against this VM's own cluster.
+  local context="${ASTRONA_KUBE_CONTEXT:-kubernetes-admin@astro-$LAB_NAME}"
+  if [ "$(kubectl config current-context)" != "$context" ]; then
+    echo "Refusing to operate on another Kubernetes context" >&2
     exit 1
   fi
 
@@ -65,6 +55,22 @@ main() {
     fi
     if [ "$attempt" = 60 ]; then
       echo "The API server did not come back with the static token file within five minutes" >&2
+      exit 1
+    fi
+    sleep 5
+  done
+  # The kubelet replaces the mirror Pod of kube-apiserver a little after the
+  # new container starts. Wait until the API shows the flag, so the graders
+  # never read the old mirror Pod on the starting state.
+  local command
+  for attempt in $(seq 1 36); do
+    command=$(kube -n kube-system get pod "kube-apiserver-$NODE" \
+      -o jsonpath='{.spec.containers[0].command}' 2>/dev/null </dev/null) || command=""
+    case "$command" in
+      *--token-auth-file*) break ;;
+    esac
+    if [ "$attempt" = 36 ]; then
+      echo "The mirror Pod kube-apiserver-$NODE did not show --token-auth-file within three minutes" >&2
       exit 1
     fi
     sleep 5

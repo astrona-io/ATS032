@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
-# Bootstrap for lab ats-032-lab-040-01-02. astrona pipes this script into bash
-# on the lab VM as the astrona account (passwordless sudo).
+# Bootstrap for lab ats-032-lab-040-01-02. vm/install.sh builds the one-node
+# cluster (node controlplane) and runs this script inside the lab VM from
+# /opt/astrona-lab as the VM administrator user (passwordless sudo).
 #
 # The image (ghcr.io/astrona-io/ubuntu-qcow2-image:24.04-cks-*) already has
 # containerd, kubeadm/kubelet/kubectl v1.35 on hold, every v1.35 and v1.36
 # control-plane image in containerd and an offline apt repository per minor
-# under /opt/kubernetes-apt. This script only creates the cluster and the
-# starting workload; it needs no network.
+# under /opt/kubernetes-apt. This script only creates the starting workload; it
+# needs no network.
 
 LAB_NAME=ats-032-lab-040-01-02
 NODE=controlplane
@@ -19,25 +20,14 @@ kube() {
 main() {
   set -euo pipefail
 
-  # Context guard: run only on a VM built from the kubeadm image.
-  if [ ! -x /usr/local/sbin/astrona-kubeadm-init ] || [ ! -r /etc/astrona-kubeadm/versions.env ]; then
-    echo "Refusing to run: this VM is not built from the CKS practice image" >&2
+  # Context guard: run only against this VM's own cluster.
+  local context="${ASTRONA_KUBE_CONTEXT:-kubernetes-admin@astro-$LAB_NAME}"
+  if [ "$(kubectl config current-context)" != "$context" ]; then
+    echo "Refusing to operate on another Kubernetes context" >&2
     exit 1
   fi
   # shellcheck disable=SC1091
   . /etc/astrona-kubeadm/versions.env
-
-  local users=()
-  id student >/dev/null 2>&1 && users+=(--user student)
-  sudo -n /usr/local/sbin/astrona-kubeadm-init \
-    --node-name "$NODE" --cluster-name "astro-$LAB_NAME" "${users[@]}" </dev/null
-
-  local context
-  context=$(kube config current-context </dev/null)
-  if [ "$context" != "kubernetes-admin@astro-$LAB_NAME" ]; then
-    echo "Refusing to continue on context $context" >&2
-    exit 1
-  fi
 
   # The workload that the drain moves. It uses the pause image, which is
   # already in containerd, so nothing is pulled.

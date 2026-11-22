@@ -60,21 +60,25 @@ sections:
       objective: Grant Namespace Pod Read Access.
       runtime: kind
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-17
+      runtime_verification: passed
     - id: lab-02
       path: sections/section-010/module-01/labs/lab-02
       after_reading: sections/section-010/module-01/course-02-clusterroles-reuse-and-escalation-prevention.md
       objective: Reuse A ClusterRole In One Namespace And Delegate Role Management.
       runtime: kind
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-17
+      runtime_verification: passed
     - id: lab-03
       path: sections/section-010/module-01/labs/lab-03
       after_reading: sections/section-010/module-01/course-03-additive-grants-dangerous-verbs-and-auditing-access.md
       objective: Revoke An Action That Several Bindings Grant.
       runtime: kind
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-17
+      runtime_verification: passed
+    practice_readings:
+    - sections/section-010/module-01/course-01-roles-bindings-and-scope.md
+    - sections/section-010/module-01/course-02-clusterroles-reuse-and-escalation-prevention.md
+    - sections/section-010/module-01/course-03-additive-grants-dangerous-verbs-and-auditing-access.md
     quiz: sections/section-010/module-01/quiz.yaml
   - id: module-02
     title: Audit And Narrow Effective Access
@@ -106,14 +110,18 @@ sections:
       objective: Remove Bindings To Broad Groups.
       runtime: kind
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-17
+      runtime_verification: passed
     - id: lab-01
       path: sections/section-010/module-02/labs/lab-01
       after_reading: sections/section-010/module-02/course-03-rewrite-a-broad-grant-as-least-privilege.md
       objective: Rewrite A Broad Grant As Least Privilege.
       runtime: kind
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-17
+      runtime_verification: passed
+    practice_readings:
+    - sections/section-010/module-02/course-01-ask-the-authorizer-precisely.md
+    - sections/section-010/module-02/course-02-find-every-grant-for-an-identity.md
+    - sections/section-010/module-02/course-03-rewrite-a-broad-grant-as-least-privilege.md
     quiz: sections/section-010/module-02/quiz.yaml
   - id: module-03
     title: Subjects, Built-In Roles And Wildcards
@@ -144,21 +152,25 @@ sections:
       objective: Fix The Subjects Of A RoleBinding.
       runtime: kind
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-17
+      runtime_verification: passed
     - id: lab-03
       path: sections/section-010/module-03/labs/lab-03
       after_reading: sections/section-010/module-03/course-02-built-in-and-aggregated-clusterroles.md
       objective: Build An Aggregated ClusterRole.
       runtime: kind
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-17
+      runtime_verification: passed
     - id: lab-01
       path: sections/section-010/module-03/labs/lab-01
       after_reading: sections/section-010/module-03/course-03-remove-wildcards-and-narrow-rules.md
       objective: Remove Wildcards From A Group Role.
       runtime: kind
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-17
+      runtime_verification: passed
+    practice_readings:
+    - sections/section-010/module-03/course-01-users-groups-and-serviceaccounts-as-subjects.md
+    - sections/section-010/module-03/course-02-built-in-and-aggregated-clusterroles.md
+    - sections/section-010/module-03/course-03-remove-wildcards-and-narrow-rules.md
     quiz: sections/section-010/module-03/quiz.yaml
 - id: section-020
   title: Exercise caution in using service accounts e.g. disable defaults, minimize permissions
@@ -195,14 +207,18 @@ sections:
       objective: Disable Unneeded ServiceAccount Tokens.
       runtime: kind
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-17
+      runtime_verification: passed
     - id: lab-02
       path: sections/section-020/module-01/labs/lab-02
       after_reading: sections/section-020/module-01/course-03-bound-tokens-audience-and-legacy-secrets.md
       objective: Replace a Legacy Token Secret With a Projected Token.
       runtime: kind
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-17
+      runtime_verification: passed
+    practice_readings:
+    - sections/section-020/module-01/course-01-serviceaccounts-and-the-default-token.md
+    - sections/section-020/module-01/course-02-disable-automounting-and-minimize-permissions.md
+    - sections/section-020/module-01/course-03-bound-tokens-audience-and-legacy-secrets.md
     quiz: sections/section-020/module-01/quiz.yaml
   - id: module-02
     title: Dedicated Least-Privilege ServiceAccounts
@@ -232,21 +248,25 @@ sections:
       objective: Give a Deployment Its Own ServiceAccount.
       runtime: kind
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-17
+      runtime_verification: passed
     - id: lab-02
       path: sections/section-020/module-02/labs/lab-02
       after_reading: sections/section-020/module-02/course-02-grant-only-what-the-workload-uses.md
       objective: Grant a ServiceAccount Least-Privilege Access.
       runtime: kind
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-17
+      runtime_verification: passed
     - id: lab-03
       path: sections/section-020/module-02/labs/lab-03
       after_reading: sections/section-020/module-02/course-03-clean-up-the-default-serviceaccount.md
       objective: Lock Down the Default ServiceAccount.
       runtime: kind
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-17
+      runtime_verification: passed
+    practice_readings:
+    - sections/section-020/module-02/course-01-one-serviceaccount-for-each-workload.md
+    - sections/section-020/module-02/course-02-grant-only-what-the-workload-uses.md
+    - sections/section-020/module-02/course-03-clean-up-the-default-serviceaccount.md
     quiz: sections/section-020/module-02/quiz.yaml
   - id: module-03
     title: Audit ServiceAccount Use And Tokens
@@ -277,14 +297,18 @@ sections:
       objective: Remove Over-Broad ServiceAccount Bindings.
       runtime: kind
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-17
+      runtime_verification: passed
     - id: lab-02
       path: sections/section-020/module-03/labs/lab-02
       after_reading: sections/section-020/module-03/course-03-audit-tokens-secrets-lifetimes-and-audience.md
       objective: Remove Long-Lived ServiceAccount Tokens.
       runtime: kind
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-17
+      runtime_verification: passed
+    practice_readings:
+    - sections/section-020/module-03/course-01-find-which-pods-use-which-serviceaccount.md
+    - sections/section-020/module-03/course-02-audit-grants-that-reach-serviceaccounts.md
+    - sections/section-020/module-03/course-03-audit-tokens-secrets-lifetimes-and-audience.md
     quiz: sections/section-020/module-03/quiz.yaml
 - id: section-030
   title: Restrict access to Kubernetes API
@@ -321,14 +345,18 @@ sections:
       objective: Give A Workload A Narrow ServiceAccount.
       runtime: kind
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-17
+      runtime_verification: passed
     - id: lab-02
       path: sections/section-030/module-01/labs/lab-02
       after_reading: sections/section-030/module-01/course-03-hardening-the-endpoint-and-the-kubelet.md
       objective: Harden The Kubelet On A Node.
       runtime: qemu
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-18 (arm64)
+      runtime_verification: passed
+    practice_readings:
+    - sections/section-030/module-01/course-01-how-an-api-request-is-checked.md
+    - sections/section-030/module-01/course-02-a-narrow-workload-identity.md
+    - sections/section-030/module-01/course-03-hardening-the-endpoint-and-the-kubelet.md
     quiz: sections/section-030/module-01/quiz.yaml
   - id: module-02
     title: Authentication, Anonymous Access And Authorization Modes
@@ -360,21 +388,25 @@ sections:
       objective: Remove Static Token Authentication From The API Server.
       runtime: qemu
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-18 (arm64)
+      runtime_verification: passed
     - id: lab-01
       path: sections/section-030/module-02/labs/lab-01
       after_reading: sections/section-030/module-02/course-02-anonymous-access-in-practice.md
       objective: Remove RBAC Grants For Anonymous Requests.
       runtime: kind
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-17
+      runtime_verification: passed
     - id: lab-03
       path: sections/section-030/module-02/labs/lab-03
       after_reading: sections/section-030/module-02/course-03-authorization-modes-and-impersonation.md
       objective: Remove AlwaysAllow And Narrow Impersonation Rights.
       runtime: qemu
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-18 (arm64)
+      runtime_verification: passed
+    practice_readings:
+    - sections/section-030/module-02/course-01-authentication-methods-and-identities.md
+    - sections/section-030/module-02/course-02-anonymous-access-in-practice.md
+    - sections/section-030/module-02/course-03-authorization-modes-and-impersonation.md
     quiz: sections/section-030/module-02/quiz.yaml
   - id: module-03
     title: Admission Control For API Writes
@@ -403,21 +435,25 @@ sections:
       objective: Enforce Pod Security Standards On A Namespace.
       runtime: kind
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-17
+      runtime_verification: passed
     - id: lab-02
       path: sections/section-030/module-03/labs/lab-02
       after_reading: sections/section-030/module-03/course-02-validatingadmissionpolicy-with-cel.md
       objective: Block NodePort Services With A ValidatingAdmissionPolicy.
       runtime: kind
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-17
+      runtime_verification: passed
     - id: lab-03
       path: sections/section-030/module-03/labs/lab-03
       after_reading: sections/section-030/module-03/course-03-admission-webhooks-and-failure-policy.md
       objective: Make An Admission Webhook Fail Closed Safely.
       runtime: kind
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-17
+      runtime_verification: passed
+    practice_readings:
+    - sections/section-030/module-03/course-01-pod-security-admission.md
+    - sections/section-030/module-03/course-02-validatingadmissionpolicy-with-cel.md
+    - sections/section-030/module-03/course-03-admission-webhooks-and-failure-policy.md
     quiz: sections/section-030/module-03/quiz.yaml
 - id: section-040
   title: Upgrade Kubernetes to avoid vulnerabilities
@@ -456,21 +492,26 @@ sections:
       objective: Drain A Worker Node With A PodDisruptionBudget.
       runtime: kind
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-17
+      runtime_verification: passed
     - id: lab-02
       path: sections/section-040/module-01/labs/lab-02
       after_reading: sections/section-040/module-01/course-03-the-kubeadm-upgrade-sequence.md
       objective: Upgrade A kubeadm Control Plane From v1.35 To v1.36.
       runtime: qemu
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-18 (arm64)
+      runtime_verification: passed
     - id: lab-03
       path: sections/section-040/module-01/labs/lab-03
       after_reading: sections/section-040/module-01/course-04-snapshot-and-verify.md
       objective: Save An etcd Snapshot Before An Upgrade.
       runtime: qemu
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-18 (arm64)
+      runtime_verification: passed
+    practice_readings:
+    - sections/section-040/module-01/course-01-versions-skew-and-support.md
+    - sections/section-040/module-01/course-02-cordon-drain-and-disruption-budgets.md
+    - sections/section-040/module-01/course-03-the-kubeadm-upgrade-sequence.md
+    - sections/section-040/module-01/course-04-snapshot-and-verify.md
     quiz: sections/section-040/module-01/quiz.yaml
   - id: module-02
     title: Track Vulnerabilities And Inventory Versions
@@ -500,14 +541,18 @@ sections:
       objective: Record A Cluster Version Inventory With Image Digests.
       runtime: kind
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-17
+      runtime_verification: passed
     - id: lab-02
       path: sections/section-040/module-02/labs/lab-02
       after_reading: sections/section-040/module-02/course-03-triage-a-vulnerability-and-plan-patch-waves.md
       objective: Triage Vulnerability Records And Label Patch Waves.
       runtime: kind
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-17
+      runtime_verification: passed
+    practice_readings:
+    - sections/section-040/module-02/course-01-where-vulnerabilities-are-published.md
+    - sections/section-040/module-02/course-02-inventory-what-the-cluster-runs.md
+    - sections/section-040/module-02/course-03-triage-a-vulnerability-and-plan-patch-waves.md
     quiz: sections/section-040/module-02/quiz.yaml
   - id: module-03
     title: Patch Nodes And Verify The Upgraded Cluster
@@ -535,19 +580,23 @@ sections:
       objective: Restart The Container Runtime On A Drained Node.
       runtime: qemu
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-18 (arm64)
+      runtime_verification: passed
     - id: lab-01
       path: sections/section-040/module-03/labs/lab-01
       after_reading: sections/section-040/module-03/course-02-verify-the-cluster-after-an-upgrade.md
       objective: Verify And Repair A Cluster After Maintenance.
       runtime: kind
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-17
+      runtime_verification: passed
     - id: lab-03
       path: sections/section-040/module-03/labs/lab-03
       after_reading: sections/section-040/module-03/course-03-rollback-limits-and-restore-drills.md
       objective: Restore etcd From A Snapshot.
       runtime: qemu
       status: alpha
-      runtime_verification: passed astrona validate and astrona test on 2026-11-18 (arm64)
+      runtime_verification: passed
+    practice_readings:
+    - sections/section-040/module-03/course-01-patch-the-operating-system-and-container-runtime-on-nodes.md
+    - sections/section-040/module-03/course-02-verify-the-cluster-after-an-upgrade.md
+    - sections/section-040/module-03/course-03-rollback-limits-and-restore-drills.md
     quiz: sections/section-040/module-03/quiz.yaml
