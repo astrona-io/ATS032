@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Reference solution for lab ats-032-lab-040-03-02, run by `astrona test`.
-# astrona pipes it into bash on the lab VM as the astrona account. It follows
-# solution.md: drain the node, restart containerd, wait for Ready, uncordon.
-# Every step is safe to run again.
+# vm/apply-solution.sh runs it inside the lab VM as the VM administrator user.
+# It follows solution.md: drain the node, restart containerd, wait for Ready,
+# uncordon. Every step is safe to run again.
 
 LAB_NAME=ats-032-lab-040-03-02
 NODE=controlplane
@@ -15,10 +15,10 @@ kube() {
 main() {
   set -euo pipefail
 
-  local context
-  context=$(kube config current-context)
-  if [ "$context" != "kubernetes-admin@astro-$LAB_NAME" ]; then
-    echo "Refusing to operate on context $context" >&2
+  # Context guard: run only against this VM's own cluster.
+  local context="${ASTRONA_KUBE_CONTEXT:-kubernetes-admin@astro-$LAB_NAME}"
+  if [ "$(kubectl config current-context)" != "$context" ]; then
+    echo "Refusing to operate on another Kubernetes context" >&2
     exit 1
   fi
 

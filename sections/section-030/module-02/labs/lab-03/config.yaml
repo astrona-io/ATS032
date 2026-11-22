@@ -19,32 +19,32 @@ bootstrap:
   - name: create-kubeadm-cluster
     description: Creates the single-node kubeadm cluster, gives the group helpdesk a broad impersonation grant and adds AlwaysAllow to the kube-apiserver
     type: file
-    source: bootstrap/setup.sh
+    source: vm/install.sh
 testing:
   init:
   - name: verify-start
     description: Verify the starting state and reject the unfinished lab
     type: file
-    source: testing/verify-start.sh
+    source: vm/verify-start.sh
   - name: reference-result
     description: Set the authorization modes to Node,RBAC and narrow the impersonation grant to one ServiceAccount
     type: file
-    source: solution/apply.sh
+    source: vm/apply-solution.sh
   - name: wait-solved
     description: Wait until the restarted API server answers and every outcome passes
     type: file
-    source: testing/wait-solved.sh
+    source: vm/wait-solved.sh
 validation:
   scripts:
   - name: authorization-mode-secure
     description: The kube-apiserver uses Node and RBAC authorization without AlwaysAllow
     type: file
-    source: validation/validate-authorization-mode-secure.sh
+    source: vm/validate-authorization-mode-secure.sh
     points: 1
   - name: impersonation-narrowed
     description: The group helpdesk can impersonate only the ServiceAccount probe in the starfleet namespace
     type: file
-    source: validation/validate-impersonation-narrowed.sh
+    source: vm/validate-impersonation-narrowed.sh
     points: 1
 teardown:
   keepCluster: false

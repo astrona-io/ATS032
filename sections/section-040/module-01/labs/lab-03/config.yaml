@@ -19,32 +19,32 @@ bootstrap:
   - name: create-kubeadm-cluster
     description: Creates the single-node kubeadm cluster, installs etcdctl and etcdutl from the etcd image and creates the ConfigMap upgrade-ticket
     type: file
-    source: bootstrap/setup.sh
+    source: vm/install.sh
 testing:
   init:
   - name: verify-start
     description: Verify the starting state and reject the unfinished lab
     type: file
-    source: testing/verify-start.sh
+    source: vm/verify-start.sh
   - name: reference-result
     description: Save the etcd snapshot with etcdctl and record its revision
     type: file
-    source: solution/apply.sh
+    source: vm/apply-solution.sh
   - name: wait-solved
     description: Wait until every outcome passes
     type: file
-    source: testing/wait-solved.sh
+    source: vm/wait-solved.sh
 validation:
   scripts:
   - name: snapshot-saved
     description: /var/lib/etcd/backup/pre-upgrade.db on node controlplane is a valid etcd snapshot taken after the lab started
     type: file
-    source: validation/validate-snapshot-saved.sh
+    source: vm/validate-snapshot-saved.sh
     points: 1
   - name: snapshot-recorded
     description: The ConfigMap snapshot-record holds the revision that etcdutl snapshot status reports for that file
     type: file
-    source: validation/validate-snapshot-recorded.sh
+    source: vm/validate-snapshot-recorded.sh
     points: 1
 teardown:
   keepCluster: false
