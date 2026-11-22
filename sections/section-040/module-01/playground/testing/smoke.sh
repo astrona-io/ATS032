@@ -347,7 +347,8 @@ expect_equal 'the snapshot is not empty' "$(awk '{print ($5 > 0) ? "not empty" :
 snapshot_status="$(page_run "$page" 'sudo etcdutl snapshot status /var/backups/etcd-snapshot.db --write-out=table')"
 printf '%s\n' "$snapshot_status"
 expect 'etcdutl prints the table header' "$(squeeze <<<"$snapshot_status")" "$(text_from_page "$page" '| HASH | REVISION | TOTAL KEYS | TOTAL SIZE | VERSION |')"
-expect 'the snapshot has storage version 3.6.0' "$(sed -n 4p <<<"$snapshot_status")" '| 3.6.0 |'
+# The columns are padded with spaces, as in the page row; squeeze them first.
+expect 'the snapshot has storage version 3.6.0' "$(sed -n 4p <<<"$snapshot_status" | squeeze)" '| 3.6.0 |'
 expect_equal 'the snapshot has a hash' "$(sed -n 4p <<<"$snapshot_status" | awk -F'|' '{gsub(/ /, "", $2); print ($2 != "" && $2 != "0") ? "hash" : "no hash"}')" hash
 restore="$(page_run "$page" 'sudo etcdutl snapshot restore /var/backups/etcd-snapshot.db --data-dir /var/lib/etcd-restored' 2>&1)"
 printf '%s\n' "$restore" | tail -n 1
