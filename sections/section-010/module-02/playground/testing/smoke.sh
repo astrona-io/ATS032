@@ -158,7 +158,7 @@ expect_can_i "$page" "kubectl auth can-i get secrets -n outpost $scout" yes 'edi
 expect_can_i "$page" "kubectl auth can-i create rolebindings.rbac.authorization.k8s.io -n outpost $scout" no 'edit cannot create bindings'
 expect_can_i "$page" "kubectl auth can-i get nodes $scout" no 'the grant has no rule for nodes'
 expect_can_i "$page" "kubectl auth can-i update configmaps/scout-report -n outpost $scout" yes 'scout may update the ConfigMap scout-report'
-expect_can_i "$page" "kubectl auth can-i create pods/exec -n outpost $scout" yes 'scout may create pods/exec'
+expect_can_i "$page" "kubectl auth can-i create pods --subresource=exec -n outpost $scout" yes 'scout may create pods/exec'
 expect_can_i "$page" "kubectl auth can-i list pods --all-namespaces $scout" yes 'scout may list Pods in every namespace'
 expect_can_i "$page" "kubectl auth can-i list pods --all-namespaces $shuttle" no 'shuttle has no cluster-wide grant'
 expect_can_i "$page" "kubectl auth can-i get /version $shuttle" yes 'every authenticated identity may read /version'
@@ -203,11 +203,11 @@ expect 'the rules of scout have write verbs for configmaps' "$(rule_rows "$scout
 # Rewrite a broad grant as least privilege
 page=course-03-rewrite-a-broad-grant-as-least-privilege.md
 expect_can_i "$page" "kubectl auth can-i list services -n outpost $crew" yes 'view lets the crew list Services'
-expect_can_i "$page" "kubectl auth can-i get pods/log -n outpost $crew" yes 'view lets the crew read Pod logs'
+expect_can_i "$page" "kubectl auth can-i get pods --subresource=log -n outpost $crew" yes 'view lets the crew read Pod logs'
 save_from_page "$page" role-crew-pod-reader.yaml
 page_run "$page" 'kubectl -n outpost delete rolebinding crew-view'
 expect_can_i "$page" "kubectl auth can-i list pods -n outpost $crew" yes 'the narrow Role lets the crew list Pods'
-expect_can_i "$page" "kubectl auth can-i get pods/log -n outpost $crew" yes 'the narrow Role lets the crew read Pod logs'
+expect_can_i "$page" "kubectl auth can-i get pods --subresource=log -n outpost $crew" yes 'the narrow Role lets the crew read Pod logs'
 expect_can_i "$page" "kubectl auth can-i list services -n outpost $crew" no 'Services are gone from the grant'
 expect_can_i "$page" "kubectl auth can-i list pods -n starfleet $crew" no 'the grant does not reach starfleet'
 expect 'the built-in ClusterRole view stays' "$(kubectl get clusterrole view -o name)" clusterrole.rbac.authorization.k8s.io/view

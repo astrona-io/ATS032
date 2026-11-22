@@ -227,6 +227,12 @@ for key in ca.crt namespace; do
   expect "the legacy Secret has the key $key, shown with its size" "$(grep -E "^$key:" <<<"$legacy_secret" || true)" bytes
 done
 expect_equal 'the legacy Secret has the key token' "$(grep -cE '^token:' <<<"$legacy_secret" || true)" 1
+# The page says describe prints the full token value for this Secret type.
+# Compare it with the stored value; print only its length, never the token.
+stored_token="$(kubectl -n outpost get secret reporter-legacy-token -o jsonpath='{.data.token}' | base64 -d)"
+described_token="$(sed -n 's/^token:[[:space:]]*//p' <<<"$legacy_secret")"
+printf 'describe line for token: token: <%s characters>\n' "${#described_token}"
+expect 'describe prints the full token value, not its size' "$([[ -n "$stored_token" && "$described_token" == "$stored_token" ]] && echo same || echo different)" same
 token_secrets="$(page_run "$page" 'kubectl get secrets -A --field-selector type=kubernetes.io/service-account-token')"
 printf '%s\n' "$token_secrets"
 expect 'the audit lists reporter-legacy-token' "$token_secrets" reporter-legacy-token

@@ -64,16 +64,19 @@ questions:
     prompt: "How do you ask whether an identity may read the log of Pods in `outpost`?"
     options:
       - id: a
-        text: "`kubectl auth can-i get pods/log -n outpost --as=...`"
-        explanation: "Correct. A subresource is written after a slash."
+        text: "`kubectl auth can-i get pods --subresource=log -n outpost --as=...`"
+        explanation: "Correct. The `--subresource` flag names the subresource `log` of `pods`."
       - id: b
+        text: "`kubectl auth can-i get pods/log -n outpost --as=...`"
+        explanation: "`kubectl auth can-i` reads the part after the slash as a resource name, so this asks about a Pod named `log`."
+      - id: c
         text: "`kubectl auth can-i get pods -n outpost --as=...`"
         explanation: "A rule for `pods` does not cover the subresource `pods/log`."
-      - id: c
+      - id: d
         text: "`kubectl auth can-i get logs -n outpost --as=...`"
         explanation: "`logs` is not a resource type."
     correct_option: a
-    explanation: "Subresources are written as `resource/subresource`, and they are authorized separately from the resource."
+    explanation: "`kubectl auth can-i` names a subresource with `--subresource`, and the API server authorizes it separately from the resource."
 
   - id: ats032-010-02-q04
     type: single_choice

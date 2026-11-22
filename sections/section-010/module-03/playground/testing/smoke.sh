@@ -212,7 +212,7 @@ expect_can_i "$page" "kubectl auth can-i list pods -n outpost $crew" yes 'the cr
 expect_can_i "$page" "kubectl auth can-i delete configmaps -n outpost $crew" yes 'the crew may still delete ConfigMaps'
 expect_can_i "$page" "kubectl auth can-i get secrets -n outpost $crew" no 'the crew may no longer read Secrets'
 expect_can_i "$page" "kubectl auth can-i delete pods -n outpost $crew" no 'the crew may no longer delete Pods'
-expect_can_i "$page" "kubectl auth can-i create pods/exec -n outpost $crew" no 'the crew may no longer create pods/exec'
+expect_can_i "$page" "kubectl auth can-i create pods --subresource=exec -n outpost $crew" no 'the crew may no longer create pods/exec'
 expect_can_i "$page" "kubectl auth can-i create rolebindings.rbac.authorization.k8s.io -n outpost $crew" no 'the crew may no longer create bindings'
 expect 'the group binding did not change' "$(kubectl -n outpost get rolebinding outpost-crew-operator -o jsonpath='{.roleRef.name} {.subjects[0].name}')" 'crew-operator outpost-crew'
 
