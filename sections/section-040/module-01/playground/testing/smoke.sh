@@ -179,7 +179,7 @@ expect 'guide: the only node is controlplane' "$(tail -1 <<<"$guide_nodes" | squ
 expect_equal 'guide: the node has no control-plane taint' "$(kubectl get node controlplane -o jsonpath='{.spec.taints}')" ''
 expect_equal 'guide: probe has two ready replicas' "$(kubectl -n starfleet get deployment probe -o jsonpath='{.status.readyReplicas}')" 2
 expect_equal 'guide: shuttle and drifter are bare Pods' "$(kubectl -n starfleet get pod shuttle -o jsonpath='{.metadata.ownerReferences}')$(kubectl -n outpost get pod drifter -o jsonpath='{.metadata.ownerReferences}')" ''
-expect_equal 'guide: kubeadm, kubectl and kubelet are on hold' "$(apt-mark showhold)" "$(printf 'kubeadm\nkubectl\nkubelet')"
+expect_equal 'guide: falco, kubeadm, kubectl and kubelet are on hold' "$(apt-mark showhold)" "$(printf 'falco\nkubeadm\nkubectl\nkubelet')"
 expect_equal 'guide: etcdctl and etcdutl are in /usr/local/bin' "$(command -v etcdctl) $(command -v etcdutl)" '/usr/local/bin/etcdctl /usr/local/bin/etcdutl'
 expect 'guide: the package repository is the local copy' "$(cat /etc/apt/sources.list.d/kubernetes.list)" 'file:/opt/kubernetes-apt/v1.35/'
 
@@ -306,7 +306,7 @@ upgraded_nodes="$(page_run "$page" 'kubectl get nodes')"
 printf '%s\n' "$upgraded_nodes"
 expect 'the node is Ready' "$(squeeze <<<"$upgraded_nodes")" 'controlplane Ready control-plane'
 expect 'the node runs kubelet v1.36.6' "$upgraded_nodes" "$(text_from_page "$page" 'v1.36.6')"
-expect_equal 'all three packages are on hold' "$(page_run "$page" 'apt-mark showhold')" "$(printf 'kubeadm\nkubectl\nkubelet')"
+expect_equal 'falco and the three Kubernetes packages are on hold' "$(page_run "$page" 'apt-mark showhold')" "$(printf 'falco\nkubeadm\nkubectl\nkubelet')"
 upgraded_versions="$(page_run "$page" 'kubectl version')"
 printf '%s\n' "$upgraded_versions"
 expect 'the client is v1.36.6' "$upgraded_versions" "$(text_from_page "$page" 'Client Version: v1.36.6')"
@@ -380,6 +380,13 @@ expect_equal 'apiserver runs for one more year' "$(grep -cE '^apiserver .* 36[45
 expect 'the CA is not renewed and has years left' "$(grep -E '^ca ' <<<"$certificates")" "$(text_from_page "$page" '9y')"
 expect 'admin.conf is not externally managed' "$(grep '^admin.conf ' <<<"$certificates" | squeeze)" ' ca no'
 kubectl -n starfleet rollout status deployment/probe --timeout=180s
+# kube-proxy programs the new Service a moment after the rollout, so the first
+# request can get "Connection refused". Wait, at most about a minute, for an answer.
+probe_ip="$(kubectl -n starfleet get service probe -o jsonpath='{.spec.clusterIP}')"
+for attempt in $(seq 1 30); do
+  curl -s -m 3 "http://$probe_ip/" >/dev/null && break
+  sleep 2
+done
 reply="$(page_run "$page" "curl -s \"http://\$(kubectl -n starfleet get service probe -o jsonpath='{.spec.clusterIP}')/\"")"
 printf '%s\n' "$reply"
 expect 'a probe Pod answered with version v1' "$reply" "$(text_from_page "$page" 'version=v1 host=probe-')"

@@ -17,7 +17,7 @@ apt-mark showhold
 cat /etc/apt/sources.list.d/kubernetes.list
 ```
 
-The node runs v1.35.10, the two `probe` Pods run on it, and the three packages are on hold. The package source names the v1.35 repository:
+The node runs v1.35.10, the two `probe` Pods run on it, and the three Kubernetes packages are on hold. The image also holds `falco`, a runtime security tool that watches system calls; the upgrade does not touch it. The package source names the v1.35 repository:
 
 ```text
 NAME           STATUS   ROLES           AGE     VERSION
@@ -25,6 +25,7 @@ controlplane   Ready    control-plane   3m28s   v1.35.10
 NAME                     READY   STATUS    RESTARTS   AGE
 probe-5dbf7f459d-4n5tc   1/1     Running   0          3m12s
 probe-5dbf7f459d-6cmtk   1/1     Running   0          3m11s
+falco
 kubeadm
 kubectl
 kubelet
@@ -179,7 +180,7 @@ kubectl -n starfleet-032-040-01-02 get pods
 apt-mark showhold
 ```
 
-The node is `Ready` at v1.36.6, both `probe` Pods run, and all three packages are on hold:
+The node is `Ready` at v1.36.6, both `probe` Pods run, and the three Kubernetes packages are on hold again, next to `falco`:
 
 ```text
 node/controlplane uncordoned
@@ -188,6 +189,7 @@ controlplane   Ready    control-plane   7m43s   v1.36.6
 NAME                     READY   STATUS    RESTARTS   AGE
 probe-5dbf7f459d-b9hpc   1/1     Running   0          66s
 probe-5dbf7f459d-znv8z   1/1     Running   0          66s
+falco
 kubeadm
 kubectl
 kubelet

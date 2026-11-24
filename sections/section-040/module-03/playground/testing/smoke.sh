@@ -256,7 +256,7 @@ expect 'containerd --version names containerd v2' "$runtime" "$(text_from_page "
 # Without network apt-get update only prints warnings, as the page says.
 page_run "$page" 'sudo apt-get update' || true
 holds="$(page_run "$page" 'apt-mark showhold')"
-expect_equal 'the three Kubernetes packages are held' "$holds" "$(printf 'kubeadm\nkubectl\nkubelet')"
+expect_equal 'falco and the three Kubernetes packages are held' "$holds" "$(printf 'falco\nkubeadm\nkubectl\nkubelet')"
 simulation="$(page_run "$page" 'sudo apt-get upgrade --simulate')"
 printf '%s\n' "$simulation"
 expect 'the simulation calculates an upgrade' "$simulation" "$(text_from_page "$page" 'Calculating upgrade...')"
