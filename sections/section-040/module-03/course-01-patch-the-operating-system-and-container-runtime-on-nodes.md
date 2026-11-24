@@ -56,7 +56,7 @@ sudo apt-get upgrade --simulate
 test -f /var/run/reboot-required && echo reboot needed
 ```
 
-The output of `apt-get update` is a list of package sources and is left out here. If the VM has no network, it only prints warnings, and the simulation uses the lists it already has. The rest of the output below comes from one run on 2026-11-18, when the VM could reach the Ubuntu mirror. The four held packages are the same on every run: the three Kubernetes packages and `falco`, a runtime security tool that watches system calls, which the image holds at its version. The list of upgrades is not: it depends on the updates published since the image was built and on whether the VM can reach the mirror, so your list will differ.
+The output of `apt-get update` is a list of package sources and is left out here. If the VM has no network, it only prints warnings, and the simulation uses the lists it already has. The rest of the output below comes from one run on 2026-11-24, when the VM could reach the Ubuntu mirror. The four held packages are the same on every run: the three Kubernetes packages and `falco`, a runtime security tool that watches system calls, which the image holds at its version. The list of upgrades is not: it depends on the updates published since the image was built and on whether the VM can reach the mirror, so your list will differ.
 
 ```text
 falco
@@ -67,14 +67,18 @@ Reading package lists...
 Building dependency tree...
 Reading state information...
 Calculating upgrade...
+The following upgrades have been deferred due to phasing:
+  libsqlite3-0
 The following packages will be upgraded:
-  needrestart
-1 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
-Inst needrestart [3.6-7ubuntu4.5] (3.6-7ubuntu4.6 Ubuntu:24.04/noble-updates, Ubuntu:24.04/noble-security [all])
-Conf needrestart (3.6-7ubuntu4.6 Ubuntu:24.04/noble-updates, Ubuntu:24.04/noble-security [all])
+  libssh-4 python3-oauthlib
+2 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+Inst libssh-4 [0.10.6-2ubuntu0.5] (0.10.6-2ubuntu0.6 Ubuntu:24.04/noble-updates, Ubuntu:24.04/noble-security [amd64])
+Inst python3-oauthlib [3.2.2-1] (3.2.2-1ubuntu0.1 Ubuntu:24.04/noble-updates, Ubuntu:24.04/noble-security [all])
+Conf libssh-4 (0.10.6-2ubuntu0.6 Ubuntu:24.04/noble-updates, Ubuntu:24.04/noble-security [amd64])
+Conf python3-oauthlib (3.2.2-1ubuntu0.1 Ubuntu:24.04/noble-updates, Ubuntu:24.04/noble-security [all])
 ```
 
-The held packages stay on their version during `apt-get upgrade`. The kubeadm upgrade procedure moves the three Kubernetes packages. The last command printed nothing, because the marker file `/var/run/reboot-required` does not exist. Ubuntu creates it after a kernel or core library update. When it exists, you run `sudo systemctl reboot` on the drained node. After the reboot, the kubelet starts again and the node becomes Ready.
+Ubuntu releases some updates in phases: at first only part of all machines get the new version. `apt` defers such a phased update on the other machines, so `libsqlite3-0` is listed as deferred and counted as "not upgraded". The held packages stay on their version during `apt-get upgrade`. The kubeadm upgrade procedure moves the three Kubernetes packages. The last command printed nothing, because the marker file `/var/run/reboot-required` does not exist. Ubuntu creates it after a kernel or core library update. When it exists, you run `sudo systemctl reboot` on the drained node. After the reboot, the kubelet starts again and the node becomes Ready.
 
 Some teams skip in-place patching. They create a new node from a newer image, add it to the cluster, drain the old node and delete it. This is called node replacement. It gives the same result as patching and the nodes stay identical, but it needs automation to create nodes.
 
