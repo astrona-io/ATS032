@@ -27,7 +27,7 @@ The context is `kubernetes-admin@astro-ats-032-playground-040-01`. The only node
 
 The namespace `starfleet` holds the Deployment `probe` with two replicas, its Service `probe`, and the Pod `shuttle`. The namespace `outpost` holds the Pod `drifter`. `shuttle` and `drifter` are bare Pods with BusyBox tools: no controller owns them.
 
-The host has the tools of a kubeadm control-plane node. `kubeadm`, `kubelet` and `kubectl` are installed from a Kubernetes package repository on the VM, under `/opt/kubernetes-apt`, and the packages are on hold. That repository has the packages for 1.35 and 1.36, so you can upgrade the cluster to 1.36 without the internet. `etcdctl` and `etcdutl`, the etcd client and the etcd file tool, are in `/usr/local/bin`. The etcd certificates are under `/etc/kubernetes/pki/etcd/`.
+The host has the tools of a kubeadm control-plane node. `kubeadm`, `kubelet` and `kubectl` are installed from a Kubernetes package repository on the VM, under `/opt/kubernetes-apt`, and the packages are on hold. The image also holds the package `falco`, a runtime security tool that watches system calls, so `apt-mark showhold` lists four packages. That repository has the packages for 1.35 and 1.36, so you can upgrade the cluster to 1.36 without the internet. `etcdctl` and `etcdutl`, the etcd client and the etcd file tool, are in `/usr/local/bin`. The etcd certificates are under `/etc/kubernetes/pki/etcd/`.
 
 ## Practice tasks
 

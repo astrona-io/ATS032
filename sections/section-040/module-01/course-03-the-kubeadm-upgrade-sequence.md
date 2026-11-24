@@ -194,6 +194,7 @@ kubectl version
 ```text
 NAME           STATUS   ROLES           AGE     VERSION
 controlplane   Ready    control-plane   7m35s   v1.36.6
+falco
 kubeadm
 kubectl
 kubelet
@@ -202,7 +203,7 @@ Kustomize Version: v5.8.1
 Server Version: v1.36.6
 ```
 
-The node runs kubelet `v1.36.6`, the API server is `v1.36.6`, and all three packages are on hold again. The `probe` and `coredns` Pods stayed `Pending` for about a minute after the uncordon, while the control-plane Pods restarted, and then ran. Check with `kubectl get pods -A` until all Pods are `Running`.
+The node runs kubelet `v1.36.6`, the API server is `v1.36.6`, and the three Kubernetes packages are on hold again. The fourth held package, `falco`, is a runtime security tool that watches system calls; the image holds it at its version, and the upgrade does not touch it. The `probe` and `coredns` Pods stayed `Pending` for about a minute after the uncordon, while the control-plane Pods restarted, and then ran. Check with `kubectl get pods -A` until all Pods are `Running`.
 
 ## Other control-plane nodes and workers
 
