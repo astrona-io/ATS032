@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 270" width="840" height="270" role="img" aria-labelledby="title desc">
+  <title id="title">Two bindings give the same permission</title>
+  <desc id="desc">At the start, shuttle-view and shuttle-pod-lister both let shuttle list pods in outpost, so the answer is yes. After deleting shuttle-view, shuttle-pod-lister still allows it, so the answer is still yes. Only after deleting shuttle-pod-lister too is the answer no.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <line class="sep" x1="282" y1="20" x2="282" y2="260"/>
+  <line class="sep" x1="557" y1="20" x2="557" y2="260"/>
+  <path class="okline" d="M250 82 H266 V225 H252" marker-end="url(#arrowok)"/>
+  <path class="okline" d="M250 142 H266 V225 H252" marker-end="url(#arrowok)"/>
+  <path class="okline" d="M525 142 H541 V225 H527" marker-end="url(#arrowok)"/>
+<text class="strong" x="145" y="40" text-anchor="middle">Both bindings exist</text>
+  <rect class="box" x="30" y="60" width="220" height="44" rx="8"/>
+  <text class="code" x="140" y="87" text-anchor="middle">shuttle-view</text>
+  <rect class="box" x="30" y="120" width="220" height="44" rx="8"/>
+  <text class="code" x="140" y="147" text-anchor="middle">shuttle-pod-lister</text>
+  <rect class="ok" x="30" y="200" width="220" height="50" rx="8"/>
+  <text x="140" y="230" text-anchor="middle"><tspan class="code">list pods</tspan>: <tspan class="strong good">yes</tspan></text>
+<text class="strong" x="420" y="40" text-anchor="middle">Delete <tspan class="code">shuttle-view</tspan></text>
+  <rect class="drop" x="305" y="60" width="220" height="44" rx="8" stroke-dasharray="6 5" opacity="0.6"/>
+  <text x="415" y="87" text-anchor="middle" opacity="0.7"><tspan class="code">shuttle-view</tspan> deleted</text>
+  <rect class="box" x="305" y="120" width="220" height="44" rx="8"/>
+  <text class="code" x="415" y="147" text-anchor="middle">shuttle-pod-lister</text>
+  <rect class="ok" x="305" y="200" width="220" height="50" rx="8"/>
+  <text x="415" y="230" text-anchor="middle"><tspan class="code">list pods</tspan>: <tspan class="strong good">yes</tspan></text>
+<text class="strong" x="695" y="40" text-anchor="middle">Delete <tspan class="code">shuttle-pod-lister</tspan></text>
+  <rect class="drop" x="580" y="60" width="220" height="44" rx="8" stroke-dasharray="6 5" opacity="0.6"/>
+  <text x="690" y="87" text-anchor="middle" opacity="0.7"><tspan class="code">shuttle-view</tspan> deleted</text>
+  <rect class="drop" x="580" y="120" width="220" height="44" rx="8" stroke-dasharray="6 5" opacity="0.6"/>
+  <text x="690" y="147" text-anchor="middle" opacity="0.7"><tspan class="code">shuttle-pod-lister</tspan> deleted</text>
+  <rect class="drop" x="580" y="200" width="220" height="50" rx="8"/>
+  <text x="690" y="230" text-anchor="middle"><tspan class="code">list pods</tspan>: <tspan class="strong bad">no</tspan></text>
+</svg>

@@ -1,38 +1,38 @@
----
-exam_objectives:
-- Use Role Based Access Controls to minimize exposure
----
 # ClusterRoles, Reuse And Escalation Prevention
 
-A permission set that many namespaces need should not be copied into a Role in each one. Kubernetes lets you define it once as a ClusterRole and bind it where it is needed. This part shows how the binding type decides the reach of a ClusterRole, which built-in ClusterRoles exist, and which check stops an identity from creating a grant larger than its own permissions.
+Many namespaces often need the same set of permissions. You should not copy that set into a Role in each namespace. Kubernetes lets you define it once as a ClusterRole and bind it where it is needed.
+
+This page shows how the type of binding decides the reach of a ClusterRole. It also lists the built-in ClusterRoles. Finally, it shows the check that stops an identity from creating a grant that is larger than its own permissions.
 
 ## A ClusterRole is a definition, the binding is the reach
 
-A ClusterRole is a list of rules that is not tied to a namespace. What it grants depends only on the binding that uses it. A RoleBinding that references a ClusterRole gives those rules inside the namespace of the RoleBinding and nowhere else. A ClusterRoleBinding that references the same ClusterRole gives them in every namespace, and it is the only way to grant cluster-scoped resources such as nodes or namespaces.
+A ClusterRole is a list of rules that is not tied to a namespace. What it grants depends only on the binding that uses it:
 
-```mermaid
-flowchart TB
-    C["ClusterRole: view"] -->|"RoleBinding in outpost"| O["Read access in outpost"]
-    C -->|"RoleBinding in starfleet"| S["Read access in starfleet"]
-    C -->|"ClusterRoleBinding"| A["Read access in every namespace"]
-```
+- A RoleBinding that references a ClusterRole gives those rules inside the namespace of the RoleBinding, and nowhere else.
+- A ClusterRoleBinding that references the same ClusterRole gives the rules in every namespace. It is also the only way to grant cluster-scoped resources, such as nodes or namespaces.
 
-The diagram shows one ClusterRole producing three different reaches, which depend only on the binding.
+![Diagram: one ClusterRole view gives read access in outpost through a RoleBinding in outpost, read access in starfleet through a RoleBinding in starfleet, and read access in every namespace through a ClusterRoleBinding](images/clusterrole-binding-reach.svg)
 
-A ClusterRole is also required for rules that a Role cannot hold: cluster-scoped resources and non-resource URLs such as `/healthz`.
+The drawing shows one ClusterRole with three different reaches, and the binding alone decides each reach.
+
+You also need a ClusterRole for rules that a Role cannot hold. These are rules for cluster-scoped resources and for non-resource URLs. A non-resource URL is an API server path that is not an object, such as `/healthz`.
 
 ## The built-in ClusterRoles
 
-Kubernetes creates a set of ClusterRoles when the API server starts. Four of them are meant for users and are used with a RoleBinding to give a person or workload a standard level of access in a namespace:
+You do not have to write every ClusterRole yourself. Kubernetes creates a set of ClusterRoles when the API server starts. Four of them are meant for users. You use them with a RoleBinding to give a person or a workload a standard level of access in a namespace:
 
-- `view` allows read-only access to most namespaced objects. It does not include Secrets and it does not include Roles or RoleBindings.
-- `edit` allows read and write access to most objects, including Secrets, and allows a workload to run as any ServiceAccount of the namespace. It does not allow changing Roles or RoleBindings.
-- `admin` allows what `edit` allows plus managing Roles and RoleBindings inside the namespace.
+- `view` allows read-only access to most namespaced objects. It does not include Secrets, and it does not include Roles or RoleBindings.
+- `edit` allows read and write access to most objects, including Secrets. It also allows a workload to run as any ServiceAccount of the namespace. It does not allow changing Roles or RoleBindings.
+- `admin` allows what `edit` allows, plus managing Roles and RoleBindings inside the namespace.
 - `cluster-admin` allows every action on every resource. Bound with a ClusterRoleBinding, it gives full control of the cluster.
 
-Names that start with `system:` belong to Kubernetes components. The API server re-creates the built-in ClusterRoles and their bindings at startup, so edits to them can be overwritten.
+![Diagram: the four built-in user ClusterRoles from narrow to broad; view reads most objects without Secrets, edit adds writes and Secrets, admin adds Roles and RoleBindings in the namespace, and cluster-admin allows every action on every resource](images/built-in-clusterroles.svg)
 
-Look at the built-in roles in the playground. The first command lists the four roles. The second prints the rules of `view` as a table of resources and verbs:
+The drawing orders the four roles from narrow to broad and marks where Secrets and the management of Roles first appear.
+
+Names that start with `system:` belong to Kubernetes components. The API server re-creates the built-in ClusterRoles and their bindings at startup. So it can overwrite any edits you make to them.
+
+Now look at the built-in roles in the playground. The first command lists the four roles. The second command prints the rules of `view` as a table of resources and verbs:
 
 <!-- astrona:playground:renew -->
 
@@ -41,11 +41,13 @@ kubectl get clusterrole view edit admin cluster-admin
 kubectl describe clusterrole view
 ```
 
-In the table from `describe`, find the resources the role covers. You will see many resources such as `pods`, `services` and `configmaps`, each with the verbs `get`, `list` and `watch`. You will not find `secrets`. That absence is deliberate: reading a Secret exposes credentials.
+In the table from `describe`, find the resources the role covers. You see many resources, such as `pods`, `services` and `configmaps`, each with the verbs `get`, `list` and `watch`. You do not find `secrets`. Kubernetes leaves Secrets out of `view` on purpose, because reading a Secret exposes credentials.
 
 ## Bind a ClusterRole inside one namespace
 
-The `shuttle` ServiceAccount now needs to read Pods in `outpost`. Reusing `view` is shorter than writing a Role, but `view` is broader than the need: it also reads Services, ConfigMaps and more. Binding it is a trade-off between less YAML and more access. For this exercise the namespace boundary is the safeguard.
+Next, put a built-in role to use. The `shuttle` ServiceAccount now needs to read Pods in `outpost`. Reusing `view` is shorter than writing a Role. But `view` is broader than the need, because it also reads Services, ConfigMaps and more.
+
+So binding `view` is a trade-off: less YAML, but more access. For this exercise, the namespace boundary is the safeguard.
 
 Save this as `rolebinding-shuttle-view.yaml`:
 
@@ -79,13 +81,18 @@ kubectl auth can-i get secrets -n outpost --as=system:serviceaccount:starfleet:s
 kubectl auth can-i list pods -n starfleet --as=system:serviceaccount:starfleet:shuttle
 ```
 
-The first command prints `yes`. The second prints `no`, because `view` has no rule for Secrets. The third prints `no`, because the RoleBinding exists only in `outpost`, although it references a cluster-wide definition.
+The first command prints `yes`. The second prints `no`, because `view` has no rule for Secrets. The third prints `no`, because the RoleBinding exists only in `outpost`, even though it references a cluster-wide definition.
 
 ## Escalation prevention
 
-RBAC would be easy to defeat if any identity that may create Roles could write a Role with any permission and bind it to itself. The API server blocks this. A user can create or update a Role or ClusterRole only if the user already holds every permission in it, in the same scope, or holds the special verb `escalate` on roles. A user can create a RoleBinding only if the user holds all permissions of the referenced role, or holds the verb `bind` on that role. The check is made by the API server when it stores the object, not by the RBAC authorizer's normal allow decision.
+Binding roles raises a security question. RBAC would be easy to defeat if any identity that may create Roles could write a Role with any permission and bind it to itself. The API server blocks this with two rules:
 
-Show it with `shuttle`. First give it the right to manage Roles and RoleBindings in `outpost`. Save this as `role-role-manager.yaml`:
+- A user can create or update a Role or ClusterRole only if the user already holds every permission in it, in the same scope. The exception is a user who holds the special verb `escalate` on roles.
+- A user can create a RoleBinding only if the user holds all permissions of the referenced role. The exception is a user who holds the verb `bind` on that role.
+
+The API server makes this check when it stores the object. It is not part of the normal allow decision of the RBAC authorizer.
+
+You can see the check at work with `shuttle`. First, give it the right to manage Roles and RoleBindings in `outpost`. Save this as `role-role-manager.yaml`:
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -119,16 +126,22 @@ Apply it:
 kubectl apply -f role-role-manager.yaml
 ```
 
-Then try to create two Roles as `shuttle`. The first one asks for a permission that `shuttle` holds through the earlier `configmap-reader` grant. The second one asks for Secrets, which `shuttle` does not hold:
+Then try to create two Roles as `shuttle`. The first Role asks for a permission that `shuttle` already holds through the earlier `configmap-reader` grant. The second Role asks for Secrets, which `shuttle` does not hold:
 
 ```sh
 kubectl create role copy-reader --verb=get --resource=configmaps -n outpost --as=system:serviceaccount:starfleet:shuttle
 kubectl create role secret-reader --verb=get --resource=secrets -n outpost --as=system:serviceaccount:starfleet:shuttle
 ```
 
-The first command succeeds and prints that the Role was created. The second fails with a `Forbidden` error that says the user is attempting to grant RBAC permissions not currently held. The ServiceAccount may create Roles, but only Roles that stay inside what it already has. Two verbs bypass this check on purpose: `escalate` lets an identity write larger Roles, and `bind` lets it create bindings to roles it does not hold. Both are therefore as dangerous as the permissions they unlock.
+The first command succeeds and prints that the Role was created. The second command fails with a `Forbidden` error. The error says that the user is attempting to grant RBAC permissions not currently held. So the ServiceAccount may create Roles, but only Roles that stay inside what it already has.
 
-You now know that the binding decides the reach of a ClusterRole, that `view` leaves out Secrets, and that the API server stops an identity from granting more than it holds. What the checks do not do is cancel a grant that exists somewhere else, which is the subject of the next part.
+![Diagram: shuttle asks the API server to store two Roles; copy-reader asks for get on configmaps, which shuttle holds, so the API server stores it; secret-reader asks for get on secrets, which shuttle does not hold, so the API server answers Forbidden](images/escalation-check.svg)
+
+The drawing shows the API server comparing each new Role with the permissions that `shuttle` already holds, and storing only the Role that fits inside them.
+
+Two verbs bypass this check on purpose. `escalate` lets an identity write larger Roles, and `bind` lets it create bindings to roles it does not hold. So both verbs are as dangerous as the permissions they unlock.
+
+You now know that the binding decides the reach of a ClusterRole, that `view` leaves out Secrets, and that the API server stops an identity from granting more than it holds. These checks do not cancel a grant that exists somewhere else. The open question is what happens to access when you remove a grant while another grant still allows the same action.
 
 ## Common pitfalls
 
@@ -136,4 +149,4 @@ You now know that the binding decides the reach of a ClusterRole, that `view` le
 > - **Thinking a RoleBinding to a ClusterRole is cluster-wide.** It applies only in the namespace of the RoleBinding.
 > - **Binding `edit` or `admin` for convenience.** Both include Secrets, and `admin` also manages Roles and RoleBindings in the namespace.
 > - **Editing a built-in `system:` role.** The API server restores it at startup.
-> - **Giving `escalate`, `bind` or `impersonate` to a workload.** They remove the protection against self-granted permissions or let the holder act as another identity.
+> - **Giving `escalate`, `bind` or `impersonate` to a workload.** The first two remove the protection against self-granted permissions. `impersonate` lets the holder act as another identity.
