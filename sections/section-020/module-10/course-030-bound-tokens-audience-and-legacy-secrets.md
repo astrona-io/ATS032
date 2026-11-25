@@ -1,18 +1,30 @@
----
-exam_objectives:
-- Exercise caution in using service accounts e.g. disable defaults, minimize permissions on newly created ones
----
 # Bound Tokens, Audience And Legacy Secrets
 
-Some workloads must call the API, or must prove their identity to another service. For them the question changes from "mount or not" to "how long is the credential valid, and who accepts it". Kubernetes answers with bound tokens that expire and name an audience. The older long-lived token stored in a Secret answers neither question, and it is still a finding in many security reviews. This part requests short-lived tokens, configures a projected token with an audience and a lifetime, and looks at the legacy Secret.
+Some workloads must call the API, or must prove their identity to another service. For them, the question changes. It is no longer "mount or not", but "how long is the credential valid, and who accepts it?"
+
+Kubernetes answers with bound tokens that expire and name an audience. The older long-lived token stored in a Secret answers neither question, and it is still a finding in many security reviews. On this page, you request short-lived tokens, configure a projected token with an audience and a lifetime, and look at the legacy Secret.
 
 ## The TokenRequest API
 
-The TokenRequest API is an API call that creates a token for one ServiceAccount, on demand. The API server signs the JSON Web Token (JWT) and returns it. The caller sets how long it should be valid, which objects it is bound to, and which audience it is for. Nothing is stored in the cluster, so there is no Secret to leak from a backup, and the token stops working when it expires.
+The TokenRequest API is an API call that creates a token for one ServiceAccount, on demand. The API server signs the JSON Web Token (JWT) and returns it. A JWT is a signed text string that carries claims about who it belongs to and when it expires. The caller of the API sets three things:
 
-An **audience** is the party the token is meant for. The `aud` claim in the token lists it. A service that checks a token must verify that its own audience is in the list. The API server accepts a token only when it was issued for the API server's own audience. A token that was issued for the audience `ledger` is therefore useless against the API server, and it is the right form for a pod that proves its identity to a different service.
+- how long the token should be valid;
+- which objects it is bound to;
+- which audience it is for.
 
-The kubelet uses this API for the token in every projected volume. You can use it directly with `kubectl create token`. The command below asks for a token for `reporter` that lives ten minutes. It prints the JWT on one line, so run it only in a terminal that nobody else sees, and do not paste the value anywhere. The shortest lifetime the API accepts is ten minutes, and the API server can return a shorter lifetime than you ask for if its own maximum is lower.
+The API server stores nothing in the cluster. So there is no Secret to leak from a backup, and the token stops working when it expires.
+
+An **audience** is the party the token is meant for. The `aud` claim in the token lists it. A service that checks a token must verify that its own audience is in the list. The API server accepts a token only when the token was issued for the API server's own audience.
+
+A token that was issued for the audience `ledger` is therefore useless against the API server. That is exactly the right form for a pod that proves its identity to a different service.
+
+![Diagram: a token with the default audience is accepted by kube-apiserver, while a token with the audience ledger is rejected by kube-apiserver and accepted by the ledger service](images/token-audience.svg)
+
+The drawing shows that each receiver accepts only tokens that name its own audience, so a stolen `ledger` token cannot call the API server.
+
+The kubelet uses this API for the token in every projected volume. You can use it directly with `kubectl create token`. The command below asks for a token for the `reporter` ServiceAccount that lives ten minutes.
+
+The command prints the JWT on one line. Run it only in a terminal that nobody else sees, and do not paste the value anywhere. The shortest lifetime the API accepts is ten minutes. The API server can also return a shorter lifetime than you ask for, if its own maximum is lower.
 
 <!-- astrona:playground:renew -->
 
@@ -21,11 +33,16 @@ kubectl -n outpost get serviceaccount reporter || kubectl -n outpost create serv
 kubectl -n outpost create token reporter --duration=10m
 ```
 
-The first command makes sure that the account exists. The second prints a token. The same command accepts `--audience` to set the audience, and `--bound-object-kind` with `--bound-object-name` to tie the token to a Pod or a Secret, so that it stops working when that object is deleted.
+The first command makes sure that the account exists. The second command prints a token. The same command accepts more flags:
+
+- `--audience` sets the audience;
+- `--bound-object-kind` with `--bound-object-name` ties the token to a Pod or a Secret, so that the token stops working when that object is deleted.
 
 ## A projected token with an audience and a lifetime
 
-A pod can ask the kubelet for a token with its own audience and lifetime in a projected volume. The settings are `audience`, `expirationSeconds` and `path` in a `serviceAccountToken` source. The kubelet refreshes the file when about 80 percent of the lifetime has passed. The pod below sets `automountServiceAccountToken: false` so it does not receive the default token, and mounts one token for the audience `ledger` that lives ten minutes.
+A token on the command line is useful for a test. A pod needs the token as a file that stays fresh. A pod can ask the kubelet for a token with its own audience and lifetime in a projected volume. The settings are `audience`, `expirationSeconds` and `path` in a `serviceAccountToken` source. The kubelet refreshes the file when about 80 percent of the lifetime has passed.
+
+The pod below sets `automountServiceAccountToken: false`, so it does not receive the default token. It mounts one token for the audience `ledger` that lives ten minutes.
 
 Save this as `pod-ledger-client.yaml`:
 
@@ -71,11 +88,21 @@ kubectl -n outpost exec ledger-client -- ls /var/run/tokens
 kubectl -n outpost get pod ledger-client -o jsonpath='{.spec.volumes[0].projected.sources[0].serviceAccountToken}{"\n"}'
 ```
 
-The `ls` command lists one file, `ledger-token`. The pod has no directory `/var/run/secrets/kubernetes.io/serviceaccount`. The last command prints the token settings as JSON with `audience` set to `ledger`, `expirationSeconds` set to `600` and `path` set to `ledger-token`. This is the form to use whenever a pod must prove its identity to a service other than the API server.
+The `ls` command lists one file, `ledger-token`. The pod has no directory `/var/run/secrets/kubernetes.io/serviceaccount`. The last command prints the token settings as JSON, with `audience` set to `ledger`, `expirationSeconds` set to `600` and `path` set to `ledger-token`.
+
+This is the form to use whenever a pod must prove its identity to a service other than the API server.
 
 ## The legacy token Secret
 
-Before Kubernetes 1.24, the control plane created a Secret for every ServiceAccount. It held a token that never expired. Kubernetes no longer creates these Secrets automatically, but you can still ask for one: a Secret of type `kubernetes.io/service-account-token` with the annotation `kubernetes.io/service-account.name`. The token controller then fills it with a token that is valid as long as the Secret and the ServiceAccount exist. It has no expiry and no audience, and it is not bound to a pod. Anyone who reads the Secret, from a backup or through the API, holds a credential with no end date.
+Bound tokens are the modern form. Many clusters still hold the older form. Before Kubernetes 1.24, the control plane created a Secret for every ServiceAccount, and that Secret held a token that never expired.
+
+Kubernetes no longer creates these Secrets automatically, but you can still ask for one. You create a Secret of type `kubernetes.io/service-account-token` with the annotation `kubernetes.io/service-account.name`. The token controller then fills it with a token that is valid as long as the Secret and the ServiceAccount exist.
+
+This token has no expiry and no audience, and it is not bound to a pod. Anyone who reads the Secret, from a backup or through the API, holds a credential with no end date.
+
+![Diagram: a bound token has an expiry time, an audience, is bound to a pod and is not stored, while a legacy token Secret has no expiry, no audience, no binding and is stored in the cluster](images/bound-vs-legacy-token.svg)
+
+The drawing compares the two forms property by property. The bound token has every limit; the legacy Secret has none.
 
 Save this as `secret-reporter-legacy-token.yaml`:
 
@@ -96,22 +123,24 @@ Apply it:
 kubectl apply -f secret-reporter-legacy-token.yaml
 ```
 
-Then check the result. For most Secrets, the `describe` command shows each key with its size and not its value. A Secret of type `kubernetes.io/service-account-token` is different: `kubectl` prints the full `token` value, so the token appears on your screen. The second command is the audit that you run on a real cluster: it lists every long-lived token Secret in all namespaces.
+Then check the result. For most Secrets, the `describe` command shows each key with its size and not its value. A Secret of type `kubernetes.io/service-account-token` is different: `kubectl` prints the full `token` value, so the token appears on your screen.
+
+The second command is the audit that you run on a real cluster. It lists every long-lived token Secret in all namespaces.
 
 ```sh
 kubectl -n outpost describe secret reporter-legacy-token
 kubectl get secrets -A --field-selector type=kubernetes.io/service-account-token
 ```
 
-The first command lists three keys: `ca.crt`, `namespace` and `token`. The second lists this Secret, and in a real cluster it lists any other legacy tokens that someone created. Remove this one, because nothing needs it:
+The first command lists three keys: `ca.crt`, `namespace` and `token`. The second command lists this Secret. In a real cluster, it also lists any other legacy tokens that someone created. Remove this one, because nothing needs it:
 
 ```sh
 kubectl -n outpost delete secret reporter-legacy-token
 ```
 
-The way to leave a legacy token is the way you learned in this part: ask for a short-lived token with `kubectl create token`, or let the kubelet project one into the pod. Deleting the ServiceAccount also invalidates every token that belongs to it.
+To move away from a legacy token, use a bound token instead. Ask for a short-lived token with `kubectl create token`, or let the kubelet project one into the pod. Deleting the ServiceAccount also invalidates every token that belongs to it.
 
-You now know that a bound token expires, names an audience and can be tied to a pod, and that the legacy Secret has none of these properties. The checks in this module come together in one rule: the pod gets a credential only when it needs one, the credential is short-lived, and the account behind it has only the permissions the workload uses.
+You now know that a bound token expires, names an audience and can be tied to a pod. The legacy Secret has none of these properties. All the checks come together in one rule: the pod gets a credential only when it needs one, the credential is short-lived, and the account behind it has only the permissions the workload uses. The open question for each workload is which of these limits it really needs.
 
 ## Common pitfalls
 

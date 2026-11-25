@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 336" width="840" height="336" role="img" aria-labelledby="title desc">
+  <title id="title">Bound token compared with a legacy token Secret</title>
+  <desc id="desc">A bound token from the TokenRequest API has an expiry time, an audience in the aud claim, is bound to a pod and is not stored in the cluster. A legacy Secret of type kubernetes.io/service-account-token has no expiry, no audience, no binding and is stored in a Secret.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+  <text class="strong" x="400" y="34" text-anchor="middle">Bound token (TokenRequest)</text>
+  <text class="strong" x="695" y="34" text-anchor="middle">Legacy token Secret</text>
+  <text class="strong" x="20" y="85">Expiry time</text>
+  <rect class="ok" x="250" y="52" width="300" height="48" rx="8"/>
+  <text x="400.0" y="81" text-anchor="middle">yes, for example <tspan class="code">600</tspan> seconds</text>
+  <rect class="drop" x="570" y="52" width="250" height="48" rx="8"/>
+  <text x="695.0" y="71" text-anchor="middle">no, valid while the Secret</text>
+  <text x="695.0" y="91" text-anchor="middle">and the ServiceAccount exist</text>
+  <text class="strong" x="20" y="149">Audience</text>
+  <rect class="ok" x="250" y="116" width="300" height="48" rx="8"/>
+  <text x="400.0" y="145" text-anchor="middle">yes, the <tspan class="code">aud</tspan> claim</text>
+  <rect class="drop" x="570" y="116" width="250" height="48" rx="8"/>
+  <text x="695.0" y="145" text-anchor="middle">no</text>
+  <text class="strong" x="20" y="213">Bound to a pod</text>
+  <rect class="ok" x="250" y="180" width="300" height="48" rx="8"/>
+  <text x="400.0" y="209" text-anchor="middle">yes, stops when the pod is deleted</text>
+  <rect class="drop" x="570" y="180" width="250" height="48" rx="8"/>
+  <text x="695.0" y="209" text-anchor="middle">no</text>
+  <text class="strong" x="20" y="277">Stored in the cluster</text>
+  <rect class="ok" x="250" y="244" width="300" height="48" rx="8"/>
+  <text x="400.0" y="273" text-anchor="middle">no, created on demand</text>
+  <rect class="drop" x="570" y="244" width="250" height="48" rx="8"/>
+  <text x="695.0" y="273" text-anchor="middle">yes, in a Secret</text>
+  <text class="label" x="820" y="320" text-anchor="end">legacy Secret type <tspan class="code">kubernetes.io/service-account-token</tspan></text>
+</svg>
