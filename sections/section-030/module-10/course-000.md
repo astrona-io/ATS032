@@ -1,42 +1,51 @@
----
-exam_objectives:
-- Restrict access to Kubernetes API
----
 # Restrict Access To The Kubernetes API
 
-The Kubernetes API server is the front door of the cluster. Every change to a Pod, Secret or Role, and every read of cluster state, goes through it. Whoever can send a request that the API server accepts holds a large part of the cluster. This module shows the three checks every request passes, how a workload calls the API with a narrow identity, and which settings on the API server and the kubelet close the common ways in.
+The Kubernetes API server (`kube-apiserver`) is the front door of the cluster. Every change to a Pod, a Secret or a Role goes through it, and so does every read of the cluster state. Whoever can send a request that the API server accepts controls a large part of the cluster.
 
-Keep one sentence in mind for this module: **every request is authenticated, authorized and admitted in that order, and hardening means that each step says no to anything that is not needed.** You will send requests with and without credentials and compare the answers, give a workload a small identity and prove it, and then read the live API server configuration to see which hardening settings are in place.
+So the API server checks every request before it acts on it. It runs three checks in a fixed order: authentication (who is calling), authorization (may this caller do this action) and admission (is the content of this change acceptable). Hardening means that each check says no to anything that is not needed.
 
-The module has three parts. **How An API Request Is Checked** follows a request through authentication, authorization and admission and tests anonymous access. **A Narrow Workload Identity** builds a ServiceAccount with one Role and uses its token from inside a Pod. **Hardening The Endpoint And The Kubelet** covers API server flags, kubelet settings, network exposure, the NodeRestriction admission plugin and audit logging.
+The API server is not the only door. The kubelet, the agent that runs the Pods on each node, has its own API. This module looks at both: how a request is checked, how a workload calls the API with a small identity, and which settings on the API server and the kubelet close the common ways in.
 
-## Learning objectives
+## What you will learn
 
-After this module you can:
+After this module, you can:
 
-- Name the three checks a request passes and the HTTP status that each failed check produces.
-- Test anonymous and authenticated access to the API from inside a Pod.
-- Give a workload a dedicated ServiceAccount with a Role that allows one resource, and verify the allowed and the denied requests.
-- Name the API server flags and kubelet settings that control anonymous access, authorization and exposure.
-- Explain what the NodeRestriction plugin limits and what an audit policy records.
+- name the three checks a request passes, and the HTTP status code that each failed check returns;
+- test anonymous and authenticated access to the API from inside a Pod;
+- give a workload its own ServiceAccount with a Role that allows one resource, and check both an allowed and a denied request;
+- name the API server flags and kubelet settings that control anonymous access, authorization and network exposure;
+- explain what the NodeRestriction admission plugin limits and what an audit policy records.
+
+## How the module is laid out
+
+You start with **How An API Request Is Checked**, which follows one request through authentication, authorization and admission, and tests what an anonymous caller may do. **A Narrow Workload Identity** then builds a ServiceAccount with one Role and uses its token from inside a Pod. **Hardening The Endpoint And The Kubelet** closes the module with the API server flags, the kubelet settings, network exposure, the NodeRestriction plugin and audit logging.
+
+A lab follows the second and the third part, so you can practise each skill right after you read about it.
 
 ## Before you start
 
-You need Kubernetes basics: Pods, Deployments, namespaces, Services and `kubectl exec`. Basic RBAC helps: a Role lists permissions and a RoleBinding gives them to a subject.
+You should know the Kubernetes basics: Pods, Deployments, namespaces, Services and `kubectl exec`. Basic RBAC (role-based access control) helps too: a Role lists permissions, and a RoleBinding gives those permissions to a user, a group or a ServiceAccount.
 
-The commands run in a playground: a virtual machine (VM) with a single-node Kubernetes cluster that `kubeadm` created. Every command in the parts runs in a shell on that VM. Open the shell from your own machine with this command, in every new terminal:
+## Your playground
+
+Your playground is a virtual machine (VM) with a single-node Kubernetes v1.35 cluster that `kubeadm` created. You need a real node here, because some steps read the configuration files of the API server and the kubelet on the node itself. Run every command of the module in a shell on that VM. Open the shell from your own machine with this command, in every new terminal:
 
 ```sh
 astrona ssh astro-ats-032-playground-030-01
 ```
 
-You are the user `student`. You can run commands as root with `sudo`, which you need to read the configuration files of the API server and the kubelet. `kubectl` already works and uses the `cluster-admin` role. The cluster runs Kubernetes v1.35, and its only node is called `controlplane`: it runs the control plane and the workloads. The cluster starts with this content:
+You are the user `student`. You can run commands as root with `sudo`, which you need to read the configuration files on the node. `kubectl` already works and uses the `cluster-admin` role. The only node is called `controlplane`. It runs the control plane (the API server, etcd, the controller manager and the scheduler) and the example workloads.
 
-| Namespace | What is in it |
-| --- | --- |
-| `starfleet` | The Deployment `probe` with two replicas and a Service `probe`, which run Python and are used to send API requests. The pod `shuttle`, a client with BusyBox tools. All of them use the `default` ServiceAccount |
-| `outpost` | The pod `drifter`, a client with BusyBox tools |
+The cluster starts with these objects:
 
-Launch your playground now, and keep it running next to you while you read the parts:
+| Namespace | Object | What it is |
+| --- | --- | --- |
+| `starfleet` | `probe` Deployment, two pods, labels `app: probe` and `release: probe` | A small Python web server on port 8080. You use its Python to send requests to the API |
+| `starfleet` | `probe-code` ConfigMap | Holds `server.py`, the code of the `probe` web server |
+| `starfleet` | `probe` Service | Port 80, forwards to port 8080 of the `probe` pods |
+| `starfleet` | `shuttle` pod, label `app: shuttle` | A client pod with BusyBox tools |
+| `outpost` | `drifter` pod, label `app: drifter` | A client pod with BusyBox tools, in another namespace |
+
+All of these pods use the `default` ServiceAccount of their namespace. Launch your playground now, and keep it running while you read:
 
 <!-- astrona:playground -->
