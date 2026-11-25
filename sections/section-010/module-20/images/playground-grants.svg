@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 400" width="840" height="400" role="img" aria-labelledby="title desc">
+  <title id="title">Grants in the playground at the start</title>
+  <desc id="desc">The ServiceAccount scout gets the edit ClusterRole in every namespace through the ClusterRoleBinding scout-edit-everywhere. The ServiceAccount shuttle gets the Role configmap-reader in outpost through the RoleBinding shuttle-configmap-reader. The group starfleet-crew gets the view ClusterRole in outpost through the RoleBinding crew-view.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <path class="line" d="M190 98 H308" marker-end="url(#arrow)"/>
+  <path class="line" d="M520 98 H588" marker-end="url(#arrow)"/>
+  <path class="line" d="M190 206 V248 H308" marker-end="url(#arrow)"/>
+  <path class="line" d="M520 248 H588" marker-end="url(#arrow)"/>
+  <path class="line" d="M190 330 H308" marker-end="url(#arrow)"/>
+  <path class="line" d="M520 330 H588" marker-end="url(#arrow)"/>
+  <rect class="frame" x="20" y="40" width="200" height="190" rx="10"/>
+  <text class="label" x="30" y="32" text-anchor="start">namespace starfleet</text>
+  <rect class="frame" x="290" y="190" width="530" height="190" rx="10"/>
+  <text class="label" x="300" y="182" text-anchor="start">namespace outpost</text>
+  <text class="label" x="310" y="32" text-anchor="start">cluster scope</text>
+  <rect class="box" x="40" y="76" width="150" height="44" rx="8"/>
+  <text x="115" y="103" text-anchor="middle"><tspan class="code">scout</tspan></text>
+  <rect class="box" x="40" y="162" width="150" height="44" rx="8"/>
+  <text x="115" y="189" text-anchor="middle"><tspan class="code">shuttle</tspan></text>
+  <rect class="box" x="40" y="308" width="150" height="44" rx="8"/>
+  <text x="115" y="329" text-anchor="middle">group</text>
+  <text x="115" y="345" text-anchor="middle"><tspan class="code">starfleet-crew</tspan></text>
+  <rect class="drop" x="310" y="70" width="210" height="56" rx="8"/>
+  <text x="415" y="93" text-anchor="middle">ClusterRoleBinding</text>
+  <text x="415" y="113" text-anchor="middle"><tspan class="code">scout-edit-everywhere</tspan></text>
+  <rect class="drop" x="590" y="70" width="215" height="56" rx="8"/>
+  <text x="697" y="93" text-anchor="middle">ClusterRole <tspan class="code">edit</tspan></text>
+  <text class="label bad" x="697" y="113" text-anchor="middle">every namespace</text>
+  <rect class="box" x="310" y="220" width="210" height="56" rx="8"/>
+  <text x="415" y="243" text-anchor="middle">RoleBinding</text>
+  <text x="415" y="263" text-anchor="middle"><tspan class="code">shuttle-configmap-reader</tspan></text>
+  <rect class="ok" x="590" y="220" width="215" height="56" rx="8"/>
+  <text x="697" y="243" text-anchor="middle">Role <tspan class="code">configmap-reader</tspan></text>
+  <text class="label good" x="697" y="263" text-anchor="middle">get, list configmaps</text>
+  <rect class="box" x="310" y="302" width="210" height="56" rx="8"/>
+  <text x="415" y="325" text-anchor="middle">RoleBinding</text>
+  <text x="415" y="345" text-anchor="middle"><tspan class="code">crew-view</tspan></text>
+  <rect class="ask" x="590" y="302" width="215" height="56" rx="8"/>
+  <text x="697" y="325" text-anchor="middle">ClusterRole <tspan class="code">view</tspan></text>
+  <text class="label" x="697" y="345" text-anchor="middle">read most objects</text>
+</svg>

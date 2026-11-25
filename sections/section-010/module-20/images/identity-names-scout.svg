@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 370" width="840" height="370" role="img" aria-labelledby="title desc">
+  <title id="title">The names of the ServiceAccount scout</title>
+  <desc id="desc">The ServiceAccount scout in starfleet answers to the user name system:serviceaccount:starfleet:scout and to the groups system:serviceaccounts:starfleet, system:serviceaccounts and system:authenticated. A binding that names any of them reaches scout.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <path class="line" d="M230 200 C 255 200, 255 82, 278 82" marker-end="url(#arrow)"/>
+  <path class="line" d="M650 82 C 675 82, 675 200, 698 200" marker-end="url(#arrow)"/>
+  <path class="line" d="M230 200 C 255 200, 255 162, 278 162" marker-end="url(#arrow)"/>
+  <path class="line" d="M650 162 C 675 162, 675 200, 698 200" marker-end="url(#arrow)"/>
+  <path class="line" d="M230 200 C 255 200, 255 242, 278 242" marker-end="url(#arrow)"/>
+  <path class="line" d="M650 242 C 675 242, 675 200, 698 200" marker-end="url(#arrow)"/>
+  <path class="line" d="M230 200 C 255 200, 255 322, 278 322" marker-end="url(#arrow)"/>
+  <path class="line" d="M650 322 C 675 322, 675 200, 698 200" marker-end="url(#arrow)"/>
+  <rect class="box" x="30" y="172" width="200" height="56" rx="8"/>
+  <text x="130" y="196" text-anchor="middle">ServiceAccount</text>
+  <text x="130" y="216" text-anchor="middle"><tspan class="code">scout</tspan> in <tspan class="code">starfleet</tspan></text>
+  <rect class="ask" x="280" y="60" width="370" height="44" rx="8"/>
+  <text class="label" x="296" y="87" text-anchor="start">user</text>
+  <text x="346" y="87" text-anchor="start"><tspan class="code">system:serviceaccount:starfleet:scout</tspan></text>
+  <rect class="ask" x="280" y="140" width="370" height="44" rx="8"/>
+  <text class="label" x="296" y="167" text-anchor="start">group</text>
+  <text x="346" y="167" text-anchor="start"><tspan class="code">system:serviceaccounts:starfleet</tspan></text>
+  <rect class="ask" x="280" y="220" width="370" height="44" rx="8"/>
+  <text class="label" x="296" y="247" text-anchor="start">group</text>
+  <text x="346" y="247" text-anchor="start"><tspan class="code">system:serviceaccounts</tspan></text>
+  <rect class="ask" x="280" y="300" width="370" height="44" rx="8"/>
+  <text class="label" x="296" y="327" text-anchor="start">group</text>
+  <text x="346" y="327" text-anchor="start"><tspan class="code">system:authenticated</tspan></text>
+  <rect class="box" x="700" y="160" width="125" height="80" rx="8"/>
+  <text x="762" y="190" text-anchor="middle">any binding</text>
+  <text x="762" y="210" text-anchor="middle">that names</text>
+  <text x="762" y="230" text-anchor="middle">one of them</text>
+  <text class="label" x="465" y="40" text-anchor="middle">every name the RBAC authorizer collects</text>
+</svg>

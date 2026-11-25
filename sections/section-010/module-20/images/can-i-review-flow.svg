@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 370" width="840" height="370" role="img" aria-labelledby="title desc">
+  <title id="title">What kubectl auth can-i asks the API server</title>
+  <desc id="desc">kubectl auth can-i sends a SelfSubjectAccessReview to the API server. With --as, the API server first checks that the caller holds the impersonate verb. Then it asks its authorizers, such as RBAC or a webhook, with the user and groups, and returns yes or no. Admission and the existence of the object are not checked.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <path class="line" d="M190 90 H298" marker-end="url(#arrow)"/>
+  <text class="label" x="244" y="80" text-anchor="middle">review request</text>
+  <path class="line" d="M420 116 V160" marker-end="url(#arrow)"/>
+  <text class="label" x="430" y="144" text-anchor="start">only with --as</text>
+  <path class="line" d="M420 224 V268" marker-end="url(#arrow)"/>
+  <text class="label" x="430" y="252" text-anchor="start">user and groups</text>
+  <path class="line" d="M300 300 H110 V118" marker-end="url(#arrow)"/>
+  <text class="label" x="200" y="290" text-anchor="middle">yes or no</text>
+  <rect class="box" x="30" y="64" width="160" height="52" rx="8"/>
+  <text x="110" y="95" text-anchor="middle"><tspan class="code">kubectl auth can-i</tspan></text>
+  <rect class="frame" x="280" y="30" width="540" height="320" rx="10"/>
+  <text class="label" x="292" y="50" text-anchor="start">API server</text>
+  <rect class="box" x="300" y="64" width="240" height="52" rx="8"/>
+  <text x="420" y="87" text-anchor="middle"><tspan class="code">SelfSubjectAccessReview</tspan></text>
+  <text class="label" x="420" y="106" text-anchor="middle">asks about the caller</text>
+  <rect class="ask" x="300" y="164" width="240" height="56" rx="8"/>
+  <text x="420" y="188" text-anchor="middle">Impersonation check</text>
+  <text class="label" x="420" y="208" text-anchor="middle">caller holds <tspan class="code">impersonate</tspan>?</text>
+  <rect class="box" x="300" y="272" width="240" height="56" rx="8"/>
+  <text x="420" y="296" text-anchor="middle">Authorizers</text>
+  <text class="label" x="420" y="316" text-anchor="middle">RBAC, webhook and others</text>
+  <rect class="policy" x="604" y="250" width="200" height="92" rx="8"/>
+  <text class="strong" x="704" y="274" text-anchor="middle">Not checked</text>
+  <text x="704" y="296" text-anchor="middle">admission</text>
+  <text x="704" y="318" text-anchor="middle">whether the object exists</text>
+</svg>
