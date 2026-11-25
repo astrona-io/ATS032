@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 290" width="840" height="290" role="img" aria-labelledby="title desc">
+  <title id="title">The binding decides where the policy applies</title>
+  <desc id="desc">In the namespace outpost, which the binding selects, a NodePort Service is denied because the expression is false, and a ClusterIP Service is created because the expression is true. In the namespace starfleet, which the binding does not select, a NodePort Service is created without any check.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <text class="label" x="20" y="38">outpost: the binding selects it</text>
+  <text class="label" x="570" y="38">starfleet: not selected</text>
+  <rect class="frame" x="20" y="50" width="530" height="210" rx="10"/>
+  <rect class="frame" x="570" y="50" width="250" height="210" rx="10"/>
+
+  <path class="dashed" d="M210 102 H348" marker-end="url(#arrowbad)"/>
+  <path class="okline" d="M210 202 H348" marker-end="url(#arrowok)"/>
+  <path class="okline" d="M695 124 V178" marker-end="url(#arrowok)"/>
+  <text class="label bad" x="280" y="92" text-anchor="middle">expression false</text>
+  <text class="label good" x="280" y="192" text-anchor="middle">expression true</text>
+  <text class="label good" x="707" y="156">not checked</text>
+
+  <rect class="box" x="40" y="80" width="170" height="44" rx="8"/>
+  <text x="125" y="107" text-anchor="middle"><tspan class="code">NodePort</tspan> Service</text>
+  <rect class="box" x="40" y="180" width="170" height="44" rx="8"/>
+  <text x="125" y="207" text-anchor="middle"><tspan class="code">ClusterIP</tspan> Service</text>
+  <rect class="drop" x="350" y="80" width="180" height="44" rx="8"/>
+  <text x="440" y="107" text-anchor="middle">Denied</text>
+  <rect class="ok" x="350" y="180" width="180" height="44" rx="8"/>
+  <text x="440" y="207" text-anchor="middle">Created</text>
+
+  <rect class="box" x="590" y="80" width="210" height="44" rx="8"/>
+  <text x="695" y="107" text-anchor="middle"><tspan class="code">NodePort</tspan> Service</text>
+  <rect class="ok" x="590" y="180" width="210" height="44" rx="8"/>
+  <text x="695" y="207" text-anchor="middle">Created</text>
+</svg>

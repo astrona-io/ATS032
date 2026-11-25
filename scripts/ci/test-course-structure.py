@@ -8,8 +8,8 @@ import unittest
 import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
-LAB = 'sections/section-010/module-01/labs/lab-01'
-VM_LAB = 'sections/section-030/module-01/labs/lab-02'
+LAB = 'sections/section-010/module-10/labs/lab-01'
+VM_LAB = 'sections/section-030/module-10/labs/lab-02'
 spec = importlib.util.spec_from_file_location('structure', Path(__file__).with_name('check-course-structure.py'))
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)

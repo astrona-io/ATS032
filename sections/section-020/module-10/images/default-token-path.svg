@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 420" width="820" height="420" role="img" aria-labelledby="title desc">
+  <title id="title">How the default token reaches a container</title>
+  <desc id="desc">A pod without serviceAccountName gets the default ServiceAccount from the ServiceAccount admission controller. The kubelet requests a token with the TokenRequest API and mounts the projected volume kube-api-access. A process in the container can then call the API with the token, and the RBAC Roles and bindings of the ServiceAccount decide what it may do.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+  <path class="line" d="M140 96 V138" marker-end="url(#arrow)"/>
+  <path class="line" d="M140 196 V238" marker-end="url(#arrow)"/>
+  <path class="line" d="M140 296 V338" marker-end="url(#arrow)"/>
+  <path class="line" d="M520 366 H362" marker-end="url(#arrow)"/>
+  <text class="label" x="152" y="122">ServiceAccount admission</text>
+  <text class="label" x="152" y="222">kubelet uses TokenRequest</text>
+  <text class="label" x="152" y="322">kubelet mounts the volume</text>
+  <text class="label" x="441" y="356" text-anchor="middle">decide what</text>
+  <rect class="box" x="20" y="40" width="240" height="56" rx="8"/>
+  <text x="140.0" y="63" text-anchor="middle">pod without</text>
+  <text x="140.0" y="83" text-anchor="middle"><tspan class="code">serviceAccountName</tspan></text>
+  <rect class="box" x="20" y="140" width="240" height="56" rx="8"/>
+  <text x="140.0" y="163" text-anchor="middle">ServiceAccount</text>
+  <text x="140.0" y="183" text-anchor="middle"><tspan class="code">default</tspan></text>
+  <rect class="box" x="20" y="240" width="240" height="56" rx="8"/>
+  <text x="140.0" y="263" text-anchor="middle">projected token volume</text>
+  <text x="140.0" y="283" text-anchor="middle"><tspan class="code">kube-api-access-…</tspan></text>
+  <rect class="drop" x="20" y="340" width="340" height="56" rx="8"/>
+  <text x="190.0" y="363" text-anchor="middle">process in the container</text>
+  <text x="190.0" y="383" text-anchor="middle">can call the API with the token</text>
+  <rect class="ask" x="520" y="340" width="280" height="56" rx="8"/>
+  <text x="660.0" y="363" text-anchor="middle">RBAC Roles and bindings</text>
+  <text x="660.0" y="383" text-anchor="middle">of the ServiceAccount</text>
+  <text x="520" y="70">Admission picks the account.</text>
+  <text x="520" y="170">The kubelet requests a token.</text>
+  <text x="520" y="270">The kubelet mounts the files.</text>
+</svg>

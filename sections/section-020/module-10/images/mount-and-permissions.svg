@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 330" width="840" height="330" role="img" aria-labelledby="title desc">
+  <title id="title">Mounting and permissions are two separate controls</title>
+  <desc id="desc">A ServiceAccount has two separate controls. The automountServiceAccountToken setting decides whether the token is in the container; false leaves no token to steal. The RoleBindings to the account decide what a leaked token can do; with no grants it can do almost nothing.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+  <path class="line" d="M300 120 H378" marker-end="url(#arrow)"/>
+  <path class="line" d="M300 250 H378" marker-end="url(#arrow)"/>
+  <path class="okline" d="M580 120 H638" marker-end="url(#arrowok)"/>
+  <path class="okline" d="M580 250 H638" marker-end="url(#arrowok)"/>
+  <rect class="frame" x="20" y="40" width="280" height="270" rx="10"/>
+  <text class="label" x="160" y="32" text-anchor="middle">a ServiceAccount</text>
+  <rect class="box" x="40" y="92" width="240" height="56" rx="8"/>
+  <text x="160.0" y="115" text-anchor="middle">control 1: mounting</text>
+  <text x="160.0" y="135" text-anchor="middle"><tspan class="code">automountServiceAccountToken</tspan></text>
+  <rect class="box" x="40" y="222" width="240" height="56" rx="8"/>
+  <text x="160.0" y="245" text-anchor="middle">control 2: permissions</text>
+  <text x="160.0" y="265" text-anchor="middle">RoleBindings to the account</text>
+  <rect class="ask" x="380" y="92" width="200" height="56" rx="8"/>
+  <text x="480.0" y="115" text-anchor="middle">Is the token in</text>
+  <text x="480.0" y="135" text-anchor="middle">the container?</text>
+  <rect class="ask" x="380" y="222" width="200" height="56" rx="8"/>
+  <text x="480.0" y="245" text-anchor="middle">What can a leaked</text>
+  <text x="480.0" y="265" text-anchor="middle">token do?</text>
+  <rect class="ok" x="640" y="92" width="180" height="56" rx="8"/>
+  <text x="730.0" y="115" text-anchor="middle"><tspan class="code">false</tspan></text>
+  <text x="730.0" y="135" text-anchor="middle">no token to steal</text>
+  <rect class="ok" x="640" y="222" width="180" height="56" rx="8"/>
+  <text x="730.0" y="245" text-anchor="middle">no grants</text>
+  <text x="730.0" y="265" text-anchor="middle">almost nothing</text>
+</svg>

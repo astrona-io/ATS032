@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="800" height="400" role="img" aria-labelledby="title desc">
+  <title id="title">Files the kubelet reads on a kubeadm node</title>
+  <desc id="desc">On the node controlplane, the kubelet watches the static Pod manifest /etc/kubernetes/manifests/kube-apiserver.yaml and creates or recreates the kube-apiserver Pod from it. The kubelet reads its own configuration file /var/lib/kubelet/config.yaml only when it starts.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <rect class="frame" x="20" y="30" width="760" height="350" rx="10"/>
+  <text class="label" x="36" y="52">node <tspan class="code">controlplane</tspan></text>
+
+  <path class="line" d="M235 128 L370 198" marker-end="url(#arrow)"/>
+  <text class="label" x="292" y="172" text-anchor="end">watches the file</text>
+  <path class="line" d="M595 128 L450 198" marker-end="url(#arrow)"/>
+  <text class="label" x="538" y="172">read only at start</text>
+  <path class="okline" d="M410 248 V298" marker-end="url(#arrowok)"/>
+  <text class="label good" x="422" y="278">creates and recreates</text>
+
+  <rect class="box" x="40" y="72" width="390" height="56" rx="8"/>
+  <text x="235" y="94" text-anchor="middle">static Pod manifest</text>
+  <text x="235" y="116" text-anchor="middle" class="code">/etc/kubernetes/manifests/kube-apiserver.yaml</text>
+  <rect class="box" x="470" y="72" width="250" height="56" rx="8"/>
+  <text x="595" y="94" text-anchor="middle">kubelet configuration</text>
+  <text x="595" y="116" text-anchor="middle" class="code">/var/lib/kubelet/config.yaml</text>
+  <rect class="ask" x="330" y="200" width="160" height="48" rx="8"/>
+  <text x="410" y="229" text-anchor="middle" class="code">kubelet</text>
+  <rect class="ok" x="300" y="300" width="220" height="56" rx="8"/>
+  <text x="410" y="322" text-anchor="middle" class="code">kube-apiserver</text>
+  <text x="410" y="344" text-anchor="middle">static Pod</text>
+</svg>

@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 350" width="840" height="350" role="img" aria-labelledby="title desc">
+  <title id="title">A ServiceAccount patch applies only to new pods</title>
+  <desc id="desc">The default ServiceAccount of outpost is patched with automountServiceAccountToken false. The pod drifter was created before the patch and still has its token directory with ca.crt, namespace and token. The pod plain-check was created after the patch and has no token directory. To change drifter, recreate it.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+  <path class="line" d="M40 200 H800" marker-end="url(#arrow)"/>
+  <line x1="420" y1="40" x2="420" y2="330" stroke="#b7791f" stroke-width="1.75" stroke-dasharray="5 4"/>
+  <path class="line" d="M200 200 V170"/>
+  <path class="line" d="M640 200 V170"/>
+  <path class="line" d="M200 230 V250"/>
+  <path class="line" d="M640 230 V250"/>
+  <text class="label" x="790" y="222" text-anchor="end">time</text>
+  <circle cx="200" cy="200" r="5" fill="#5b6472"/>
+  <circle cx="640" cy="200" r="5" fill="#5b6472"/>
+  <rect class="policy" x="230" y="40" width="380" height="56" rx="8"/>
+  <text x="420.0" y="63" text-anchor="middle"><tspan class="code">kubectl patch serviceaccount default</tspan></text>
+  <text x="420.0" y="83" text-anchor="middle"><tspan class="code">automountServiceAccountToken: false</tspan></text>
+  <rect class="box" x="100" y="114" width="200" height="56" rx="8"/>
+  <text x="200.0" y="137" text-anchor="middle">pod <tspan class="code">drifter</tspan></text>
+  <text x="200.0" y="157" text-anchor="middle">created before the patch</text>
+  <rect class="box" x="540" y="114" width="200" height="56" rx="8"/>
+  <text x="640.0" y="137" text-anchor="middle">pod <tspan class="code">plain-check</tspan></text>
+  <text x="640.0" y="157" text-anchor="middle">created after the patch</text>
+  <rect class="drop" x="80" y="250" width="240" height="56" rx="8"/>
+  <text x="200.0" y="273" text-anchor="middle">token directory exists</text>
+  <text x="200.0" y="293" text-anchor="middle"><tspan class="code">ca.crt namespace token</tspan></text>
+  <rect class="ok" x="520" y="250" width="240" height="56" rx="8"/>
+  <text x="640.0" y="273" text-anchor="middle">no token directory</text>
+  <text x="640.0" y="293" text-anchor="middle"><tspan class="code">ls</tspan> fails</text>
+  <text class="label" x="200" y="334" text-anchor="middle">recreate the pod to change it</text>
+  <text class="label" x="640" y="334" text-anchor="middle">uses <tspan class="code">default</tspan>, names no account</text>
+</svg>
