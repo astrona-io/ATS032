@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 360" width="840" height="360" role="img" aria-labelledby="title desc">
+  <title id="title">Three outcomes of authentication</title>
+  <desc id="desc">A request goes to the list of authenticators. If one method accepts the credential, the request gets a user name and groups. If there is no credential and anonymous access is on, the request becomes system:anonymous. If a credential is given and no method accepts it, or there is no credential and anonymous access is off, the API server returns 401 Unauthorized.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <path class="line" d="M150 180 H198" marker-end="url(#arrow)"/>
+  <path class="okline" d="M370 160 C470 160 480 70 598 70" marker-end="url(#arrowok)"/>
+  <path class="line" d="M370 180 H598" marker-end="url(#arrow)"/>
+  <path class="dashed" d="M370 200 C470 200 480 290 598 290" marker-end="url(#arrowbad)"/>
+  <text class="label good" x="590" y="30" text-anchor="end">credential accepted</text>
+  <text class="label" x="484" y="172" text-anchor="middle">no credential, anonymous on</text>
+  <text class="label bad" x="590" y="330" text-anchor="end">credential rejected,</text>
+  <text class="label bad" x="590" y="346" text-anchor="end">or no credential, anonymous off</text>
+
+  <rect class="box" x="20" y="152" width="130" height="56" rx="8"/>
+  <text x="85" y="185" text-anchor="middle">Request</text>
+
+  <rect class="ask" x="200" y="132" width="170" height="96" rx="8"/>
+  <text class="strong" x="285" y="164" text-anchor="middle">Authenticators</text>
+  <text x="285" y="186" text-anchor="middle">each method is tried</text>
+  <text x="285" y="206" text-anchor="middle">in turn</text>
+
+  <rect class="ok" x="600" y="42" width="220" height="56" rx="8"/>
+  <text x="710" y="75" text-anchor="middle">User name and groups</text>
+
+  <rect class="ask" x="600" y="152" width="220" height="56" rx="8"/>
+  <text class="code" x="710" y="185" text-anchor="middle">system:anonymous</text>
+
+  <rect class="drop" x="600" y="262" width="220" height="56" rx="8"/>
+  <text x="710" y="295" text-anchor="middle"><tspan class="code">401</tspan> Unauthorized</text>
+</svg>

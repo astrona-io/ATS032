@@ -1,36 +1,31 @@
----
-exam_objectives:
-- Restrict access to Kubernetes API
----
 # Authentication Methods And Identities
 
-A request that the API server cannot attribute to a caller cannot be limited, logged or revoked in any useful way. This part explains how the API server turns a credential into an identity. You read your own identity, open a ServiceAccount token to see what it claims, and send a request with a token that is not valid to see that the API server refuses it.
+The API server can only limit, log or revoke what a caller does if it knows who the caller is. A request that it cannot link to a caller is a request it cannot control. So the first step for every request is authentication: the API server checks the credential and turns it into an identity.
+
+On this page, you see how that step works. You read your own identity, open a ServiceAccount token to see what it claims, and send a request with a token that is not valid, to see that the API server refuses it.
 
 ## Methods and the identity they produce
 
-The API server holds a list of authentication methods and offers each request to them in turn. The first method that accepts the credential decides the identity. An identity has a user name, an optional unique ID, a list of groups and optional extra fields. The authorizer later sees only these values.
+The API server holds a list of authentication methods, also called authenticators. It offers each request to them in turn, and the first method that accepts the credential decides the identity. An identity has a user name, an optional unique ID, a list of groups and optional extra fields. The next step, authorization, sees only these values.
 
-- **Client certificates** are checked against the CA in `--client-ca-file`. The common name (CN) of the certificate becomes the user name and each organization (O) entry becomes a group. The `kubectl` credentials of an administrator normally use this method. A certificate cannot be revoked before it expires, because Kubernetes has no certificate revocation list.
-- **ServiceAccount tokens** are signed JSON Web Tokens (JWT). The API server checks the signature, the expiry and the audience. The user name is `system:serviceaccount:<namespace>:<name>` and the groups are `system:serviceaccounts`, `system:serviceaccounts:<namespace>` and `system:authenticated`.
-- **OpenID Connect (OIDC) tokens** are JWTs from an external identity provider. The API server maps claims of the token to a user name and groups. They are configured with `--oidc-*` flags or with a structured authentication configuration file.
-- **Webhook token authentication** sends the token to an external service that returns the identity.
-- **A static token file** (`--token-auth-file`) lists tokens, users and groups in a plain file. The tokens never expire and a change needs an API server restart. Do not use it in a real cluster.
-- **An authenticating proxy** passes the identity in request headers. The API server trusts the headers only from a proxy that presents a client certificate from a configured CA.
+These are the methods the API server supports:
 
-```mermaid
-flowchart TB
-    R["Request"] -->|"offer to each method"| A["Authenticators"]
-    A -->|"one accepts"| U["User name and groups"]
-    A -->|"credential given, none accepts"| E["401 Unauthorized"]
-    A -->|"no credential, anonymous on"| N["system:anonymous"]
-    A -->|"no credential, anonymous off"| E
-```
+- **Client certificates.** The API server checks the certificate against the certificate authority (CA) in `--client-ca-file`. The common name (CN) of the certificate becomes the user name, and each organization (O) entry becomes a group. The `kubectl` credentials of an administrator normally use this method. A certificate cannot be revoked before it expires, because Kubernetes has no certificate revocation list.
+- **ServiceAccount tokens.** A ServiceAccount is the Kubernetes identity of a workload, and its token is a signed JSON Web Token (JWT). The API server checks the signature, the expiry and the audience. The user name is `system:serviceaccount:<namespace>:<name>`, and the groups are `system:serviceaccounts`, `system:serviceaccounts:<namespace>` and `system:authenticated`.
+- **OpenID Connect (OIDC) tokens.** These are JWTs from an external identity provider. The API server maps claims of the token to a user name and groups. You configure them with `--oidc-*` flags or with a structured authentication configuration file.
+- **Webhook token authentication.** The API server sends the token to an external service, and that service returns the identity.
+- **A static token file.** The flag `--token-auth-file` points to a plain file that lists tokens, users and groups. The tokens never expire, and a change needs an API server restart. Do not use it in a real cluster.
+- **An authenticating proxy.** A proxy in front of the API server passes the identity in request headers. The API server trusts these headers only from a proxy that presents a client certificate from a configured CA.
 
-The diagram shows three outcomes. A valid credential gives an identity. A missing credential gives an anonymous caller or a `401`, depending on one flag. A credential that no method accepts is always a `401`.
+Whatever the method, a request can end in only three ways. The drawing below shows them.
+
+![Diagram: a request goes to the authenticators; a credential that one method accepts gives a user name and groups, a credential that no method accepts gives 401 Unauthorized, and a request with no credential becomes system:anonymous when anonymous access is on and gets 401 when it is off](images/authentication-outcomes.svg)
+
+A valid credential gives an identity. A missing credential gives an anonymous caller or a `401`, depending on one flag. A credential that no method accepts is always a `401`.
 
 ## Read your own identity
 
-The `kubectl auth whoami` command sends a `SelfSubjectReview` to the API server, and the server answers with the identity that it attached to your request. That is the identity the authorizer sees, not the one you assume.
+Start with your own identity. The `kubectl auth whoami` command sends a `SelfSubjectReview` to the API server. This is a request that asks the API server which identity it gave to the request itself. The answer is the identity that the authorizer sees, not the one you assume.
 
 <!-- astrona:playground:renew -->
 
@@ -47,13 +42,19 @@ Groups                                              [kubeadm:cluster-admins syst
 Extra: authentication.kubernetes.io/credential-id   [X509SHA256=560de0fbce577c903e099684e4520b63c41c6cf8834dc4b507501e4538f74f46]
 ```
 
-The user `kubernetes-admin` comes from the common name of the certificate that `kubeadm` wrote, and the group `kubeadm:cluster-admins` comes from its organization. `kubeadm` binds that group to the `cluster-admin` ClusterRole. The group `system:authenticated` is not in the certificate. The API server adds it to every caller that is not anonymous. You can run the same review for another identity with impersonation:
+The user `kubernetes-admin` comes from the common name of the certificate that `kubeadm` wrote. The group `kubeadm:cluster-admins` comes from its organization, and `kubeadm` binds that group to the `cluster-admin` ClusterRole. The group `system:authenticated` is not in the certificate. The API server adds it to every caller that is not anonymous.
+
+![Diagram: the client certificate has CN kubernetes-admin and O kubeadm:cluster-admins; the API server turns the CN into the user name, the O into a group, and adds the group system:authenticated](images/certificate-to-identity.svg)
+
+The drawing shows where each value of the identity comes from. Two values come from the certificate, and the API server adds the third.
+
+You can run the same review for another identity with impersonation. The flag `--as` makes `kubectl` send the request as the user you name:
 
 ```sh
 kubectl auth whoami --as=system:serviceaccount:starfleet:default
 ```
 
-This time the user name is the ServiceAccount, and the groups are the three ServiceAccount groups named above:
+This time the user name is the ServiceAccount. The groups are the three groups that every ServiceAccount token gives:
 
 ```text
 ATTRIBUTE   VALUE
@@ -63,7 +64,9 @@ Groups      [system:serviceaccounts system:serviceaccounts:starfleet system:auth
 
 ## Look inside a ServiceAccount token
 
-A ServiceAccount token is three Base64-encoded parts separated by dots. The middle part holds the claims. The next command asks the API server for a token for the `default` ServiceAccount of `starfleet` and prints the claims. The default lifetime of a requested token is one hour.
+The identity of a ServiceAccount comes from its token, so it is worth looking inside one. A ServiceAccount token has three Base64-encoded parts, separated by dots. The middle part holds the claims, which are the statements the token makes about itself.
+
+The next command asks the API server for a token for the `default` ServiceAccount of `starfleet` and prints its claims. The default lifetime of a requested token is one hour.
 
 ```sh
 kubectl -n starfleet create token default | python3 -c "import sys,base64,json;p=sys.stdin.read().split('.')[1];print(json.dumps(json.loads(base64.urlsafe_b64decode(p+'='*(-len(p)%4))),indent=2))"
@@ -92,11 +95,21 @@ The command prints the claims as JSON. Your `exp`, `iat`, `jti`, `nbf` and `uid`
 }
 ```
 
-The claims include `iss` (the issuer of the token), `aud` (the audience, the service the token is meant for), `exp` (the expiry time), `sub` (the subject) and a `kubernetes.io` object. The value of `exp` is 3600 seconds after `iat` (issued at), which is the one-hour lifetime. The value of `sub` is `system:serviceaccount:starfleet:default`, and the `kubernetes.io` object names the namespace and the ServiceAccount. Decoding a token does not check the signature, so a decoded claim is information and not proof. Only the API server, which holds the public key, can validate it.
+These are the claims that matter most:
+
+- `iss` is the issuer, the party that created the token.
+- `aud` is the audience, the service the token is meant for.
+- `exp` is the expiry time, and `iat` (issued at) is the time the token was made. Here `exp` is 3600 seconds after `iat`, which is the one-hour lifetime.
+- `sub` is the subject, here `system:serviceaccount:starfleet:default`.
+- The `kubernetes.io` object names the namespace and the ServiceAccount.
+
+Decoding a token does not check its signature. So a decoded claim is information, not proof. Only the API server, which holds the public key, can validate the token.
 
 ## An invalid credential is not anonymous
 
-Define a helper that runs a Python script in a `probe` Pod and prints only the HTTP status code of a request to the API server. The first argument is the path. The second argument is `anon` for no credential, `token` for the token mounted in the Pod and `bad` for a token that is not valid. The certificate check stays on, so the call verifies the API server.
+Now test how the API server treats a missing credential and a wrong one. For this you need a helper. It runs a Python script in a `probe` Pod and prints only the HTTP status code of a request to the API server.
+
+The first argument of the helper is the path. The second argument picks the credential: `anon` sends no credential, `token` sends the token mounted in the Pod, and `bad` sends a token that is not valid. The certificate check stays on, so the call also verifies the API server.
 
 ```sh
 call_api() {
@@ -135,14 +148,16 @@ The three lines of output are:
 401
 ```
 
-The first two print `200`, because the path `/version` is readable by every caller. The third prints `401`. A caller with no credential can be treated as anonymous. A caller that presents a credential which fails verification is rejected, even on a path that anonymous callers may read. The API server does not downgrade a bad credential to anonymous, which is why a `401` always points to the credential and never to RBAC.
+The first two requests print `200`, because every caller may read the path `/version`. The third prints `401`. A caller with no credential can be treated as anonymous. A caller that presents a credential which fails verification is rejected, even on a path that anonymous callers may read.
 
-You can now name the methods, read the identity that a request received and tell a missing credential from an invalid one. The next question is what a caller with no credential can do, because the answer depends on bindings you control.
+The API server never downgrades a bad credential to anonymous. That is why a `401` always points to the credential and never to RBAC (role-based access control), which runs only later, in authorization.
+
+You can now name the authentication methods, read the identity that a request received, and tell a missing credential from an invalid one. One question stays open: what may a caller with no credential do? The answer depends on bindings that you control.
 
 ## Common pitfalls
 
 > [!WARNING]
-> - **Treating a decoded token as verified.** Decoding shows the claims only. The signature is checked by the API server.
+> - **Treating a decoded token as verified.** Decoding shows the claims only. The API server checks the signature.
 > - **Using a static token file.** Its tokens never expire and cannot be rotated without a restart.
 > - **Relying on certificates for people.** A client certificate cannot be revoked before it expires. Prefer short-lived tokens from an identity provider.
 > - **Expecting a bad token to act as anonymous.** It returns `401`. Anonymous treatment is only for requests with no credential.

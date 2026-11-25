@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 310" width="840" height="310" role="img" aria-labelledby="title desc">
+  <title id="title">Anonymous requests before and after the delete</title>
+  <desc id="desc">Before the delete, an anonymous request to /version gets 200, and an anonymous request to the Pods of starfleet also gets 200 through the ClusterRoleBinding anonymous-viewer. After kubectl delete clusterrolebinding anonymous-viewer, /version still gets 200 through system:public-info-viewer, and the Pods request gets 403.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <line class="sep" x1="420" y1="30" x2="420" y2="290"/>
+  <text class="strong" x="30" y="44">Before the delete</text>
+  <text class="strong" x="450" y="44">After the delete</text>
+
+  <rect class="box" x="30" y="70" width="370" height="44" rx="8"/>
+  <text class="code" x="44" y="97">/version</text>
+  <rect class="ok" x="300" y="78" width="88" height="28" rx="6"/>
+  <text class="code good" x="344" y="97" text-anchor="middle">200</text>
+
+  <rect class="drop" x="30" y="132" width="370" height="44" rx="8"/>
+  <text class="code" x="44" y="159">/api/v1/.../starfleet/pods</text>
+  <rect class="drop" x="300" y="140" width="88" height="28" rx="6"/>
+  <text class="code bad" x="344" y="159" text-anchor="middle">200</text>
+
+  <rect class="policy" x="30" y="204" width="370" height="70" rx="8"/>
+  <text x="44" y="230">The Pods request is allowed by</text>
+  <text class="code" x="44" y="254">anonymous-viewer</text>
+
+  <rect class="box" x="450" y="70" width="370" height="44" rx="8"/>
+  <text class="code" x="464" y="97">/version</text>
+  <rect class="ok" x="720" y="78" width="88" height="28" rx="6"/>
+  <text class="code good" x="764" y="97" text-anchor="middle">200</text>
+
+  <rect class="ok" x="450" y="132" width="370" height="44" rx="8"/>
+  <text class="code" x="464" y="159">/api/v1/.../starfleet/pods</text>
+  <rect class="ok" x="720" y="140" width="88" height="28" rx="6"/>
+  <text class="code good" x="764" y="159" text-anchor="middle">403</text>
+
+  <rect class="policy" x="450" y="204" width="370" height="70" rx="8"/>
+  <text x="464" y="230"><tspan class="code">/version</tspan> is still allowed by</text>
+  <text class="code" x="464" y="254">system:public-info-viewer</text>
+</svg>
