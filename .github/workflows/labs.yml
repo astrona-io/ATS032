@@ -66,10 +66,6 @@ jobs:
         run: python3 scripts/ci/test-course-structure.py
       - name: Check course registration and lifecycle files
         run: python3 scripts/ci/check-course-structure.py
-      - name: Test teaching coverage failure cases
-        run: python3 scripts/ci/test-teaching-coverage.py
-      - name: Check teaching coverage map
-        run: python3 scripts/ci/lab-coverage.py
       - name: Test assessment validation failure cases
         run: python3 scripts/ci/test-assessments.py
       - name: Check question banks, answers and teaching links

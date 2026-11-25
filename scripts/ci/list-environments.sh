@@ -11,7 +11,7 @@
 # every section, because it can break any lab. Otherwise each lab or
 # playground with a changed file in its own directory is selected: every
 # environment is self-contained, so a change in one cannot break another.
-# Changes to course pages, quizzes, astrona.yaml and TEACHING-COVERAGE.yaml
+# Changes to course pages, quizzes, astrona.yaml
 # select nothing here; the structure checks in the workflow's list job cover
 # them. No match prints [].
 set -euo pipefail
