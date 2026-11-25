@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 340" width="840" height="340" role="img" aria-labelledby="title desc">
+  <title id="title">A containerd restart keeps running containers</title>
+  <desc id="desc">systemctl restart containerd stops the old containerd process with MainPID 840 and starts a new one with MainPID 3666. The shuttle and drifter containers keep running, because each container runs under its own containerd-shim process.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <path class="dashed" d="M160 128 V196" marker-end="url(#arrowbad)"/>
+  <path class="line" d="M270 228 L378 112"/>
+  <path class="line" d="M270 228 L378 232"/>
+  <path class="okline" d="M560 112 H608" marker-end="url(#arrowok)"/>
+  <path class="okline" d="M560 232 H608" marker-end="url(#arrowok)"/>
+
+  <rect class="frame" x="30" y="30" width="790" height="290" rx="10"/>
+  <text class="label" x="48" y="54">node <tspan class="code">controlplane</tspan></text>
+
+  <rect class="drop" x="50" y="72" width="220" height="56" rx="8"/>
+  <text x="160" y="95" text-anchor="middle" class="code">containerd</text>
+  <text x="160" y="116" text-anchor="middle" class="code">MainPID=840</text>
+  <text class="label bad" x="172" y="160">old process stops</text>
+  <text class="label" x="172" y="178"><tspan class="code">systemctl restart</tspan></text>
+
+  <rect class="ok" x="50" y="200" width="220" height="56" rx="8"/>
+  <text x="160" y="223" text-anchor="middle" class="code">containerd</text>
+  <text x="160" y="244" text-anchor="middle" class="code">MainPID=3666</text>
+
+  <rect class="box" x="380" y="90" width="180" height="44" rx="8"/>
+  <text x="470" y="117" text-anchor="middle" class="code">containerd-shim</text>
+  <rect class="box" x="380" y="210" width="180" height="44" rx="8"/>
+  <text x="470" y="237" text-anchor="middle" class="code">containerd-shim</text>
+
+  <rect class="ok" x="610" y="90" width="190" height="44" rx="8"/>
+  <text x="705" y="117" text-anchor="middle"><tspan class="code">shuttle</tspan> container</text>
+  <rect class="ok" x="610" y="210" width="190" height="44" rx="8"/>
+  <text x="705" y="237" text-anchor="middle"><tspan class="code">drifter</tspan> container</text>
+
+  <text x="425" y="296" text-anchor="middle">Each container runs under its own shim, so it keeps running.</text>
+</svg>
