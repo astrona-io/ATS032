@@ -1,16 +1,12 @@
----
-exam_objectives:
-- Upgrade Kubernetes to avoid vulnerabilities
----
 # Snapshot And Verify
 
-An upgrade can fail in a way that damages cluster state. The etcd datastore holds all of that state: every object, every Secret, every Role. A snapshot of etcd taken before the upgrade lets you return to a known state. After the upgrade, a short set of checks proves that the cluster works. This part runs both on the playground, which is now at Kubernetes 1.36.
+An upgrade can fail in a way that damages the state of the cluster. etcd is the key-value database that holds all of that state: every object, every Secret, every Role. A snapshot of etcd that you take before the upgrade lets you return to a known state. After the upgrade, a short set of checks proves that the cluster works.
 
-In a real upgrade, the snapshot comes before the first `kubeadm` command. The commands are the same before and after an upgrade, so you can practise them now on the upgraded cluster.
+On this page, you do both on the playground, which now runs Kubernetes 1.36. In a real upgrade, the snapshot comes before the first `kubeadm` command. The commands are the same before and after an upgrade, so you can practise them now on the upgraded cluster.
 
 ## Find the etcd settings
 
-In a kubeadm cluster, etcd runs as a static Pod on the control-plane node, and its command line holds every setting a client needs. Open a shell with `astrona ssh astro-ats-032-playground-040-01`. This command prints one flag per line:
+To talk to etcd, a client needs its address and the right certificates. In a kubeadm cluster, etcd runs as a static Pod on the control-plane node, and its command line holds every setting a client needs. Open a shell with `astrona ssh astro-ats-032-playground-040-01`. This command prints one flag per line:
 
 <!-- astrona:playground:renew -->
 
@@ -29,11 +25,17 @@ The output has 20 lines. These are the lines that matter for a snapshot:
 --trusted-ca-file=/etc/kubernetes/pki/etcd/ca.crt
 ```
 
-`--data-dir` is the directory with the database. `--listen-client-urls` includes `https://127.0.0.1:2379`, the client address on the node itself. `--client-cert-auth=true` means that etcd accepts only clients with a certificate signed by its CA (certificate authority). The client therefore needs three files: the CA file from `--trusted-ca-file`, and a certificate and key, here the server's own pair from `--cert-file` and `--key-file`.
+Each of these flags tells you something the client needs:
+
+- `--data-dir` is the directory with the database.
+- `--listen-client-urls` includes `https://127.0.0.1:2379`, the client address on the node itself.
+- `--client-cert-auth=true` means that etcd accepts only clients with a certificate that its CA (certificate authority) signed. A CA is a certificate and key that sign other certificates.
+
+So the client needs three files: the CA file from `--trusted-ca-file`, and a certificate and a key. Here, the client uses the server's own pair from `--cert-file` and `--key-file`.
 
 ## Take a snapshot
 
-The client for a running etcd is `etcdctl`. It is part of the etcd container image, and on the playground it is also installed on the host. Check its version:
+With the address and the three files known, you can take the snapshot. The client for a running etcd is `etcdctl`. It is part of the etcd container image, and on the playground it is also installed on the host. Check its version:
 
 ```sh
 etcdctl version
@@ -44,7 +46,9 @@ etcdctl version: 3.6.6
 API version: 3.6
 ```
 
-`etcdctl` 3.6 speaks only version 3 of the etcd API. Older guides set `ETCDCTL_API=3`. With 3.6, that variable has no effect, and `etcdctl` prints a warning `"unrecognized environment variable"` for it. Run the snapshot as root, because only root can read the key file. The endpoint is the local client address:
+`etcdctl` 3.6 speaks only version 3 of the etcd API. Older guides set `ETCDCTL_API=3`. With 3.6, that variable has no effect, and `etcdctl` prints a warning `"unrecognized environment variable"` for it.
+
+Run the snapshot as root, because only root can read the key file. The endpoint is the local client address:
 
 ```sh
 sudo etcdctl \
@@ -62,7 +66,13 @@ Snapshot saved at /var/backups/etcd-snapshot.db
 Server version 3.6.0
 ```
 
-`etcdctl` asked the etcd server for a copy of its database over TLS (Transport Layer Security) and wrote it to the file. Now check the file. The tool for files is `etcdutl`. It reads the file directly and needs no running etcd and no certificates. In etcd 3.6, `etcdctl snapshot status` no longer exists: it only prints the help text of the `snapshot` command.
+`etcdctl` asked the etcd server for a copy of its database over TLS (Transport Layer Security), the protocol that encrypts the connection and checks the certificates. Then `etcdctl` wrote the copy to the file.
+
+![Diagram: etcdctl connects over TLS with the CA file, certificate and key to etcd at 127.0.0.1:2379 and saves a snapshot file, while etcdutl reads that file directly to show its status or restore it into a new data directory](images/etcd-snapshot-tools.svg)
+
+The drawing shows the split between the two tools. `etcdctl` talks to the running etcd server, and `etcdutl` works only on files.
+
+Now check the file. The tool for files is `etcdutl`. It reads the file directly, so it needs no running etcd and no certificates. In etcd 3.6, `etcdctl snapshot status` no longer exists: it only prints the help text of the `snapshot` command.
 
 ```sh
 sudo ls -l /var/backups/etcd-snapshot.db
@@ -80,11 +90,11 @@ sudo etcdutl snapshot status /var/backups/etcd-snapshot.db --write-out=table
 
 The table shows the hash, the etcd revision at the time of the snapshot, the number of keys and the size. A file with a size of zero or a missing hash is not a usable snapshot. Your numbers differ.
 
-A snapshot contains every Secret, and etcd stores Secrets in plain form unless encryption at rest is configured. Treat the file like a credential. `etcdctl` already gave it mode `0600`, so only root can read it. Copy it to a protected place off the host, and delete old copies that you do not need.
+A snapshot contains every Secret. etcd stores Secrets in plain form unless encryption at rest is configured. So treat the file like a credential. `etcdctl` already gave it mode `0600`, so only root can read it. Copy it to a protected place off the host, and delete old copies that you do not need.
 
 ## Restore
 
-A restore is a recovery action, not part of a normal upgrade. `etcdutl snapshot restore` writes a new data directory from the snapshot. It does not touch the running etcd:
+A snapshot is only useful if you can get the data back from it. A restore is a recovery action, not part of a normal upgrade. `etcdutl snapshot restore` writes a new data directory from the snapshot. It does not touch the running etcd:
 
 ```sh
 sudo etcdutl snapshot restore /var/backups/etcd-snapshot.db --data-dir /var/lib/etcd-restored
@@ -96,13 +106,21 @@ The command prints log lines with tabs between the fields. The output is shorten
 2026-11-18T08:57:28Z	info	snapshot/v3_snapshot.go:333	restored snapshot	{"path": "/var/backups/etcd-snapshot.db", "wal-dir": "/var/lib/etcd-restored/member/wal", "data-dir": "/var/lib/etcd-restored", "snap-dir": "/var/lib/etcd-restored/member/snap", "initial-memory-map-size": 10737418240}
 ```
 
-`/var/lib/etcd-restored` now holds a `member` directory, like `/var/lib/etcd`. To use it, you would edit `/etc/kubernetes/manifests/etcd.yaml` so that the `hostPath` of the volume named `etcd-data` is `/var/lib/etcd-restored`. The kubelet then recreates the etcd Pod with the restored data. Do not do that on the playground now, because it would return the cluster to the time of the snapshot. Remove the copy with `sudo rm -rf /var/lib/etcd-restored`.
+`/var/lib/etcd-restored` now holds a `member` directory, like `/var/lib/etcd`. To use it, you would edit `/etc/kubernetes/manifests/etcd.yaml` so that the `hostPath` of the volume named `etcd-data` is `/var/lib/etcd-restored`. The kubelet then recreates the etcd Pod with the restored data.
 
-A snapshot covers only the cluster state in etcd. Data in application databases and in volumes is not part of it and needs its own backup. With several control-plane nodes, the restore has more steps, because every etcd member must start from the same snapshot.
+Do not do that on the playground now, because it would return the cluster to the time of the snapshot. Remove the copy with `sudo rm -rf /var/lib/etcd-restored`.
+
+A snapshot covers only the cluster state in etcd. Data in application databases and in volumes is not part of it, and it needs its own backup. With several control-plane nodes, the restore has more steps, because every etcd member must start from the same snapshot.
 
 ## Verify after the upgrade
 
-After the last node is done, check the cluster from top to bottom. The first command lists the nodes and their versions. The second asks the API server for the result of its own health checks, one line for each check. The third lists Pods in any namespace that are not running:
+The snapshot protects the cluster before the upgrade. After the last node is done, you also need proof that the upgrade worked. Check the cluster from top to bottom, from the nodes up to a real application request.
+
+![Diagram: five checks after an upgrade, from the node versions and the API server health through Pods that are not running and the certificate dates to one real request to the probe Service](images/post-upgrade-checks.svg)
+
+The drawing lists the checks in the order that this page runs them. Each check covers a layer that the check before it cannot see.
+
+Start with the first three. The first command lists the nodes and their versions. The second asks the API server for the result of its own health checks, one line for each check. The third lists Pods in any namespace that are not running:
 
 ```sh
 kubectl get nodes
@@ -124,7 +142,9 @@ readyz check passed
 No resources found
 ```
 
-The node is `Ready` at the target version, every health check shows `ok`, and no Pod is outside the `Running` phase. On a busy cluster, the third command can also show finished Jobs, but nothing in a failed or pending state. kubeadm renewed the certificates during the upgrade, and you can read their dates on the control-plane host:
+The node is `Ready` at the target version, every health check shows `ok`, and no Pod is outside the `Running` phase. On a busy cluster, the third command can also show finished Jobs, but nothing should be in a failed or pending state.
+
+kubeadm renewed the certificates during the upgrade. You can read their dates on the control-plane host:
 
 ```sh
 sudo kubeadm certs check-expiration
@@ -141,7 +161,9 @@ CERTIFICATE AUTHORITY   EXPIRES                  RESIDUAL TIME   EXTERNALLY MANA
 ca                      Nov 15, 2036 08:48 UTC   9y              no
 ```
 
-The certificates run for one more year from the day of the upgrade. kubeadm does not renew the CAs, which expire in 2036 on the playground. Last, test the application and not only the platform. Send a request from the node to the ClusterIP of the `probe` Service:
+The certificates run for one more year from the day of the upgrade. kubeadm does not renew the CAs, which expire in 2036 on the playground.
+
+Last, test the application and not only the platform. Send a request from the node to the ClusterIP of the `probe` Service. The ClusterIP is the virtual IP address of the Service inside the cluster:
 
 ```sh
 curl -s "http://$(kubectl -n starfleet get service probe -o jsonpath='{.spec.clusterIP}')/"
@@ -151,9 +173,11 @@ curl -s "http://$(kubectl -n starfleet get service probe -o jsonpath='{.spec.clu
 version=v1 host=probe-7db6ffd7d6-hwhxt greeting=hello
 ```
 
-A `probe` Pod answered through the Service, so the Service and its endpoints work on the new version. If a node shows `NotReady` after an upgrade, read the kubelet log on that node with `sudo journalctl -u kubelet`. If the API server does not answer, list the containers with `sudo crictl ps -a` and read the log of the failing one.
+A `probe` Pod answered through the Service, so the Service and its endpoints work on the new version.
 
-You can now protect an upgrade with a snapshot, recover the state from it, and prove the result. That completes the cycle: know the versions, move the workloads, upgrade the components, and verify.
+When a check fails, look at the component that owns the problem. If a node shows `NotReady` after an upgrade, read the kubelet log on that node with `sudo journalctl -u kubelet`. If the API server does not answer, list the containers with `sudo crictl ps -a` and read the log of the failing one.
+
+You can now protect an upgrade with a snapshot, recover the state from it, and prove the result. That completes the cycle: know the versions, move the workloads, upgrade the components, and verify. The question that stays open on every real cluster is when the next patch release comes, because the cycle starts again with it.
 
 ## Common pitfalls
 
@@ -161,7 +185,7 @@ You can now protect an upgrade with a snapshot, recover the state from it, and p
 > - **Taking the snapshot without the three certificate options.** `etcdctl` cannot connect to the TLS endpoint.
 > - **Running `etcdctl` without `sudo`.** Only root can read the key file under `/etc/kubernetes/pki/etcd/`.
 > - **Using `etcdctl snapshot status` with etcd 3.6.** The command no longer exists. Use `etcdutl snapshot status`.
-> - **Not checking the snapshot.** Run `etcdutl snapshot status` and read the table.
+> - **Not checking the snapshot.** Run `etcdutl snapshot status` and read the table before you trust the file.
 > - **Leaving a snapshot readable by everyone.** It holds all Secrets. Keep mode `0600` and store it off the host.
 > - **Restoring and expecting recent changes to exist.** A restore returns to the time of the snapshot.
 > - **Checking only `kubectl get nodes`.** Also check the API health, system Pods and one real application request.

@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 360" width="860" height="360" role="img" aria-labelledby="title desc">
+  <title id="title">A PodDisruptionBudget stops the second eviction</title>
+  <desc id="desc">The drain asks the API server to evict probe-7db6ffd7d6-fc28n. The budget allows one disruption, so the API server accepts. The new replica probe-7db6ffd7d6-kkdck stays Pending because the node is cordoned. The drain then asks to evict probe-7db6ffd7d6-r4lb2, the budget allows zero disruptions, and the API server refuses.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+
+  <path class="okline" d="M270 78 H338" marker-end="url(#arrowok)"/>
+  <path class="okline" d="M560 78 H608" marker-end="url(#arrowok)"/>
+  <path class="line" d="M710 106 V138" marker-end="url(#arrow)"/>
+  <path class="line" d="M270 288 H338" marker-end="url(#arrow)"/>
+  <path class="dashed" d="M560 288 H608" marker-end="url(#arrowbad)"/>
+
+  <text class="strong" x="30" y="34">First eviction</text>
+  <rect class="box" x="30" y="50" width="240" height="56" rx="8"/>
+  <text x="150" y="73" text-anchor="middle">evict</text>
+  <text class="code" x="150" y="93" text-anchor="middle">probe-7db6ffd7d6-fc28n</text>
+  <rect class="ask" x="340" y="50" width="220" height="56" rx="8"/>
+  <text x="450" y="73" text-anchor="middle">API server checks budget</text>
+  <text x="450" y="93" text-anchor="middle">allowed disruptions: <tspan class="strong">1</tspan></text>
+  <rect class="ok" x="610" y="50" width="200" height="56" rx="8"/>
+  <text x="710" y="83" text-anchor="middle" class="good strong">evicted</text>
+
+  <rect class="box" x="480" y="140" width="330" height="56" rx="8"/>
+  <text x="645" y="163" text-anchor="middle">new replica <tspan class="code">probe-7db6ffd7d6-kkdck</tspan></text>
+  <text x="645" y="183" text-anchor="middle"><tspan class="code">Pending</tspan>: the node is cordoned</text>
+
+  <text class="strong" x="30" y="244">Second eviction</text>
+  <rect class="box" x="30" y="260" width="240" height="56" rx="8"/>
+  <text x="150" y="283" text-anchor="middle">evict</text>
+  <text class="code" x="150" y="303" text-anchor="middle">probe-7db6ffd7d6-r4lb2</text>
+  <rect class="ask" x="340" y="260" width="220" height="56" rx="8"/>
+  <text x="450" y="283" text-anchor="middle">API server checks budget</text>
+  <text x="450" y="303" text-anchor="middle">allowed disruptions: <tspan class="strong">0</tspan></text>
+  <rect class="drop" x="610" y="260" width="200" height="56" rx="8"/>
+  <text x="710" y="283" text-anchor="middle" class="bad strong">refused</text>
+  <text x="710" y="303" text-anchor="middle">drain retries every 5s</text>
+
+  <text class="label" x="30" y="348">The budget <tspan class="code">probe-budget</tspan> has <tspan class="code">maxUnavailable: 1</tspan>, so one <tspan class="code">probe</tspan> Pod keeps running.</text>
+</svg>
