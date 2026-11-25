@@ -12,7 +12,7 @@ def link(title, path):
 
 
 def technical(path):
-    return '/module-' in path and '/course-' in path and 'summary' not in path
+    return '/module-' in path and '/course-' in path and not path.endswith('/course-000.md') and 'summary' not in path
 
 
 def validate(course, coverage):

@@ -8,10 +8,10 @@ The course has teaching material for its registered lab tasks, but its readings 
 
 These four readings are listed in `additional_readings` and have no lab of their own. They prepare later tasks in the same module, and the module playground can be used to practise them, but no grader checks them directly.
 
-- `sections/section-010/module-02/course-01-ask-the-authorizer-precisely.md`: precise `kubectl auth can-i` questions. The later labs in the module use the answers, but no outcome grades the questions themselves.
-- `sections/section-030/module-01/course-01-how-an-api-request-is-checked.md`: the order of authentication, authorization and admission for an API request. It is conceptual; the later labs in the module grade a narrow ServiceAccount and the kubelet settings.
-- `sections/section-040/module-01/course-01-versions-skew-and-support.md`: version skew and the support window. No lab grades a skew decision; the upgrade lab only grades the result of one upgrade from v1.35 to v1.36.
-- `sections/section-040/module-02/course-01-where-vulnerabilities-are-published.md`: where Kubernetes vulnerabilities are announced. No lab reads a real advisory feed.
+- `sections/section-010/module-20/course-010-ask-the-authorizer-precisely.md`: precise `kubectl auth can-i` questions. The later labs in the module use the answers, but no outcome grades the questions themselves.
+- `sections/section-030/module-10/course-010-how-an-api-request-is-checked.md`: the order of authentication, authorization and admission for an API request. It is conceptual; the later labs in the module grade a narrow ServiceAccount and the kubelet settings.
+- `sections/section-040/module-10/course-010-versions-skew-and-support.md`: version skew and the support window. No lab grades a skew decision; the upgrade lab only grades the result of one upgrade from v1.35 to v1.36.
+- `sections/section-040/module-20/course-010-where-vulnerabilities-are-published.md`: where Kubernetes vulnerabilities are announced. No lab reads a real advisory feed.
 
 ## Remaining practical gaps and boundaries
 

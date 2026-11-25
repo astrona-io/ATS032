@@ -17,7 +17,7 @@ questions:
   difficulty: advanced
   learning_objective: Order the steps of a safe rewrite.
   source_readings:
-  - sections/section-010/module-02/course-03-rewrite-a-broad-grant-as-least-privilege.md
+  - sections/section-010/module-20/course-030-rewrite-a-broad-grant-as-least-privilege.md
   prompt: A workload holds a broad ClusterRoleBinding. Which order replaces it with
     a narrow grant without an outage?
   options:
@@ -41,7 +41,7 @@ questions:
   difficulty: intermediate
   learning_objective: Explain how an aggregated ClusterRole gets its rules.
   source_readings:
-  - sections/section-010/module-03/course-02-built-in-and-aggregated-clusterroles.md
+  - sections/section-010/module-30/course-020-built-in-and-aggregated-clusterroles.md
   prompt: An aggregated ClusterRole has an `aggregationRule` with a label selector.
     Where do its rules come from?
   options:
@@ -63,7 +63,7 @@ questions:
   difficulty: advanced
   learning_objective: Explain what a wildcard in verbs matches.
   source_readings:
-  - sections/section-010/module-03/course-03-remove-wildcards-and-narrow-rules.md
+  - sections/section-010/module-30/course-030-remove-wildcards-and-narrow-rules.md
   prompt: 'A Role has `verbs: ["*"]` for `resources: ["pods"]`. Which action does
     it allow?'
   options:
@@ -84,7 +84,7 @@ questions:
   difficulty: intermediate
   learning_objective: Choose a binding that keeps a workload least privileged.
   source_readings:
-  - sections/section-020/module-02/course-02-grant-only-what-the-workload-uses.md
+  - sections/section-020/module-20/course-020-grant-only-what-the-workload-uses.md
   prompt: A workload in one namespace must read pods there. Which setup is least privileged?
   options:
   - id: a
@@ -105,7 +105,7 @@ questions:
   learning_objective: Recognise that a group binding reaches accounts with mounting
     off.
   source_readings:
-  - sections/section-020/module-03/course-02-audit-grants-that-reach-serviceaccounts.md
+  - sections/section-020/module-30/course-020-audit-grants-that-reach-serviceaccounts.md
   prompt: A RoleBinding gives `view` to the group `system:serviceaccounts:outpost`.
     The account `archive` in `outpost` has token mounting turned off. Can `archive`
     list pods in `outpost`?
@@ -127,7 +127,7 @@ questions:
   difficulty: advanced
   learning_objective: Test a token with another audience.
   source_readings:
-  - sections/section-020/module-03/course-03-audit-tokens-secrets-lifetimes-and-audience.md
+  - sections/section-020/module-30/course-030-audit-tokens-secrets-lifetimes-and-audience.md
   prompt: A token is created with `kubectl create token archive --audience=ledger`.
     What does the API server do when it receives this token?
   options:
@@ -148,7 +148,7 @@ questions:
   difficulty: intermediate
   learning_objective: Judge the effect of a binding to the unauthenticated group.
   source_readings:
-  - sections/section-030/module-02/course-02-anonymous-access-in-practice.md
+  - sections/section-030/module-20/course-020-anonymous-access-in-practice.md
   prompt: A ClusterRoleBinding gives the `view` ClusterRole to the group `system:unauthenticated`.
     Which statement is true?
   options:
@@ -170,7 +170,7 @@ questions:
   difficulty: intermediate
   learning_objective: Explain the result of an invalid bearer token.
   source_readings:
-  - sections/section-030/module-02/course-01-authentication-methods-and-identities.md
+  - sections/section-030/module-20/course-010-authentication-methods-and-identities.md
   prompt: "`--anonymous-auth` is `true`. A request sends a bearer token that no authentication
     method accepts. What does the API server return?"
   options:
@@ -190,7 +190,7 @@ questions:
   difficulty: intermediate
   learning_objective: Choose a failure policy for a security webhook.
   source_readings:
-  - sections/section-030/module-03/course-03-admission-webhooks-and-failure-policy.md
+  - sections/section-030/module-30/course-030-admission-webhooks-and-failure-policy.md
   prompt: A validating webhook enforces a security rule that must always apply. Which
     `failurePolicy` fits, and what is the cost?
   options:
@@ -214,7 +214,7 @@ questions:
   difficulty: beginner
   learning_objective: Name a source that publishes Kubernetes vulnerabilities.
   source_readings:
-  - sections/section-040/module-02/course-01-where-vulnerabilities-are-published.md
+  - sections/section-040/module-20/course-010-where-vulnerabilities-are-published.md
   prompt: Which source lets a script watch for new Kubernetes CVEs?
   options:
   - id: a
@@ -235,7 +235,7 @@ questions:
   difficulty: intermediate
   learning_objective: Explain why a node can still refuse Pods after uncordon.
   source_readings:
-  - sections/section-040/module-03/course-02-verify-the-cluster-after-an-upgrade.md
+  - sections/section-040/module-30/course-020-verify-the-cluster-after-an-upgrade.md
   prompt: After kubectl uncordon, a node still refuses new Pods and shows the taint
     maintenance=patching:NoSchedule. What is the fix?
   options:
@@ -256,7 +256,7 @@ questions:
   difficulty: advanced
   learning_objective: Choose between fixing forward and restoring etcd.
   source_readings:
-  - sections/section-040/module-03/course-03-rollback-limits-and-restore-drills.md
+  - sections/section-040/module-30/course-030-rollback-limits-and-restore-drills.md
   prompt: After an upgrade the control plane is healthy and one application fails.
     What is the best response?
   options:
