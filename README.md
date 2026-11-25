@@ -48,3 +48,7 @@ You start playgrounds and labs with the `astrona` CLI, and work in a browser wor
 ## Contributing
 
 Found a mistake or want to improve something? See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## License
+
+Created by Astrona.io. Course content is licensed under [CC BY-NC-SA 4.0](LICENSE-CONTENT), and code under [AGPL v3](LICENSE). See [NOTICE](NOTICE) for details.
