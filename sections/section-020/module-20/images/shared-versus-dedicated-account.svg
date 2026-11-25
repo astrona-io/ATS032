@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 380" width="840" height="380" role="img" aria-labelledby="title desc">
+  <title id="title">Shared account versus one account for each workload</title>
+  <desc id="desc">Left: the two probe pods and the shuttle pod all use the default ServiceAccount, so every permission of default reaches all three pods. Right: the probe pods use the probe account with no permissions and no token, and the shuttle-reader pod uses the shuttle-reader account that may only get and list pods in starfleet.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <rect class="frame" x="20" y="20" width="390" height="340" rx="10"/>
+  <rect class="frame" x="430" y="20" width="390" height="340" rx="10"/>
+  <text class="strong" x="36" y="46">One shared account</text>
+  <text class="strong" x="446" y="46">One account for each workload</text>
+  <path class="line" d="M95 110 L215 168" marker-end="url(#arrow)"/>
+  <path class="line" d="M215 110 L215 168" marker-end="url(#arrow)"/>
+  <path class="line" d="M335 110 L215 168" marker-end="url(#arrow)"/>
+  <path class="dashed" d="M215 212 V258" marker-end="url(#arrowbad)"/>
+  <path class="okline" d="M530 110 V168" marker-end="url(#arrowok)"/>
+  <path class="okline" d="M720 110 V168" marker-end="url(#arrowok)"/>
+  <path class="okline" d="M530 212 V258" marker-end="url(#arrowok)"/>
+  <path class="okline" d="M720 212 V258" marker-end="url(#arrowok)"/>
+  <rect class="box" x="40" y="66" width="110" height="44" rx="8"/>
+  <text x="95.0" y="93.0" text-anchor="middle"><tspan class="code">probe</tspan> pod</text>
+  <rect class="box" x="160" y="66" width="110" height="44" rx="8"/>
+  <text x="215.0" y="93.0" text-anchor="middle"><tspan class="code">probe</tspan> pod</text>
+  <rect class="box" x="280" y="66" width="110" height="44" rx="8"/>
+  <text x="335.0" y="93.0" text-anchor="middle"><tspan class="code">shuttle</tspan> pod</text>
+  <rect class="ask" x="110" y="170" width="210" height="42" rx="8"/>
+  <text x="215.0" y="196.0" text-anchor="middle">ServiceAccount <tspan class="code">default</tspan></text>
+  <rect class="drop" x="60" y="260" width="310" height="60" rx="8"/>
+  <text x="215.0" y="285.0" text-anchor="middle">every permission of <tspan class="code">default</tspan></text>
+  <text x="215.0" y="305.0" text-anchor="middle">reaches all three pods</text>
+  <rect class="box" x="450" y="66" width="160" height="44" rx="8"/>
+  <text x="530.0" y="93.0" text-anchor="middle"><tspan class="code">probe</tspan> pods</text>
+  <rect class="box" x="630" y="66" width="170" height="44" rx="8"/>
+  <text x="715.0" y="93.0" text-anchor="middle"><tspan class="code">shuttle-reader</tspan> pod</text>
+  <rect class="ask" x="450" y="170" width="160" height="42" rx="8"/>
+  <text x="530.0" y="196.0" text-anchor="middle"><tspan class="code">probe</tspan> account</text>
+  <rect class="ask" x="630" y="170" width="170" height="42" rx="8"/>
+  <text x="715.0" y="196.0" text-anchor="middle"><tspan class="code">shuttle-reader</tspan></text>
+  <rect class="ok" x="450" y="260" width="160" height="60" rx="8"/>
+  <text x="530.0" y="285.0" text-anchor="middle">no permissions</text>
+  <text x="530.0" y="305.0" text-anchor="middle">no token</text>
+  <rect class="ok" x="630" y="260" width="170" height="60" rx="8"/>
+  <text x="715.0" y="285.0" text-anchor="middle">get and list pods</text>
+  <text x="715.0" y="305.0" text-anchor="middle">in <tspan class="code">starfleet</tspan></text>
+</svg>
