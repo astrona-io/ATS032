@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 250" width="840" height="250" role="img" aria-labelledby="title desc">
+  <title id="title">The support window of a minor version</title>
+  <desc id="desc">A minor version gets patch releases about once a month for about one year. A two-month period to upgrade follows. After that the version gets no more fixes, even for a published CVE.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <path class="line" d="M40 120 H800"/>
+  <path class="line" d="M40 108 V132"/>
+  <path class="line" d="M560 108 V132"/>
+  <path class="line" d="M680 108 V132"/>
+
+  <rect class="ok" x="40" y="60" width="520" height="40" rx="6"/>
+  <text x="300" y="85" text-anchor="middle">Patch releases, about once a month</text>
+  <rect class="ask" x="560" y="60" width="120" height="40" rx="6"/>
+  <text x="620" y="85" text-anchor="middle">Upgrade period</text>
+  <rect class="drop" x="680" y="60" width="120" height="40" rx="6" stroke-dasharray="6 5"/>
+  <text class="bad strong" x="740" y="85" text-anchor="middle">No fixes</text>
+
+  <text class="label" x="40" y="156">Minor version released</text>
+  <text class="label" x="560" y="156" text-anchor="middle">about one year</text>
+  <text class="label" x="680" y="156" text-anchor="middle">+ two months</text>
+
+  <text x="40" y="200">A cluster still on this minor version after the window stays vulnerable</text>
+  <text x="40" y="222">until it moves to a supported minor version.</text>
+</svg>
