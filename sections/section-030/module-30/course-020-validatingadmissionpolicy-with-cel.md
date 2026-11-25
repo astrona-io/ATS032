@@ -1,19 +1,24 @@
----
-exam_objectives:
-- Restrict access to Kubernetes API
----
 # ValidatingAdmissionPolicy With CEL
 
-The Pod Security Standards cover Pods. A real cluster has other rules: no Service of type `NodePort`, no image from an unknown registry, a label on every Deployment. Before the ValidatingAdmissionPolicy, such rules needed an admission webhook, which is a service that you build, run and keep available. A ValidatingAdmissionPolicy puts the rule inside the API server as a short expression, so there is no service to fail.
+The Pod Security Standards cover Pods only. A real cluster has other rules too: no Service of type `NodePort`, no image from an unknown registry, a label on every Deployment. Such rules are checked at admission, the step in which the Kubernetes API server reads the object of a write request after authorization and can reject it.
+
+Before the ValidatingAdmissionPolicy existed, rules like these needed an admission webhook. A webhook is a separate HTTPS service that you build, run and keep available. A ValidatingAdmissionPolicy puts the rule inside the API server as a short expression, so there is no extra service that can fail.
 
 ## Policy, binding and expression
 
-Two objects work together, and neither does anything alone.
+A rule of this kind needs two objects that work together. Neither of them does anything alone.
 
 - A **ValidatingAdmissionPolicy** says which requests it matches (`matchConstraints`) and lists one or more `validations`. A validation has a CEL expression and an optional `message`. The request is allowed when the expression evaluates to `true`.
 - A **ValidatingAdmissionPolicyBinding** switches the policy on. It names the policy in `policyName`, lists the `validationActions` and can narrow the scope with `matchResources`, for example with a namespace selector.
 
-Common Expression Language (CEL) is a small language for expressions. The variables in an expression include `object` (the new object), `oldObject` (the previous object, empty on create), `request` (details of the request, such as the user name and operation) and `params` (an optional parameter object). The expression `object.spec.type != 'NodePort'` is true for every Service whose type is not `NodePort`.
+The expressions use the Common Expression Language (CEL). CEL is a small language for expressions that return a value, such as `true` or `false`. An expression can use these variables:
+
+- `object` is the new object.
+- `oldObject` is the previous object. It is empty when the request creates an object.
+- `request` holds details of the request, such as the user name and the operation.
+- `params` is an optional parameter object.
+
+For example, the expression `object.spec.type != 'NodePort'` is true for every Service whose type is not `NodePort`.
 
 The `validationActions` of the binding choose what a failure does:
 
@@ -21,21 +26,15 @@ The `validationActions` of the binding choose what a failure does:
 - `Warn` admits it and returns a warning to the caller.
 - `Audit` admits it and adds an annotation to the audit record.
 
-A new rule usually starts with `Warn` and `Audit` together to see what it would reject, and then moves to `Deny`.
+A new rule usually starts with `Warn` and `Audit` together. This shows what the rule would reject. When the results look right, the rule moves to `Deny`.
 
-```mermaid
-flowchart TB
-    W["Create or update Service"] -->|"matchConstraints"| P["Policy no-nodeport"]
-    P -->|"binding selects namespace"| E["Evaluate CEL expression"]
-    E -->|"true"| OK["Admitted"]
-    E -->|"false, action Deny"| R["Rejected with message"]
-```
+![Diagram: a request to create or update a Service matches the policy no-nodeport, the binding selects the namespace, and the CEL expression decides; true admits the request, false with the action Deny rejects it with the message](images/vap-policy-and-binding.svg)
 
-The diagram shows that the binding decides where the policy is active. The policy alone matches requests, but nothing is enforced until a binding selects the request.
+The drawing shows that the binding decides where the policy is active. The policy alone matches requests, but nothing is enforced until a binding selects the request.
 
 ## Write a policy for Services
 
-The rule for this part is that no Service of type `NodePort` may be created in `outpost`. A NodePort Service opens a port on every node, which widens the network exposure of the cluster. Save this as `vap-no-nodeport.yaml`:
+Now build a real rule: nobody may create a Service of type `NodePort` in `outpost`. A NodePort Service opens a port on every node, so more of the cluster is reachable from the network. Save this as `vap-no-nodeport.yaml`:
 
 <!-- astrona:playground:renew -->
 
@@ -63,17 +62,17 @@ Apply it:
 kubectl apply -f vap-no-nodeport.yaml
 ```
 
-The field `failurePolicy: Fail` applies to the policy itself. If the expression cannot be evaluated, for example because of a type error, the request is rejected. The policy is not active yet, because no binding exists. Try a NodePort Service before you add the binding:
+The field `failurePolicy: Fail` applies to the policy itself. If the API server cannot evaluate the expression, for example because of a type error, it rejects the request. The policy is not active yet, because no binding exists. Try a NodePort Service before you add the binding:
 
 ```sh
 kubectl -n outpost create service nodeport demo --tcp=80:80
 ```
 
-The Service is created. Remove it with `kubectl -n outpost delete service demo` and continue.
+The API server creates the Service, because no binding switches the policy on. Remove it with `kubectl -n outpost delete service demo` and continue.
 
 ## Bind the policy to one namespace
 
-Save this as `vapb-no-nodeport-outpost.yaml`. The namespace selector uses the label `kubernetes.io/metadata.name`, which the API server sets on every namespace:
+The binding switches the policy on and limits it to one namespace. Save this as `vapb-no-nodeport-outpost.yaml`. The namespace selector uses the label `kubernetes.io/metadata.name`, which the API server sets on every namespace:
 
 ```yaml
 apiVersion: admissionregistration.k8s.io/v1
@@ -103,7 +102,15 @@ kubectl -n outpost create service clusterip demo --tcp=80:80
 kubectl -n starfleet create service nodeport demo --tcp=80:80
 ```
 
-The first request fails. The message names the policy `no-nodeport`, the binding `no-nodeport-outpost` and the text `NodePort Services are not allowed in this namespace`. The second request creates a ClusterIP Service, because the expression is true for it. The third request creates a NodePort Service in `starfleet`, because the binding selects only `outpost`. The administrator is not exempt in any of the three cases. Clean up the two Services you created:
+The three requests give three different results:
+
+- The first request fails. The message names the policy `no-nodeport`, the binding `no-nodeport-outpost` and the text `NodePort Services are not allowed in this namespace`.
+- The second request creates a ClusterIP Service, because the expression is true for it.
+- The third request creates a NodePort Service in `starfleet`, because the binding selects only `outpost`.
+
+![Diagram: in outpost a NodePort Service is denied and a ClusterIP Service is admitted; in starfleet a NodePort Service is admitted because the binding does not select that namespace](images/vap-binding-scope.svg)
+
+The drawing shows that the expression decides inside `outpost`, and the binding decides that `starfleet` is not checked at all. The administrator is not exempt in any of the three cases. Clean up the two Services you created:
 
 ```sh
 kubectl -n outpost delete service demo
@@ -112,9 +119,11 @@ kubectl -n starfleet delete service demo
 
 ## Choosing between a policy and a webhook
 
-A ValidatingAdmissionPolicy runs in the API server process, needs no network call and cannot be down. Its limits are that it can only validate, not change an object, and that it can read only the request and the optional parameter object. Use a webhook when the rule needs data from outside the API server, such as an image scan result, or when it must modify the object.
+A policy is not the only way to write a custom rule, so it helps to know its limits. A ValidatingAdmissionPolicy runs in the API server process. It needs no network call, and it cannot be down.
 
-You can now write a rule that the API server enforces by itself. The remaining option is the external webhook, and the setting that decides what it does when it fails.
+It has two limits. It can only validate an object, not change it. It can read only the request and the optional parameter object. Use a webhook when the rule needs data from outside the API server, such as an image scan result, or when the rule must change the object.
+
+You can now write a rule that the API server enforces by itself. The question still open is how an external webhook behaves, and what it does when its service fails.
 
 ## Common pitfalls
 
